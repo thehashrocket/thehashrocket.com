@@ -1,0 +1,95 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Tag } from "@/components/ui/Tag";
+
+export const metadata: Metadata = {
+  title: "Work",
+  description:
+    "Case studies from 25 years of building complex software systems.",
+};
+
+const caseStudies = [
+  {
+    slug: "pharma-wms",
+    title: "Pharma WMS",
+    subtitle:
+      "Warehouse management system for pharmaceutical distribution. Real-time inventory, compliance tracking, and multi-facility orchestration.",
+    accent: "#4ade80",
+    tags: ["Ruby on Rails", "React", "PostgreSQL", "Redis"],
+  },
+  {
+    slug: "nonprofit-matching",
+    title: "Nonprofit Matching",
+    subtitle:
+      "Connecting donors with organizations through intelligent matching algorithms and graph-based relationship discovery.",
+    accent: "#3b82f6",
+    tags: ["Next.js", "GraphQL", "Neo4j", "TypeScript"],
+  },
+  {
+    slug: "grant-discovery",
+    title: "Grant Discovery",
+    subtitle:
+      "AI-powered grant matching and application tracking. NLP-driven search across thousands of funding opportunities.",
+    accent: "#f59e0b",
+    tags: ["Python", "LLM", "PostgreSQL", "FastAPI"],
+  },
+];
+
+export default function WorkPage() {
+  return (
+    <div className="px-6 pt-32 pb-24">
+      <div className="mx-auto max-w-[1280px]">
+        <p className="mb-2 font-mono text-sm text-[var(--accent)]">
+          Case Studies
+        </p>
+        <h1 className="mb-6 font-display text-6xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-[64px]">
+          Work
+        </h1>
+        <p className="mb-16 max-w-2xl text-xl text-[var(--text-secondary)]">
+          A selection of systems I&apos;ve designed and built. Each one solved a
+          real business problem with reliable, scalable architecture.
+        </p>
+
+        {/* Full-width previews, alternating sides per DESIGN.md */}
+        <div className="flex flex-col gap-16">
+          {caseStudies.map((study, i) => (
+            <Link
+              key={study.slug}
+              href={`/work/${study.slug}`}
+              className="group block rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] transition-colors hover:border-[var(--accent)]"
+            >
+              <div
+                className={`flex flex-col gap-8 p-8 md:flex-row md:items-center md:p-12 ${
+                  i % 2 === 1 ? "md:flex-row-reverse" : ""
+                }`}
+              >
+                {/* Placeholder for case study visual */}
+                <div
+                  className="aspect-video w-full rounded-[var(--radius-sm)] md:w-1/2"
+                  style={{
+                    backgroundColor: `${study.accent}10`,
+                    border: `1px solid ${study.accent}30`,
+                  }}
+                />
+
+                <div className="md:w-1/2">
+                  <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]">
+                    {study.title}
+                  </h2>
+                  <p className="mt-3 text-lg leading-relaxed text-[var(--text-secondary)]">
+                    {study.subtitle}
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {study.tags.map((tag) => (
+                      <Tag key={tag}>{tag}</Tag>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
