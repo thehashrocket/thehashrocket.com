@@ -72,7 +72,7 @@ export default function Home() {
             Systems Atlas
           </h2>
 
-          {/* Staggered layout per DESIGN.md anti-slop rules */}
+          {/* Staggered layout per docs/DESIGN.md anti-slop rules */}
           <div className="flex flex-col gap-8">
             {caseStudies.map((study, i) => (
               <div

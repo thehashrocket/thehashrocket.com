@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.0.1] - 2026-04-10
+
+### Added
+- AI agent documentation: `docs/ARCHITECTURE.md` (system architecture, component tree, data flow) and `docs/DOMAIN.md` (business context, brand identity)
+- CLAUDE.md enriched with Architecture & Context, Testing, and Conventions sections
+
+### Changed
+- Moved `DESIGN.md` to `docs/DESIGN.md` (preserves git history via `git mv`)
+- Updated all DESIGN.md references in CLAUDE.md, `app/page.tsx`, and `app/work/page.tsx`
+
 ## [0.1.0.0] - 2026-04-10
 
 ### Added
