@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.0.2] - 2026-04-10
+
+### Added
+- Conductor workspace configuration (`conductor.json`) with setup, run, and archive scripts for automated dev environment management
+
 ## [0.1.0.1] - 2026-04-10
 
 ### Added
