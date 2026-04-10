@@ -18,7 +18,7 @@
 - **UI/Labels:** Inter (same as body)
 - **Data/Tables:** JetBrains Mono — supports tabular-nums, clear at small sizes
 - **Code:** JetBrains Mono
-- **Loading:** Google Fonts CDN (`Space+Grotesk:wght@400;500;600;700&Inter:wght@400;500;600&JetBrains+Mono:wght@400;500`)
+- **Loading:** `next/font/google` (self-hosted, zero layout shift)
 - **Scale:**
   - 96px — hero display (Space Grotesk 700, -0.03em, line-height 1.05)
   - 64px — page title (Space Grotesk 700, -0.02em, line-height 1.05)
@@ -30,7 +30,7 @@
   - 14px — small/captions (Inter 400, line-height 1.5)
 
 ## Color
-- **Approach:** Restrained — monochrome + single accent, color is rare and meaningful
+- **Approach:** Restrained — monochrome + single global accent (#4ade80 green), color is rare and meaningful. Case study accent tints (blue, amber) are scoped overrides used only within their respective case study pages, not as global UI accents.
 - **CSS custom properties (define in `:root`, Tailwind consumes them):**
 
 ### Dark Theme (default)
@@ -42,7 +42,7 @@
 | `--border` | #262626 | Borders, dividers |
 | `--text-primary` | #fafafa | Headings, primary text |
 | `--text-secondary` | #a1a1a1 | Body text, descriptions |
-| `--text-muted` | #737373 | Labels, captions, metadata |
+| `--text-muted` | #808080 | Labels, captions, metadata (5.01:1 on --bg) |
 | `--accent` | #4ade80 | Primary accent (green, terminal feel) |
 | `--accent-hover` | #22c55e | Accent hover state |
 | `--accent-subtle` | rgba(74,222,128,0.1) | Accent backgrounds, tags |
@@ -56,9 +56,9 @@
 | `--border` | #e5e5e5 | Borders, dividers |
 | `--text-primary` | #0a0a0a | Headings, primary text |
 | `--text-secondary` | #525252 | Body text |
-| `--text-muted` | #a3a3a3 | Labels, captions |
-| `--accent` | #16a34a | Accent (slightly darker green for contrast) |
-| `--accent-hover` | #15803d | Accent hover |
+| `--text-muted` | #767676 | Labels, captions (4.54:1 on --bg) |
+| `--accent` | #15803d | Accent (darker green for AA contrast, 4.81:1) |
+| `--accent-hover` | #166534 | Accent hover (6.83:1) |
 | `--accent-subtle` | rgba(22,163,74,0.08) | Accent backgrounds |
 
 ### Semantic Colors
@@ -91,16 +91,17 @@
   - `4xl`: 96px
 - **Section padding:** 96px desktop, 64px tablet, 48px mobile
 - **Content max-width:** 720px for body text, 1280px for full-width layouts
+- **Note:** Spacing scale names map to Tailwind utilities (e.g., `lg` = `p-6`). In component patterns, `--space-lg` means 24px / Tailwind `p-6`. Define as CSS custom properties if consuming outside Tailwind.
 
 ## Layout
 - **Approach:** Creative-editorial — asymmetric grids, staggered sections, no uniform card grids
-- **Grid:** 12 columns per breakpoint
+- **Grid:** 12 columns desktop, 8 columns tablet, 1 column mobile (see Responsive Tiers)
 - **Max content width:** 1280px
-- **Border radius:**
-  - `sm`: 4px — inputs, small elements
-  - `md`: 8px — cards, containers
-  - `lg`: 16px — modals, featured sections
-  - `full`: 9999px — pills, avatars, badges
+- **Border radius** (referenced as `--radius-*` in component patterns, define as CSS custom properties):
+  - `--radius-sm`: 4px — inputs, small elements
+  - `--radius-md`: 8px — cards, containers
+  - `--radius-lg`: 16px — modals, featured sections
+  - `--radius-full`: 9999px — pills, avatars, badges
 - **Anti-slop rules:**
   - No 3-column feature grids
   - No centered-everything layouts
@@ -117,9 +118,11 @@
   3. Subtle scroll reveals (Motion, text/image entrance)
 - **Priority:** Atlas morph > Motion route transition > Motion scroll > R3F in-scene
 - **Canvas behavior:** Dims/freezes when text-heavy sections are in viewport
+- **Page transitions:** Enter-only for Phase 1. No AnimatePresence exit animations (unreliable with App Router).
+- **Mobile canvas:** Always mounted, idle/frozen on non-hero pages. Only the hero scene renders on mobile (see Responsive Tiers: "Hero only"). No conditional mount/unmount.
 - **Easing:**
   - Enter: `cubic-bezier(0, 0, 0.2, 1)` (ease-out)
-  - Exit: `cubic-bezier(0.4, 0, 1, 1)` (ease-in)
+  - Exit: `cubic-bezier(0.4, 0, 1, 1)` (ease-in) — Phase 2, not used in Phase 1 (no exit animations)
   - Move: `cubic-bezier(0.4, 0, 0.2, 1)` (ease-in-out)
 - **Duration:**
   - Micro: 100ms (button hover, toggle)
@@ -169,7 +172,7 @@
 | Mobile | < 768px | 1-col | Hamburger + overlay | Hero only | Minimal |
 
 ## Accessibility
-- Contrast: 4.5:1 body text, 3:1 large text (#fafafa on #0a0a0a = 19.3:1)
+- Contrast: 4.5:1 body text, 3:1 large text (#fafafa on #0a0a0a = 18.97:1)
 - Touch targets: 44px minimum
 - Canvas: `aria-hidden` (decorative), all content in DOM
 - ARIA landmarks: `banner`, `main`, `contentinfo`
