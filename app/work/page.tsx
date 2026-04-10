@@ -50,7 +50,7 @@ export default function WorkPage() {
           real business problem with reliable, scalable architecture.
         </p>
 
-        {/* Full-width previews, alternating sides per DESIGN.md */}
+        {/* Full-width previews, alternating sides per docs/DESIGN.md */}
         <div className="flex flex-col gap-16">
           {caseStudies.map((study, i) => (
             <Link

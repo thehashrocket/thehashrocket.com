@@ -20,7 +20,21 @@ Key routing rules:
 - Code quality, health check → invoke health
 
 ## Design System
-Always read DESIGN.md before making any visual or UI decisions.
+Always read docs/DESIGN.md before making any visual or UI decisions.
 All font choices, colors, spacing, and aesthetic direction are defined there.
 Do not deviate without explicit user approval.
-In QA mode, flag any code that doesn't match DESIGN.md.
+In QA mode, flag any code that doesn't match docs/DESIGN.md.
+
+## Architecture & Context
+Read docs/ARCHITECTURE.md for system architecture, component tree, data flow, and tech stack.
+Read docs/DOMAIN.md for business context, project domains, and brand identity.
+
+## Testing
+Run `npm test` (vitest) for unit tests. Test files live in `test/`.
+Playwright is configured for E2E but not yet populated.
+
+## Conventions
+- 3D scenes go in `components/scenes/`, UI components in `components/ui/`, shell in `components/layout/`
+- Scene state is managed via Zustand store in `lib/store.ts` — pages dispatch, canvas reads
+- Server Actions go in `lib/actions.ts`
+- CSS custom properties defined in `app/globals.css`, consumed by Tailwind utilities
