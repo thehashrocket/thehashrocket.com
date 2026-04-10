@@ -29,6 +29,9 @@ In QA mode, flag any code that doesn't match docs/DESIGN.md.
 Read docs/ARCHITECTURE.md for system architecture, component tree, data flow, and tech stack.
 Read docs/DOMAIN.md for business context, project domains, and brand identity.
 
+## Node.js
+This project uses nvm for Node version management. The required version is pinned in `.nvmrc` (currently 24.11). Always run `nvm use` before executing any Node/npm commands to ensure the correct version is active.
+
 ## Testing
 Run `npm test` (vitest) for unit tests. Test files live in `test/`.
 Playwright is configured for E2E but not yet populated.
