@@ -67,6 +67,16 @@ describe("geo page data integration", () => {
     }
   });
 
+  it("FAQ data shape is compatible with accordion rendering", () => {
+    for (const slug of locationSlugs) {
+      const location = getLocation(slug)!;
+      for (const faq of location.faqs) {
+        expect(faq.question.trim().length).toBeGreaterThan(0);
+        expect(faq.answer.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
+
   it("sitemap entries would be generated for all locations", () => {
     const baseUrl = "https://thehashrocket.com";
     const urls = [
