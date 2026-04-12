@@ -1,7 +1,5 @@
 # TODOS
 
-## Deferred from CEO Plan Review (2026-04-10)
-
 ## Deferred from CEO Plan Review (2026-04-11) — Geo Landing Pages
 
 ### Google Business Profile Setup
@@ -19,16 +17,6 @@
 - **Depends on:** Geo v1 deployed + 3 months of Search Console data showing traction (organic traffic + at least 1 form fill from geo pages)
 - **Risk:** Without traction data, expanding prematurely wastes research time on local economic context per city.
 - **Context:** lib/locations.ts data-driven architecture makes adding cities trivial: add config entry, create OG image, write local context section. Gate on real data.
-
-## Deferred from Design Review (2026-04-11) — Geo Landing Pages
-
-### FAQ Accordion Upgrade
-- **What:** Replace static FAQ Q&A pairs on geo pages with an interactive accordion (expand/collapse) with keyboard navigation and ARIA attributes.
-- **Why:** Better UX for longer FAQ sections as cities accumulate more questions over time. Static Q&A shows all content, which is verbose with 5+ questions.
-- **Effort:** S (CC: ~15 min) | **Priority:** P3
-- **Depends on:** Geo v1 deployed + FAQ content growing beyond 5 questions per city
-- **Risk:** None. Straightforward progressive enhancement.
-- **Context:** Static Q&A chosen in design review for v1 (better for initial SEO crawling, all content visible to bots, simpler). Revisit if FAQs grow or user feedback suggests collapsing would help.
 
 ## Deferred from CEO Plan Review (2026-04-10)
 
