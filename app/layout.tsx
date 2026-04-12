@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { spaceGrotesk, inter, jetbrainsMono } from "@/lib/fonts";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
@@ -44,6 +45,7 @@ export default function RootLayout({
           </main>
         </SceneProvider>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
