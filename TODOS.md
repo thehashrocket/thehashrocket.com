@@ -20,6 +20,36 @@
 
 ## Deferred from CEO Plan Review (2026-04-10)
 
+## Deferred from CEO Plan Review (2026-04-11) — Geo Landing Pages
+
+### Google Business Profile Setup
+- **What:** Create and verify a Google Business Profile for thehashrocket.com targeting Central Valley service area (Sacramento, Stockton/San Joaquin County, Modesto/Stanislaus County)
+- **Why:** GBP is the #1 local search ranking factor. Without it, geo pages rank in organic but don't appear in Google Maps / local pack.
+- **Effort:** S (30 min setup + verification wait) | **Priority:** P1
+- **Depends on:** Geo landing pages deployed and indexed
+- **Risk:** Requires service area verification which can take 1-2 weeks. Manual process, not automatable.
+- **Context:** Accepted as a documented post-deploy step during CEO plan review. Set up immediately after geo pages go live. Add geo page URLs as website links in GBP.
+
+### Expand Geo Pages to Northern California
+- **What:** Add geo landing pages for additional Northern California cities (Fresno, San Jose, Oakland, etc.)
+- **Why:** If initial 3 geo pages generate leads, each new city is a direct revenue multiplier with near-zero marginal cost.
+- **Effort:** S per city (architecture in place) | **Priority:** P2
+- **Depends on:** Geo v1 deployed + 3 months of Search Console data showing traction (organic traffic + at least 1 form fill from geo pages)
+- **Risk:** Without traction data, expanding prematurely wastes research time on local economic context per city.
+- **Context:** lib/locations.ts data-driven architecture makes adding cities trivial: add config entry, create OG image, write local context section. Gate on real data.
+
+## Deferred from Design Review (2026-04-11) — Geo Landing Pages
+
+### FAQ Accordion Upgrade
+- **What:** Replace static FAQ Q&A pairs on geo pages with an interactive accordion (expand/collapse) with keyboard navigation and ARIA attributes.
+- **Why:** Better UX for longer FAQ sections as cities accumulate more questions over time. Static Q&A shows all content, which is verbose with 5+ questions.
+- **Effort:** S (CC: ~15 min) | **Priority:** P3
+- **Depends on:** Geo v1 deployed + FAQ content growing beyond 5 questions per city
+- **Risk:** None. Straightforward progressive enhancement.
+- **Context:** Static Q&A chosen in design review for v1 (better for initial SEO crawling, all content visible to bots, simpler). Revisit if FAQs grow or user feedback suggests collapsing would help.
+
+## Deferred from CEO Plan Review (2026-04-10)
+
 ### AI Chat Widget
 - **What:** LLM-powered chat widget answering questions about experience, skills, availability
 - **Why:** Instant 24/7 answers for potential clients. Differentiator.
