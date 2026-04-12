@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.1.0] - 2026-04-11
+
+### Added
+- Geo-targeted landing pages for Sacramento, Stockton, and Modesto with city-specific hero copy, industry framing, and local economic context
+- Hub page at /locations with staggered layout linking to all 3 cities
+- ProfessionalService and FAQPage JSON-LD structured data on each geo page
+- Dynamic OG images per city using next/og with committed font files
+- Sitemap entries for /locations hub and all geo pages
+- Contact form source attribution from geo pages (query param tracks which city page referred the lead)
+- "Locations" link in main navigation
+- Case study data extracted to shared lib/case-studies.ts (DRY, used by homepage, work pages, and geo pages)
+- Per-city case study connectors tying projects to local context
+- Trust proof strip in geo page hero (25+ YRS, $10K+, industries, 1:1 direct)
+- Breadcrumb navigation on each geo page
+- Nearby locations footer linking to sibling cities
+- Internal linking from /work/[slug] case study pages to geo pages
+- @vercel/analytics integration for page-level tracking
+- "Book a scoping call" CTA (Cal.com) alongside contact form CTA
+- 3 new test files (20 tests) covering location data, case study data, and geo page integration
+
 ## [0.1.0.2] - 2026-04-10
 
 ### Added

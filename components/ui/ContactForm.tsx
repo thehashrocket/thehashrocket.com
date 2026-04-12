@@ -6,7 +6,7 @@ import { Button } from "./Button";
 
 const initialState = { success: false, error: null };
 
-export function ContactForm() {
+export function ContactForm({ source }: { source?: string }) {
   const [state, formAction, isPending] = useActionState(
     submitContact,
     initialState,
@@ -38,6 +38,9 @@ export function ContactForm() {
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-6">
+      {/* Source attribution */}
+      {source && <input type="hidden" name="source" value={source} />}
+
       {/* Honeypot */}
       <div className="sr-only" aria-hidden>
         <label htmlFor="website">Website</label>

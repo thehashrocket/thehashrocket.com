@@ -18,6 +18,7 @@ export async function submitContact(
   const email = formData.get("email") as string;
   const message = formData.get("message") as string;
   const honeypot = formData.get("website") as string;
+  const source = formData.get("source") as string | null;
 
   // Honeypot check
   if (honeypot) {
@@ -61,8 +62,8 @@ export async function submitContact(
     await resend.emails.send({
       from: "Contact Form <contact@thehashrocket.com>",
       to: "jason@thehashrocket.com",
-      subject: `New contact from ${name}`,
-      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      subject: `New contact from ${name}${source ? ` (via ${source})` : ""}`,
+      text: `Name: ${name}\nEmail: ${email}${source ? `\nSource: ${source}` : ""}\n\nMessage:\n${message}`,
     });
 
     return { success: true, error: null };
