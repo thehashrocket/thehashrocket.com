@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2.0] - 2026-04-11
+
+### Changed
+- FAQ sections on geo landing pages now use native `<details>/<summary>` accordion instead of static Q&A display — click or keyboard (Enter/Space) to expand/collapse each question
+- Restored `<h3>` heading semantics inside accordion summaries for screen readers and SEO document outline
+- Added `aria-hidden` on accordion indicator icon to clean up screen reader announcements
+- Cross-browser marker suppression for Firefox compatibility
+
 ## [0.1.1.0] - 2026-04-11
 
 ### Added
