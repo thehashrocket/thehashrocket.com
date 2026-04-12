@@ -1,30 +1,8 @@
 import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
-import { Tag } from "@/components/ui/Tag";
+import { getCaseStudySummaries } from "@/lib/case-studies";
 
-const caseStudies = [
-  {
-    slug: "pharma-wms",
-    title: "Pharma WMS",
-    subtitle: "Warehouse management system for pharmaceutical distribution",
-    accent: "#4ade80",
-    tags: ["Ruby on Rails", "React", "PostgreSQL"],
-  },
-  {
-    slug: "nonprofit-matching",
-    title: "Nonprofit Matching",
-    subtitle: "Connecting donors with organizations through intelligent matching",
-    accent: "#3b82f6",
-    tags: ["Next.js", "GraphQL", "Neo4j"],
-  },
-  {
-    slug: "grant-discovery",
-    title: "Grant Discovery",
-    subtitle: "AI-powered grant matching and application tracking",
-    accent: "#f59e0b",
-    tags: ["Python", "LLM", "PostgreSQL"],
-  },
-];
+const caseStudies = getCaseStudySummaries();
 
 export default function Home() {
   return (

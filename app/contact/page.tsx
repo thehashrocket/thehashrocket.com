@@ -7,7 +7,13 @@ export const metadata: Metadata = {
     "Start a conversation about your project. I help teams build complex systems.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ source?: string }>;
+}) {
+  const { source } = await searchParams;
+
   return (
     <div className="px-6 pt-32 pb-24">
       <div className="mx-auto max-w-[720px]">
@@ -20,7 +26,7 @@ export default function ContactPage() {
           your project and I&apos;ll get back to you within 24 hours.
         </p>
 
-        <ContactForm />
+        <ContactForm source={source} />
       </div>
     </div>
   );
