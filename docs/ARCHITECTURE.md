@@ -29,7 +29,9 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Progressive enhancement:** `lib/webgl.ts` detects WebGL support. If unavailable, `ErrorBoundary` catches the failure and renders `StaticFallback`. The site is fully functional without WebGL.
 
-**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend.
+**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead.
+
+**Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data.
 
 ## Data Flow
 
@@ -56,15 +58,20 @@ app/                    Routes (App Router)
   ├── contact/          Contact form
   ├── work/             Case studies index
   │   └── [slug]/       Individual case study
-  ├── layout.tsx        Root layout (canvas + nav + footer)
+  ├── locations/        Geo landing pages hub
+  │   └── [slug]/       City page + opengraph-image.tsx
+  ├── layout.tsx        Root layout (canvas + nav + footer + analytics)
   └── not-found.tsx     404 with persistent canvas
 components/
   ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary)
   ├── scenes/           R3F scene components (HeroScene, PharmaScene, SceneRouter)
   └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard)
+      └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
 lib/
   ├── store.ts          Zustand scene state
-  ├── actions.ts        Server Actions (contact form)
+  ├── actions.ts        Server Actions (contact form with source attribution)
+  ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
+  ├── locations.ts      City configs (Sacramento, Stockton, Modesto)
   ├── fonts.ts          next/font configuration (Space Grotesk, Inter, JetBrains Mono)
   └── webgl.ts          WebGL feature detection
 docs/                   Project documentation
@@ -83,7 +90,8 @@ public/                 Static assets
 | Animation | Motion (Framer Motion) | Page transitions, scroll reveals |
 | Email | Resend | Transactional email for contact form |
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, WebGL detection |
+| Analytics | @vercel/analytics | Page-level tracking |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, WebGL detection, geo pages |
 | E2E | Playwright | Browser testing (configured, not yet populated) |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
