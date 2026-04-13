@@ -112,7 +112,7 @@ export default async function LocationPage({
       <HeroSection location={location} />
       <ServicesSection location={location} />
       <CaseStudiesSection location={location} />
-      <FAQSection location={location} />
+      <FAQSection key={slug} faqs={location.faqs} />
       <CTASection location={location} />
 
       {/* Nearby locations */}

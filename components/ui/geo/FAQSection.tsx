@@ -1,6 +1,6 @@
-import type { Location } from "@/lib/locations";
+import type { FAQ } from "@/lib/locations";
 
-export function FAQSection({ location }: { location: Location }) {
+export function FAQSection({ faqs }: { faqs: FAQ[] }) {
   return (
     <section className="border-t border-[var(--border)] px-6 py-24 md:py-32">
       <div className="mx-auto max-w-[720px]">
@@ -10,7 +10,7 @@ export function FAQSection({ location }: { location: Location }) {
         </h2>
 
         <div className="flex flex-col">
-          {location.faqs.map((faq) => (
+          {faqs.map((faq) => (
             <details
               key={faq.question}
               className="group border-b border-[var(--border)]"
