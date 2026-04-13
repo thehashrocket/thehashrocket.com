@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4.0] - 2026-04-13
+
+### Fixed
+- WebGL context crash on devices without a GPU (bots, crawlers, headless browsers, old hardware) — `isWebGLSupported()` now caches its result and gates Canvas mounting
+- Hydration mismatch in SceneCanvas — WebGL detection deferred to `useEffect` so server and client render the same fallback initially
+
 ## [0.1.3.0] - 2026-04-13
 
 ### Added

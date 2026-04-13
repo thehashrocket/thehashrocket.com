@@ -27,7 +27,7 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Zustand scene state:** `lib/store.ts` manages `currentScene`, `scrollProgress`, and `morphRunning`. Pages set the scene; the canvas reads it. No prop drilling through the component tree.
 
-**Progressive enhancement:** `lib/webgl.ts` detects WebGL support. If unavailable, `ErrorBoundary` catches the failure and renders `StaticFallback`. The site is fully functional without WebGL.
+**Progressive enhancement:** `lib/webgl.ts` detects WebGL support (cached per session). `SceneCanvas` checks support via `useEffect` before mounting the R3F Canvas — unsupported devices get `StaticFallback` without ever attempting WebGL context creation. `ErrorBoundary` remains as a safety net for runtime context loss. The site is fully functional without WebGL.
 
 **Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead.
 

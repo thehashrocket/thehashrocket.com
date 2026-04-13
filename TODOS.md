@@ -1,5 +1,15 @@
 # TODOS
 
+## Deferred from Eng Review (2026-04-13) — WebGL Crash Fix
+
+### THREE.Clock Deprecation Warning
+- **What:** THREE.js logs "THREE.Clock: This module has been deprecated. Please use THREE.Timer instead." R3F v9 uses Clock internally.
+- **Why:** Clock could be removed in a future three.js major, breaking 3D scenes. Currently cosmetic (console warning only).
+- **Effort:** S (CC: ~15 min) | **Priority:** P3
+- **Depends on:** @react-three/fiber releasing a version that uses THREE.Timer internally
+- **Risk:** None currently. Only becomes a problem on a future three.js upgrade.
+- **Context:** Spotted in Sentry breadcrumbs during WebGL crash investigation. The fix is upstream in R3F, not in our code. Check R3F changelog on next dependency update.
+
 ## Geo Landing Pages
 
 ### Google Business Profile Setup
