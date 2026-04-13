@@ -2,8 +2,14 @@
 
 import { Canvas } from "@react-three/fiber";
 import { SceneRouter } from "../scenes/SceneRouter";
+import { isWebGLSupported } from "@/lib/webgl";
+import { StaticFallback } from "./StaticFallback";
 
 export default function SceneCanvas() {
+  if (!isWebGLSupported()) {
+    return <StaticFallback />;
+  }
+
   return (
     <Canvas
       className="!fixed !inset-0 !-z-10"
