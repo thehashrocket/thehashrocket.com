@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.3.0] - 2026-04-13
+
+### Added
+- Career timeline on the About page with progressive disclosure (expanded/compact/condensed tiers), scroll-reveal animations, and responsive mobile layout
+- Career data layer (`lib/experience.ts`) with typed entries, skills taxonomy, and domain tags
+- Stack & Domains section on the homepage showing tech tags and domain expertise
+- Local experience blocks on geo landing pages (Sacramento, Stockton, Modesto) connecting career history to regional credibility
+- Data-driven Core Stack and Domains lists on the About page, replacing hardcoded content
+- Full test coverage for career data validation and Timeline component rendering
+
+### Changed
+- Updated experience claim from "25 years" to "14 years" across all 11 files (layout metadata, JSON-LD, hero, about, footer, geo pages, docs)
+- Rewrote About page bio paragraphs with specific domain references from career history
+- Work page now imports case study data from `lib/case-studies.ts` instead of duplicating it inline
+
+### Fixed
+- Timeline tier logic now handles small entry lists correctly (4 or fewer entries all get full detail)
+- Animation delay capped at 400ms to prevent long waits with many entries
+- Mobile responsive behavior wired up via `useIsMobile` hook (was previously hardcoded to desktop)
+
 ## [0.1.2.2] - 2026-04-13
 
 ### Added

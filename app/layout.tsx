@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Jason Shultz",
   },
   description:
-    "25-year senior full-stack engineer building complex systems. Consulting for startups and enterprises.",
+    "Senior full-stack engineer with 14 years building complex systems. Consulting for startups and enterprises.",
   metadataBase: new URL("https://thehashrocket.com"),
   openGraph: {
     type: "website",

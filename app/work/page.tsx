@@ -1,39 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Tag } from "@/components/ui/Tag";
+import { getCaseStudySummaries } from "@/lib/case-studies";
 
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Case studies from 25 years of building complex software systems.",
+    "Case studies from 14 years of building complex software systems.",
 };
 
-const caseStudies = [
-  {
-    slug: "pharma-wms",
-    title: "Pharma WMS",
-    subtitle:
-      "Warehouse management system for pharmaceutical distribution. Real-time inventory, compliance tracking, and multi-facility orchestration.",
-    accent: "#4ade80",
-    tags: ["Ruby on Rails", "React", "PostgreSQL", "Redis"],
-  },
-  {
-    slug: "nonprofit-matching",
-    title: "Nonprofit Matching",
-    subtitle:
-      "Connecting donors with organizations through intelligent matching algorithms and graph-based relationship discovery.",
-    accent: "#3b82f6",
-    tags: ["Next.js", "GraphQL", "Neo4j", "TypeScript"],
-  },
-  {
-    slug: "grant-discovery",
-    title: "Grant Discovery",
-    subtitle:
-      "AI-powered grant matching and application tracking. NLP-driven search across thousands of funding opportunities.",
-    accent: "#f59e0b",
-    tags: ["Python", "LLM", "PostgreSQL", "FastAPI"],
-  },
-];
+const caseStudies = getCaseStudySummaries();
 
 export default function WorkPage() {
   return (
@@ -46,8 +22,9 @@ export default function WorkPage() {
           Work
         </h1>
         <p className="mb-16 max-w-2xl text-xl text-[var(--text-secondary)]">
-          A selection of systems I&apos;ve designed and built. Each one solved a
-          real business problem with reliable, scalable architecture.
+          Over 14 years I&apos;ve built systems across pharma logistics, EdTech,
+          nonprofit technology, and manufacturing. These case studies represent
+          the kind of complex, high-stakes problems I solve.
         </p>
 
         {/* Full-width previews, alternating sides per docs/DESIGN.md */}

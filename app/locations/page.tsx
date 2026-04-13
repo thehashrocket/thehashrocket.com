@@ -23,7 +23,7 @@ export default function LocationsPage() {
           built locally.
         </h1>
         <p className="mb-16 max-w-xl text-xl text-[var(--text-secondary)]">
-          25 years of engineering complex systems. Based in California&apos;s
+          14 years of engineering complex systems. Based in California&apos;s
           Central Valley, serving businesses across the region.
         </p>
 

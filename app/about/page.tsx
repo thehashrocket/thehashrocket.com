@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { Timeline } from "@/components/ui/Timeline";
+import { careerEntries, skills, domains } from "@/lib/experience";
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "25 years of full-stack engineering. From startups to enterprises, I build systems that work.",
+    "14 years of full-stack engineering. From startups to enterprises, I build systems that work.",
 };
 
 export default function AboutPage() {
@@ -17,17 +19,18 @@ export default function AboutPage() {
 
         <div className="space-y-6 text-lg leading-relaxed text-[var(--text-secondary)]">
           <p>
-            I&apos;m a senior full-stack engineer with 25 years of experience
-            building complex software systems. I specialize in the kind of
-            problems that don&apos;t have obvious solutions — warehouse
-            logistics, real-time data pipelines, compliance-heavy applications,
-            and AI-augmented workflows.
+            I&apos;m a senior full-stack engineer with over 14 years of
+            experience building complex software systems. I&apos;ve worked
+            across EdTech, pharmaceutical logistics, nonprofit technology, and
+            manufacturing — the kind of domains where software failures have
+            real consequences.
           </p>
           <p>
-            I&apos;ve worked across the entire stack: from database architecture
-            and API design to interactive frontends and 3D visualization. My
-            approach is pragmatic — I choose the right tool for the job, not the
-            trendiest framework.
+            My career spans the full stack: from database architecture and API
+            design to interactive frontends and 3D visualization. I&apos;ve
+            built warehouse management systems handling $200M+ in distribution,
+            donor matching platforms, AI-powered grant discovery tools, and ERP
+            systems for companies undergoing digital transformation.
           </p>
           <p>
             When I consult, I bring the perspective of someone who has seen
@@ -42,12 +45,9 @@ export default function AboutPage() {
               Core Stack
             </h2>
             <ul className="space-y-2 font-mono text-sm text-[var(--text-secondary)]">
-              <li>TypeScript / JavaScript</li>
-              <li>React / Next.js</li>
-              <li>Ruby on Rails</li>
-              <li>Python / FastAPI</li>
-              <li>PostgreSQL / Redis</li>
-              <li>GraphQL / REST</li>
+              {[...skills.languages, ...skills.frameworks].map((skill) => (
+                <li key={skill}>{skill}</li>
+              ))}
             </ul>
           </div>
           <div>
@@ -55,14 +55,20 @@ export default function AboutPage() {
               Domains
             </h2>
             <ul className="space-y-2 font-mono text-sm text-[var(--text-secondary)]">
-              <li>Warehouse & Logistics</li>
-              <li>Healthcare / Pharma</li>
-              <li>Nonprofit / Civic Tech</li>
-              <li>AI / ML Pipelines</li>
-              <li>Real-time Systems</li>
-              <li>Compliance & Audit</li>
+              {domains.map((domain) => (
+                <li key={domain}>{domain}</li>
+              ))}
             </ul>
           </div>
+        </div>
+
+        {/* Career Timeline */}
+        <div className="mt-24">
+          <p className="mb-2 font-mono text-sm text-[var(--accent)]">Career</p>
+          <h2 className="mb-12 font-display text-[32px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
+            Where I&apos;ve been
+          </h2>
+          <Timeline entries={careerEntries} />
         </div>
       </div>
     </div>

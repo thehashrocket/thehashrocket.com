@@ -75,4 +75,19 @@ describe("locations", () => {
       expect(slug).toMatch(/^[a-z0-9-]+$/);
     }
   });
+
+  it("localExperience is a non-empty string when present", () => {
+    for (const slug of locationSlugs) {
+      const loc = locations[slug];
+      if (loc.localExperience !== undefined) {
+        expect(typeof loc.localExperience).toBe("string");
+        expect(loc.localExperience.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("modesto has localExperience defined", () => {
+    const modesto = getLocation("modesto");
+    expect(modesto!.localExperience).toBeTruthy();
+  });
 });

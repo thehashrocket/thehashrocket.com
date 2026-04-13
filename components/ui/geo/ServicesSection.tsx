@@ -25,6 +25,13 @@ export function ServicesSection({ location }: { location: Location }) {
               <p className="text-[var(--text-secondary)]">
                 {location.whyLocal}
               </p>
+              {location.localExperience && (
+                <div className="mt-6 border-l-2 border-[var(--accent)] pl-4">
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    {location.localExperience}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

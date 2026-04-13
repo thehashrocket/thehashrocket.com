@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
+import { Tag } from "@/components/ui/Tag";
 import { getCaseStudySummaries } from "@/lib/case-studies";
+import { skills, domains } from "@/lib/experience";
 
 const caseStudies = getCaseStudySummaries();
 
@@ -19,7 +21,7 @@ export default function Home() {
             that work.
           </h1>
           <p className="mt-6 max-w-xl text-xl leading-relaxed text-[var(--text-secondary)]">
-            25 years of engineering complex, high-stakes software.
+            14 years of engineering complex, high-stakes software.
             From warehouse logistics to AI pipelines — if it needs to be
             reliable, I&apos;ve built it.
           </p>
@@ -67,6 +69,23 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Stack & Domains */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-[1280px]">
+          <p className="mb-4 font-mono text-sm text-[var(--accent)]">
+            Stack &amp; Domains
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[...skills.frameworks, ...skills.databases].map((tech) => (
+              <Tag key={tech}>{tech}</Tag>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-[var(--text-secondary)]">
+            {domains.join(", ")}
+          </p>
         </div>
       </section>
 
