@@ -31,7 +31,9 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead.
 
-**Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data.
+**Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data. Cities with `localExperience` get a career credibility block in the "Why local?" card.
+
+**Career data:** `lib/experience.ts` holds typed career entries, skills taxonomy, and domain tags. Consumed by the About page (timeline + skills lists), homepage (tech tags + domains), and validated against `lib/locations.ts` slugs. The `Timeline` component uses progressive disclosure (expanded/compact/condensed tiers) with responsive behavior and scroll-reveal animations.
 
 ## Data Flow
 
@@ -65,13 +67,14 @@ app/                    Routes (App Router)
 components/
   ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary)
   ├── scenes/           R3F scene components (HeroScene, PharmaScene, SceneRouter)
-  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard)
+  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, Timeline)
       └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
 lib/
   ├── store.ts          Zustand scene state
   ├── actions.ts        Server Actions (contact form with source attribution)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
-  ├── locations.ts      City configs (Sacramento, Stockton, Modesto)
+  ├── experience.ts     Career data (entries, skills, domains — used by about, homepage, timeline)
+  ├── locations.ts      City configs (Sacramento, Stockton, Modesto) with optional localExperience
   ├── fonts.ts          next/font configuration (Space Grotesk, Inter, JetBrains Mono)
   └── webgl.ts          WebGL feature detection
 docs/                   Project documentation
