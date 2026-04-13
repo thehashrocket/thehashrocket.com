@@ -3,14 +3,10 @@
 ## [0.1.2.0] - 2026-04-11
 
 ### Changed
-- FAQ sections on geo pages upgraded from static Q&A to interactive accordion with smooth expand/collapse animation
-- Full keyboard navigation: ArrowUp/Down to move between questions, Home/End for first/last, Enter/Space to toggle
-- ARIA attributes for accessibility: aria-expanded, aria-controls, aria-hidden, inert on collapsed panels, role="region"
-- Pre-hydration SEO preservation: all FAQ content renders expanded before JS loads, collapses to accordion after hydration
-- Component state resets on city-to-city navigation (key-based remount)
-
-### Added
-- 13 new tests for FAQ accordion covering expand/collapse, keyboard navigation, ARIA attributes, and single-open behavior
+- FAQ sections on geo landing pages now use native `<details>/<summary>` accordion instead of static Q&A display — click or keyboard (Enter/Space) to expand/collapse each question
+- Restored `<h3>` heading semantics inside accordion summaries for screen readers and SEO document outline
+- Added `aria-hidden` on accordion indicator icon to clean up screen reader announcements
+- Cross-browser marker suppression for Firefox compatibility
 
 ## [0.1.1.0] - 2026-04-11
 
