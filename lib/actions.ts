@@ -3,7 +3,15 @@
 import { headers } from "next/headers";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+function getResend() {
+  if (!resendClient) {
+    const key = process.env.RESEND_API_KEY;
+    if (!key) throw new Error("RESEND_API_KEY environment variable is not set");
+    resendClient = new Resend(key);
+  }
+  return resendClient;
+}
 
 interface ContactFormState {
   success: boolean;
@@ -59,15 +67,22 @@ export async function submitContact(
 
   // Send email
   try {
-    await resend.emails.send({
-      from: "Contact Form <contact@thehashrocket.com>",
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
+    const { error: sendError } = await getResend().emails.send({
+      from: `Contact Form <${fromEmail}>`,
       to: "jason@thehashrocket.com",
       subject: `New contact from ${name}${source ? ` (via ${source})` : ""}`,
       text: `Name: ${name}\nEmail: ${email}${source ? `\nSource: ${source}` : ""}\n\nMessage:\n${message}`,
     });
 
+    if (sendError) {
+      console.error("Resend send failed:", sendError);
+      return { success: false, error: "Something went wrong. Please try again." };
+    }
+
     return { success: true, error: null };
-  } catch {
+  } catch (err) {
+    console.error("Contact form error:", err);
     return { success: false, error: "Something went wrong. Please try again." };
   }
 }
