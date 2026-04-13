@@ -1,12 +1,19 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { SceneRouter } from "../scenes/SceneRouter";
 import { isWebGLSupported } from "@/lib/webgl";
 import { StaticFallback } from "./StaticFallback";
 
 export default function SceneCanvas() {
-  if (!isWebGLSupported()) {
+  const [webgl, setWebgl] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setWebgl(isWebGLSupported());
+  }, []);
+
+  if (webgl === null || !webgl) {
     return <StaticFallback />;
   }
 

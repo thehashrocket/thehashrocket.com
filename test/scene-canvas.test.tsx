@@ -4,14 +4,16 @@
 
 import { describe, it, expect, vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 
 vi.mock("@/lib/webgl", () => ({
   isWebGLSupported: () => false,
 }));
 
 vi.mock("@react-three/fiber", () => ({
-  Canvas: () => <div data-testid="r3f-canvas" />,
+  Canvas: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="r3f-canvas">{children}</div>
+  ),
 }));
 
 vi.mock("@/components/scenes/SceneRouter", () => ({
@@ -23,7 +25,9 @@ describe("SceneCanvas", () => {
     const { default: SceneCanvas } = await import(
       "@/components/layout/SceneCanvas"
     );
-    render(<SceneCanvas />);
+    await act(async () => {
+      render(<SceneCanvas />);
+    });
     expect(screen.queryByTestId("r3f-canvas")).not.toBeInTheDocument();
     expect(document.querySelector(".fixed.inset-0.-z-10")).toBeInTheDocument();
   });
