@@ -2,7 +2,7 @@
 
 ## Who
 
-Jason Shultz is a senior full-stack software engineer with 25 years of experience. He builds complex, high-stakes systems across industries including pharmaceutical logistics, nonprofit technology, and AI-powered data discovery.
+Jason Shultz is a senior full-stack software engineer with 14 years of experience. He builds complex, high-stakes systems across industries including pharmaceutical logistics, nonprofit technology, and AI-powered data discovery.
 
 ## What This Site Is
 
