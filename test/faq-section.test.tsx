@@ -30,145 +30,55 @@ describe("FAQSection", () => {
     }
   });
 
-  it("expands a panel when its question is clicked", async () => {
-    const user = userEvent.setup();
+  it("renders each FAQ as a details/summary element", () => {
     render(<FAQSection faqs={faqs} />);
-
-    const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-    expect(firstButton).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(firstButton);
-    expect(firstButton).toHaveAttribute("aria-expanded", "true");
-  });
-
-  it("collapses a panel when the same question is clicked again", async () => {
-    const user = userEvent.setup();
-    render(<FAQSection faqs={faqs} />);
-
-    const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-    await user.click(firstButton);
-    expect(firstButton).toHaveAttribute("aria-expanded", "true");
-
-    await user.click(firstButton);
-    expect(firstButton).toHaveAttribute("aria-expanded", "false");
-  });
-
-  it("only allows one panel open at a time", async () => {
-    const user = userEvent.setup();
-    render(<FAQSection faqs={faqs} />);
-
-    const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-    const secondButton = screen.getByText(faqs[1].question).closest("button")!;
-
-    await user.click(firstButton);
-    expect(firstButton).toHaveAttribute("aria-expanded", "true");
-    expect(secondButton).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(secondButton);
-    expect(firstButton).toHaveAttribute("aria-expanded", "false");
-    expect(secondButton).toHaveAttribute("aria-expanded", "true");
-  });
-
-  it("has correct ARIA attributes on panels", () => {
-    render(<FAQSection faqs={faqs} />);
+    const details = document.querySelectorAll("details");
+    expect(details).toHaveLength(faqs.length);
 
     for (let i = 0; i < faqs.length; i++) {
-      const trigger = screen.getByText(faqs[i].question).closest("button")!;
-      expect(trigger).toHaveAttribute("aria-controls", `faq-${i}-panel`);
-      expect(trigger).toHaveAttribute("id", `faq-${i}-trigger`);
-
-      const panel = document.getElementById(`faq-${i}-panel`)!;
-      expect(panel).toHaveAttribute("role", "region");
-      expect(panel).toHaveAttribute("aria-labelledby", `faq-${i}-trigger`);
+      const summary = details[i].querySelector("summary");
+      expect(summary).toBeInTheDocument();
+      expect(summary!.textContent).toContain(faqs[i].question);
     }
   });
 
-  it("sets aria-hidden on collapsed panels", async () => {
+  it("expands a panel when its summary is clicked", async () => {
     const user = userEvent.setup();
     render(<FAQSection faqs={faqs} />);
 
-    // After hydration effect, all panels should be collapsed
-    const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-    await user.click(firstButton);
+    const details = document.querySelectorAll("details");
+    expect(details[0]).not.toHaveAttribute("open");
 
-    const openPanel = document.getElementById("faq-0-panel")!;
-    const closedPanel = document.getElementById("faq-1-panel")!;
-
-    expect(openPanel).toHaveAttribute("aria-hidden", "false");
-    expect(closedPanel).toHaveAttribute("aria-hidden", "true");
+    const summary = details[0].querySelector("summary")!;
+    await user.click(summary);
+    expect(details[0]).toHaveAttribute("open");
   });
 
-  describe("keyboard navigation", () => {
-    it("moves focus to next item with ArrowDown", async () => {
-      const user = userEvent.setup();
-      render(<FAQSection faqs={faqs} />);
+  it("collapses a panel when the same summary is clicked again", async () => {
+    const user = userEvent.setup();
+    render(<FAQSection faqs={faqs} />);
 
-      const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-      const secondButton = screen.getByText(faqs[1].question).closest("button")!;
+    const details = document.querySelectorAll("details");
+    const summary = details[0].querySelector("summary")!;
 
-      firstButton.focus();
-      await user.keyboard("{ArrowDown}");
-      expect(secondButton).toHaveFocus();
-    });
+    await user.click(summary);
+    expect(details[0]).toHaveAttribute("open");
 
-    it("moves focus to previous item with ArrowUp", async () => {
-      const user = userEvent.setup();
-      render(<FAQSection faqs={faqs} />);
+    await user.click(summary);
+    expect(details[0]).not.toHaveAttribute("open");
+  });
 
-      const secondButton = screen.getByText(faqs[1].question).closest("button")!;
-      const firstButton = screen.getByText(faqs[0].question).closest("button")!;
+  it("all panels start collapsed", () => {
+    render(<FAQSection faqs={faqs} />);
+    const details = document.querySelectorAll("details");
+    for (const detail of details) {
+      expect(detail).not.toHaveAttribute("open");
+    }
+  });
 
-      secondButton.focus();
-      await user.keyboard("{ArrowUp}");
-      expect(firstButton).toHaveFocus();
-    });
-
-    it("wraps focus from last to first with ArrowDown", async () => {
-      const user = userEvent.setup();
-      render(<FAQSection faqs={faqs} />);
-
-      const lastButton = screen.getByText(faqs[2].question).closest("button")!;
-      const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-
-      lastButton.focus();
-      await user.keyboard("{ArrowDown}");
-      expect(firstButton).toHaveFocus();
-    });
-
-    it("wraps focus from first to last with ArrowUp", async () => {
-      const user = userEvent.setup();
-      render(<FAQSection faqs={faqs} />);
-
-      const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-      const lastButton = screen.getByText(faqs[2].question).closest("button")!;
-
-      firstButton.focus();
-      await user.keyboard("{ArrowUp}");
-      expect(lastButton).toHaveFocus();
-    });
-
-    it("moves focus to first item with Home", async () => {
-      const user = userEvent.setup();
-      render(<FAQSection faqs={faqs} />);
-
-      const secondButton = screen.getByText(faqs[1].question).closest("button")!;
-      const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-
-      secondButton.focus();
-      await user.keyboard("{Home}");
-      expect(firstButton).toHaveFocus();
-    });
-
-    it("moves focus to last item with End", async () => {
-      const user = userEvent.setup();
-      render(<FAQSection faqs={faqs} />);
-
-      const firstButton = screen.getByText(faqs[0].question).closest("button")!;
-      const lastButton = screen.getByText(faqs[2].question).closest("button")!;
-
-      firstButton.focus();
-      await user.keyboard("{End}");
-      expect(lastButton).toHaveFocus();
-    });
+  it("renders the + indicator with aria-hidden", () => {
+    render(<FAQSection faqs={faqs} />);
+    const indicators = document.querySelectorAll("[aria-hidden='true']");
+    expect(indicators.length).toBeGreaterThanOrEqual(faqs.length);
   });
 });
