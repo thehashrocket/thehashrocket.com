@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2.2] - 2026-04-13
+
+### Added
+- Google Analytics (gtag.js) via `@next/third-parties/google`, gated behind `NEXT_PUBLIC_GA_MEASUREMENT_ID` env var so dev/preview environments stay clean
+
+### Fixed
+- FAQ accordion tests updated to match native `details/summary` implementation (pre-existing test breakage from v0.1.2.0)
+
 ## [0.1.2.1] - 2026-04-12
 
 ### Fixed
