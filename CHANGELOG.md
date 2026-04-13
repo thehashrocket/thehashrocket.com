@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2.1] - 2026-04-12
+
+### Fixed
+- Contact form now correctly detects Resend API failures instead of silently reporting success
+- Added error logging for both Resend API errors and unexpected exceptions
+- Resend client is now a lazy singleton, avoiding unnecessary instantiation on every request
+- Test mocks updated to match the actual Resend SDK `{ data, error }` response shape
+
 ## [0.1.2.0] - 2026-04-11
 
 ### Changed

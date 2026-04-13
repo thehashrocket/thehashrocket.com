@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+// Set env vars for testing
+vi.stubEnv("RESEND_API_KEY", "re_test_key");
+
 // Mock resend before importing the module
+const mockSend = vi.fn().mockResolvedValue({ data: { id: "test-id" }, error: null });
 vi.mock("resend", () => ({
   Resend: vi.fn().mockImplementation(() => ({
     emails: {
-      send: vi.fn().mockResolvedValue({ id: "test-id" }),
+      send: mockSend,
     },
   })),
 }));
@@ -100,5 +104,47 @@ describe("submitContact", () => {
       makeFormData({ ...validFields, name: "" }),
     );
     expect(result.success).toBe(false);
+  });
+
+  it("returns failure when Resend returns an error", async () => {
+    mockSend.mockResolvedValueOnce({
+      data: null,
+      error: { statusCode: 403, message: "Invalid API key" },
+    });
+    const result = await submitContact(
+      { success: false, error: null },
+      makeFormData(validFields),
+    );
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Something went wrong");
+  });
+
+  it("returns failure when Resend throws an exception", async () => {
+    mockSend.mockRejectedValueOnce(new Error("Network failure"));
+    const result = await submitContact(
+      { success: false, error: null },
+      makeFormData(validFields),
+    );
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Something went wrong");
+  });
+
+  it("returns failure when RESEND_API_KEY is missing", async () => {
+    vi.stubEnv("RESEND_API_KEY", "");
+    vi.resetModules();
+    vi.mock("resend", () => ({
+      Resend: vi.fn().mockImplementation(() => ({
+        emails: { send: mockSend },
+      })),
+    }));
+    const mod = await import("../lib/actions");
+    const fn = mod.submitContact;
+    const result = await fn(
+      { success: false, error: null },
+      makeFormData(validFields),
+    );
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Something went wrong");
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
   });
 });
