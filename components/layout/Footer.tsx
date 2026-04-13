@@ -12,7 +12,7 @@ export function Footer() {
             Jason Shultz
           </p>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Senior Full-Stack Engineer &middot; 25 years building systems
+            Senior Full-Stack Engineer &middot; 14 years building systems
           </p>
         </div>
 

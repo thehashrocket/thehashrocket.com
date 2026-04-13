@@ -34,7 +34,7 @@ export function HeroSection({ location }: { location: Location }) {
 
         {/* Trust proof */}
         <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs">
-          <span><span className="text-[var(--accent)]">25+</span> <span className="text-[var(--text-muted)]">YRS</span></span>
+          <span><span className="text-[var(--accent)]">14+</span> <span className="text-[var(--text-muted)]">YRS</span></span>
           <span className="text-[var(--text-muted)]">&middot;</span>
           <span><span className="text-[var(--accent)]">$10K+</span> <span className="text-[var(--text-muted)]">PROJECTS</span></span>
           <span className="text-[var(--text-muted)]">&middot;</span>

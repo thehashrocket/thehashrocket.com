@@ -187,4 +187,4 @@
 | 2026-04-10 | Dark monochrome + #4ade80 green | Green says "terminal, systems, alive." Distinct from blue/purple that most dev portfolios default to. |
 | 2026-04-10 | Asymmetric editorial layout | Anti-template move. Reference sites (cydstumpel) prove irregular layouts feel human. |
 | 2026-04-10 | 3 motion roles only | Codex + Claude cross-model consensus: too much motion competes with message. Constrain to hero atmosphere, narrative transitions, scroll reveals. |
-| 2026-04-10 | Budget range starts at $10k | Positioning is premium. "Under $5k" attracts wrong clients for a 25-year senior engineer. |
+| 2026-04-10 | Budget range starts at $10k | Positioning is premium. "Under $5k" attracts wrong clients for an experienced senior engineer. |
