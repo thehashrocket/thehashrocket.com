@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { spaceGrotesk, inter, jetbrainsMono } from "@/lib/fonts";
 import { Nav } from "@/components/layout/Nav";
