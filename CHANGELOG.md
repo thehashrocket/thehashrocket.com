@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.4.1] - 2026-04-14
+
+### Changed
+- Switched Vercel Analytics import from `@vercel/analytics/react` to `@vercel/analytics/next` for automatic Next.js route change tracking
+
 ## [0.1.4.0] - 2026-04-13
 
 ### Fixed
