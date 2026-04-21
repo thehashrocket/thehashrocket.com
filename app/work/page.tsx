@@ -37,9 +37,8 @@ export default function WorkPage() {
               className="group block rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] transition-colors hover:border-[var(--accent)]"
             >
               <div
-                className={`flex flex-col gap-8 p-8 md:flex-row md:items-center md:p-12 ${
-                  i % 2 === 1 ? "md:flex-row-reverse" : ""
-                }`}
+                className={`flex flex-col gap-8 p-8 md:flex-row md:items-center md:p-12 ${i % 2 === 1 ? "md:flex-row-reverse" : ""
+                  }`}
               >
                 <div className="relative aspect-video w-full overflow-hidden rounded-[var(--radius-sm)] md:w-1/2"
                   style={{
@@ -47,7 +46,7 @@ export default function WorkPage() {
                     border: `1px solid ${study.accent}30`,
                   }}
                 >
-                  {[`pharma-wms`, `nonprofit-matching`, `grant-discovery`].includes(study.slug) && (
+                  {[`nonprofit-matching`, `grant-discovery`, `print-portal`].includes(study.slug) && (
                     <Image
                       src={`/images/work/${study.slug}.png`}
                       alt={study.title}
