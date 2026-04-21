@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.5.1] - 2026-04-21
+
+### Added
+- Case study images on the /work page for Pharma WMS, Nonprofit Matching, and Grant Discovery — replacing the colored placeholder blocks
+
 ## [0.1.5.0] - 2026-04-21
 
 ### Added
