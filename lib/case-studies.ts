@@ -93,6 +93,31 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
     ],
   },
+  "print-portal": {
+    slug: "print-portal",
+    title: "Print Portal",
+    subtitle: "Production management portal for a print shop operator",
+    accent: "#06b6d4",
+    tags: ["Next.js", "TypeScript", "tRPC", "PostgreSQL", "QuickBooks"],
+    beats: [
+      {
+        heading: "The Problem",
+        body: "A print shop operator was managing the entire production lifecycle on paper and spreadsheets — customer quotes, job tickets, typesetting proofs, press runs, and invoicing. Each job touched four departments (Prepress, Press, Bindery, Shipping) with no shared visibility. Status checks required walking the floor. QuickBooks was updated by hand.",
+      },
+      {
+        heading: "The Approach",
+        body: "I built a portal where every job follows a defined path: quote to work order, work order to order, order to invoice. Typesetting proofs route through multi-iteration client approvals online. Each department sees its own live queue. Shipping dispatches via FedEx, UPS, USPS, or courier. QuickBooks syncs customers, invoices, and payments bidirectionally.",
+      },
+      {
+        heading: "The Architecture",
+        body: "T3 stack: Next.js App Router with tRPC (32 routers) and Prisma over PostgreSQL (38 models). NextAuth with Google OAuth and magic links. AG Grid for order management. Pusher for real-time production status. jsPDF for invoice generation. QuickBooks Online OAuth integration. Role-based access across 9 staff roles with 45 granular permissions.",
+      },
+      {
+        heading: "The Results",
+        body: "Eliminated paper job tickets entirely. Every department has live production status without walking the floor. Clients approve proofs online instead of by fax or email. Finance syncs directly to QuickBooks without re-keying data.",
+      },
+    ],
+  },
 };
 
 export const caseStudySlugs = Object.keys(caseStudies);

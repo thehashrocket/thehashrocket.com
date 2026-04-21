@@ -6,14 +6,15 @@ import {
 } from "../lib/case-studies";
 
 describe("case-studies", () => {
-  it("exports 3 case studies", () => {
-    expect(caseStudySlugs).toHaveLength(3);
+  it("exports 4 case studies", () => {
+    expect(caseStudySlugs).toHaveLength(4);
   });
 
-  it("has pharma-wms, nonprofit-matching, grant-discovery", () => {
+  it("has pharma-wms, nonprofit-matching, grant-discovery, print-portal", () => {
     expect(caseStudySlugs).toContain("pharma-wms");
     expect(caseStudySlugs).toContain("nonprofit-matching");
     expect(caseStudySlugs).toContain("grant-discovery");
+    expect(caseStudySlugs).toContain("print-portal");
   });
 
   it("each case study has required fields", () => {
@@ -39,7 +40,7 @@ describe("case-studies", () => {
 
   it("getCaseStudySummaries returns summaries without beats", () => {
     const summaries = getCaseStudySummaries();
-    expect(summaries).toHaveLength(3);
+    expect(summaries).toHaveLength(4);
     for (const summary of summaries) {
       expect(summary.slug).toBeTruthy();
       expect(summary.title).toBeTruthy();

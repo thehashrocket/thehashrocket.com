@@ -1,5 +1,15 @@
 # TODOS
 
+## Deferred from Eng Review (2026-04-21) — Print Portal Addition
+
+### 3D Scenes for Non-Pharma Case Studies
+- **What:** Design and build dedicated 3D canvas scenes for nonprofit-matching, grant-discovery, and print-portal case studies
+- **Why:** Currently the canvas goes dark when visiting these case study pages — only pharma-wms has a scene. Dedicated scenes complete the immersive scroll narrative the site promises.
+- **Effort:** L (3 distinct scene concepts, each needs a visual metaphor + R3F implementation) | **Priority:** P2
+- **Depends on:** All three case studies finalized with stable content
+- **Risk:** Scene design is the hard part (what does a graph, a grant pipeline, or a print queue look like in 3D?). Build all three together to amortize the design thinking.
+- **Context:** Deferred during print-portal case study addition (2026-04-21). SceneRouter already handles unknown slugs gracefully (both scenes render with active=false). The fix is additive: add a new scene component + register it in SceneRouter. Candidate metaphors: graph nodes for nonprofit-matching, particle streams for grant-discovery, stacked layers/paper sheets for print-portal.
+
 ## Deferred from Eng Review (2026-04-13) — WebGL Crash Fix
 
 ### THREE.Clock Deprecation Warning
