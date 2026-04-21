@@ -1,14 +1,14 @@
 # TODOS
 
-## Deferred from Eng Review (2026-04-21) — Print Portal Addition
+## Deferred from Design Review (2026-04-21) — 3D Scenes
 
-### 3D Scenes for Non-Pharma Case Studies
-- **What:** Design and build dedicated 3D canvas scenes for nonprofit-matching, grant-discovery, and print-portal case studies
-- **Why:** Currently the canvas goes dark when visiting these case study pages — only pharma-wms has a scene. Dedicated scenes complete the immersive scroll narrative the site promises.
-- **Effort:** L (3 distinct scene concepts, each needs a visual metaphor + R3F implementation) | **Priority:** P2
-- **Depends on:** All three case studies finalized with stable content
-- **Risk:** Scene design is the hard part (what does a graph, a grant pipeline, or a print queue look like in 3D?). Build all three together to amortize the design thinking.
-- **Context:** Deferred during print-portal case study addition (2026-04-21). SceneRouter already handles unknown slugs gracefully (both scenes render with active=false). The fix is additive: add a new scene component + register it in SceneRouter. Candidate metaphors: graph nodes for nonprofit-matching, particle streams for grant-discovery, stacked layers/paper sheets for print-portal.
+### Canvas Dimming for Case Study Pages
+- **What:** Implement the DESIGN.md spec that says the canvas "dims/freezes when text-heavy sections are in viewport." Currently no scene (PharmaScene or the three new scenes) implements this.
+- **Why:** Bright 3D geometry competing with case study body text hurts readability. Dimming during reading sections lets the text breathe and honors the design system intent.
+- **Effort:** S (CC: ~20 min) | **Priority:** P2
+- **Depends on:** All 3 new scenes shipped (this PR)
+- **Risk:** Requires a new Zustand field (e.g., `textInViewport: boolean`) or an IntersectionObserver in CaseStudyScroll, plus a dimming effect in each scene component (reduce ambientLight intensity or group opacity).
+- **Context:** Deferred during design review (2026-04-21) to keep the 3D scenes PR focused. Apply to all 5 scenes together in a follow-up PR.
 
 ## Deferred from Eng Review (2026-04-13) — WebGL Crash Fix
 
@@ -65,3 +65,7 @@
 - **Context:** MDX-in-repo is the right choice for v1 (simple, no dependencies). Revisit if content velocity demands it.
 
 ## Completed
+
+### 3D Scenes for Non-Pharma Case Studies
+- **What:** Dedicated R3F canvas scenes for nonprofit-matching (graph nodes), grant-discovery (particle clusters), and print-portal (pipeline flow) case studies
+- **Completed:** v0.1.5.0 (2026-04-21)
