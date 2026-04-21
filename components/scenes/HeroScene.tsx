@@ -2,12 +2,19 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { Mesh } from "three";
+import type { Group, Mesh } from "three";
 import type { SceneProps } from "./types";
 
 export function HeroScene({ progress, active }: SceneProps) {
   const meshRef = useRef<Mesh>(null);
-  const particlesRef = useRef<Mesh>(null);
+  const particlesRef = useRef<Group>(null);
+
+  const prefersReduced = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
 
   const particlePositions = useMemo(
     () =>
@@ -25,7 +32,7 @@ export function HeroScene({ progress, active }: SceneProps) {
   );
 
   useFrame((_, delta) => {
-    if (!active || !meshRef.current) return;
+    if (!active || !meshRef.current || prefersReduced) return;
 
     meshRef.current.rotation.y += delta * 0.15;
     meshRef.current.rotation.x = progress * Math.PI * 0.25;
@@ -56,14 +63,14 @@ export function HeroScene({ progress, active }: SceneProps) {
       </mesh>
 
       {/* Orbiting particles */}
-      <mesh ref={particlesRef}>
+      <group ref={particlesRef}>
         {particlePositions.map((pos, i) => (
           <mesh key={i} position={pos}>
             <sphereGeometry args={[0.02, 8, 8]} />
             <meshBasicMaterial color="#4ade80" transparent opacity={0.5} />
           </mesh>
         ))}
-      </mesh>
+      </group>
     </group>
   );
 }
