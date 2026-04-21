@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.5.0] - 2026-04-21
+
+### Added
+- 3D canvas scenes for all three non-pharma case studies: graph nodes for Nonprofit Matching, particle clusters for Grant Discovery, pipeline flow for Print Portal
+- `NonprofitScene` — progressive graph edge reveal driven by scroll progress (blue accent, 15 nodes, 27 edges)
+- `GrantScene` — 100 particles scatter to 5 clusters via eased lerp as scroll increases (amber accent, GPU-efficient with `needsUpdate` only on progress change)
+- `PrintPortalScene` — 4 job quads flowing through Prepress → Press → Bindery → Shipping stations with 0.25 phase offsets (cyan accent)
+- `prefers-reduced-motion` guard in all five scenes (HeroScene, PharmaScene, and all three new scenes)
+- Mobile freeze in all three new scenes — geometry visible, no animation on viewports < 768px
+
+### Fixed
+- `HeroScene` used `<mesh>` as a group container for orbiting particles — changed to `<group>` (correct R3F primitive)
+- `GrantScene` stale `prevProgress` ref now resets to -1 on deactivation, preventing frozen particles on re-entry at the same scroll position
+
 ## [0.1.4.1] - 2026-04-14
 
 ### Changed

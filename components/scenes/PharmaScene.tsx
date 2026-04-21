@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
 import type { SceneProps } from "./types";
@@ -8,8 +8,15 @@ import type { SceneProps } from "./types";
 export function PharmaScene({ progress, active }: SceneProps) {
   const groupRef = useRef<Group>(null);
 
+  const prefersReduced = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
   useFrame((_, delta) => {
-    if (!active || !groupRef.current) return;
+    if (!active || !groupRef.current || prefersReduced) return;
     groupRef.current.rotation.y += delta * 0.1;
   });
 
