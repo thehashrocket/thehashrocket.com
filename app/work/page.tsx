@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Tag } from "@/components/ui/Tag";
 import { getCaseStudySummaries } from "@/lib/case-studies";
 
@@ -40,14 +41,22 @@ export default function WorkPage() {
                   i % 2 === 1 ? "md:flex-row-reverse" : ""
                 }`}
               >
-                {/* Placeholder for case study visual */}
-                <div
-                  className="aspect-video w-full rounded-[var(--radius-sm)] md:w-1/2"
+                <div className="relative aspect-video w-full overflow-hidden rounded-[var(--radius-sm)] md:w-1/2"
                   style={{
                     backgroundColor: `${study.accent}10`,
                     border: `1px solid ${study.accent}30`,
                   }}
-                />
+                >
+                  {[`pharma-wms`, `nonprofit-matching`, `grant-discovery`].includes(study.slug) && (
+                    <Image
+                      src={`/images/work/${study.slug}.png`}
+                      alt={study.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                  )}
+                </div>
 
                 <div className="md:w-1/2">
                   <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]">
