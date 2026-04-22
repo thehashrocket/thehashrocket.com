@@ -7,7 +7,10 @@ export function PersonJsonLd() {
     jobTitle: "Senior Full-Stack Engineer",
     description:
       "Senior full-stack engineer with 14 years specializing in complex systems, warehouse logistics, and AI pipelines.",
-    sameAs: [],
+    sameAs: [
+      "https://www.linkedin.com/in/jasonshultz/",
+      "https://github.com/thehashrocket",
+    ],
   };
 
   return (
