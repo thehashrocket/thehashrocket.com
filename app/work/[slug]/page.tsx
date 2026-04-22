@@ -9,6 +9,8 @@ const studies = caseStudies;
 
 type PageParams = { slug: string };
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   return caseStudySlugs.map((slug) => ({ slug }));
 }
@@ -20,11 +22,32 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const study = studies[slug];
-  if (!study) return {};
+  if (!study) notFound();
   return {
     title: study.title,
     description: study.subtitle,
+    openGraph: {
+      url: `https://thehashrocket.com/work/${slug}`,
+    },
   };
+}
+
+function BreadcrumbListJsonLd({ slug, title }: { slug: string; title: string }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://thehashrocket.com" },
+      { "@type": "ListItem", position: 2, name: "Work", item: "https://thehashrocket.com/work" },
+      { "@type": "ListItem", position: 3, name: title, item: `https://thehashrocket.com/work/${slug}` },
+    ],
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
 }
 
 export default async function CaseStudyPage({
@@ -39,6 +62,7 @@ export default async function CaseStudyPage({
 
   return (
     <div className="px-6 pt-32 pb-24">
+      <BreadcrumbListJsonLd slug={slug} title={study.title} />
       <div className="mx-auto max-w-[720px]">
         <Link
           href="/work"

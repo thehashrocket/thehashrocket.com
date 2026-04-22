@@ -40,4 +40,5 @@ Playwright is configured for E2E but not yet populated.
 - 3D scenes go in `components/scenes/`, UI components in `components/ui/`, shell in `components/layout/`
 - Scene state is managed via Zustand store in `lib/store.ts` — pages dispatch, canvas reads
 - Server Actions go in `lib/actions.ts`
+- OG image template and font utilities live in `lib/og-image.tsx` and `lib/og-fonts.ts`; each route's `opengraph-image.tsx` imports from there
 - CSS custom properties defined in `app/globals.css`, consumed by Tailwind utilities

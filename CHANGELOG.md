@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0.0] - 2026-04-22
+
+### Added
+- OpenGraph images on all six pages (`/`, `/work`, `/about`, `/contact`, `/work/[slug]`, `/locations`) using `next/og` — each generates a 1200×630 PNG with the site's Space Grotesk/Inter type system
+- JSON-LD structured data across the site: `PersonJsonLd` and `WebSiteJsonLd` in the root layout, `BreadcrumbListJsonLd` on case study pages, `LocationJsonLd` and `FAQJsonLd` on location pages
+- `generateMetadata` on the location page for per-city `og:title`, `og:description`, and canonical URL
+- `openGraph.url` on home, work, about, contact, and location pages
+- Location slugs added to the sitemap with `priority: 0.8`
+- Font-loading utility (`lib/og-fonts.ts`) with Promise-based cache and retry-on-failure semantics
+- OG image template component (`lib/og-image.tsx`) shared across all routes
+- 5 new test files covering JSON-LD rendering, metadata exports, sitemap structure, and location page metadata generation — 98 tests total
+
+### Fixed
+- Import ordering in `app/page.tsx`
+- `openGraph.url` added to location `generateMetadata` for consistency with other pages
+
 ## [0.1.5.1] - 2026-04-21
 
 ### Added

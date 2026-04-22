@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "14 years of full-stack engineering. From startups to enterprises, I build systems that work.",
+  openGraph: {
+    url: "https://thehashrocket.com/about",
+  },
 };
 
 export default function AboutPage() {
@@ -60,6 +63,26 @@ export default function AboutPage() {
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* Social Links */}
+        <div className="mt-12 flex gap-6">
+          <a
+            href="https://www.linkedin.com/in/jasonshultz/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+          >
+            LinkedIn →
+          </a>
+          <a
+            href="https://github.com/thehashrocket"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+          >
+            GitHub →
+          </a>
         </div>
 
         {/* Career Timeline */}
