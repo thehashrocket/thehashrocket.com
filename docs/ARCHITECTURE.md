@@ -56,16 +56,17 @@ User clicks atlas card
 ```
 app/                    Routes (App Router)
   ├── page.tsx          Homepage (hero + systems atlas + CTA)
-  ├── about/            About page
-  ├── contact/          Contact form
-  ├── work/             Case studies index
-  │   └── [slug]/       Individual case study
-  ├── locations/        Geo landing pages hub
-  │   └── [slug]/       City page + opengraph-image.tsx
-  ├── layout.tsx        Root layout (canvas + nav + footer + analytics)
+  ├── opengraph-image.tsx  Homepage OG image (1200×630 via next/og)
+  ├── about/            About page + opengraph-image.tsx
+  ├── contact/          Contact form + opengraph-image.tsx
+  ├── work/             Case studies index + opengraph-image.tsx
+  │   └── [slug]/       Individual case study + opengraph-image.tsx
+  ├── locations/        Geo landing pages hub + opengraph-image.tsx
+  │   └── [slug]/       City page + opengraph-image.tsx (per-city dynamic OG)
+  ├── layout.tsx        Root layout (canvas + nav + footer + analytics + JSON-LD)
   └── not-found.tsx     404 with persistent canvas
 components/
-  ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary)
+  ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary, JsonLd, LocationJsonLd)
   ├── scenes/           R3F scene components (HeroScene, PharmaScene, SceneRouter)
   └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, Timeline)
       └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
@@ -76,6 +77,8 @@ lib/
   ├── experience.ts     Career data (entries, skills, domains — used by about, homepage, timeline)
   ├── locations.ts      City configs (Sacramento, Stockton, Modesto) with optional localExperience
   ├── fonts.ts          next/font configuration (Space Grotesk, Inter, JetBrains Mono)
+  ├── og-fonts.ts       Promise-based font loader for OG image generation (cached, retry-on-failure)
+  ├── og-image.tsx      Shared OG image template component (1200×630, Space Grotesk/Inter)
   └── webgl.ts          WebGL feature detection
 docs/                   Project documentation
 test/                   Vitest test suite
@@ -94,7 +97,7 @@ public/                 Static assets
 | Email | Resend | Transactional email for contact form |
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, WebGL detection, geo pages |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities |
 | E2E | Playwright | Browser testing (configured, not yet populated) |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
