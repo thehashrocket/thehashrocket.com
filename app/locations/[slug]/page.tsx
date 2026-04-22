@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocation, getAllLocations, locationSlugs } from "@/lib/locations";
+import { LocationJsonLd, FAQJsonLd } from "@/components/layout/LocationJsonLd";
 import { HeroSection } from "@/components/ui/geo/HeroSection";
 import { ServicesSection } from "@/components/ui/geo/ServicesSection";
 import { CaseStudiesSection } from "@/components/ui/geo/CaseStudiesSection";
@@ -32,65 +33,9 @@ export async function generateMetadata({
       title: location.metaTitle,
       description: location.metaDescription,
       type: "website",
+      url: `https://thehashrocket.com/locations/${slug}`,
     },
   };
-}
-
-function ProfessionalServiceJsonLd({ slug }: { slug: string }) {
-  const location = getLocation(slug)!;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    name: "Jason Shultz — Software Engineering",
-    description: location.metaDescription,
-    url: `https://thehashrocket.com/locations/${slug}`,
-    areaServed: {
-      "@type": "City",
-      name: location.name,
-      containedInPlace: {
-        "@type": "State",
-        name: "California",
-      },
-    },
-    provider: {
-      "@type": "Person",
-      name: "Jason Shultz",
-      jobTitle: "Senior Full-Stack Engineer",
-      url: "https://thehashrocket.com",
-    },
-    serviceType: "Software Engineering",
-    priceRange: "$$$",
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
-}
-
-function FAQPageJsonLd({ slug }: { slug: string }) {
-  const location = getLocation(slug)!;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: location.faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
-  };
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
-  );
 }
 
 export default async function LocationPage({
@@ -107,8 +52,8 @@ export default async function LocationPage({
 
   return (
     <div className="relative">
-      <ProfessionalServiceJsonLd slug={slug} />
-      <FAQPageJsonLd slug={slug} />
+      <LocationJsonLd location={location} slug={slug} />
+      <FAQJsonLd faqs={location.faqs} />
       <HeroSection location={location} />
       <ServicesSection location={location} />
       <CaseStudiesSection location={location} />

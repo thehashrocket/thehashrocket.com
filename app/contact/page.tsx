@@ -4,7 +4,10 @@ import { ContactForm } from "@/components/ui/ContactForm";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Start a conversation about your project. I help teams build complex systems.",
+    "Have a complex engineering problem? I help startups and enterprises architect and build systems that need to work at scale. Response within 24 hours.",
+  openGraph: {
+    url: "https://thehashrocket.com/contact",
+  },
 };
 
 export default async function ContactPage({

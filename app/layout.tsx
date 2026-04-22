@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Jason Shultz",
+    title: "Jason Shultz — Senior Full-Stack Engineer",
+    description:
+      "Senior full-stack engineer with 14 years building complex systems. Consulting for startups and enterprises.",
   },
 };
 

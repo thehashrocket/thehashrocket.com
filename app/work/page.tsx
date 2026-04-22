@@ -7,7 +7,10 @@ import { getCaseStudySummaries } from "@/lib/case-studies";
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Case studies from 14 years of building complex software systems.",
+    "Case studies from 14 years building complex, high-stakes software — pharma logistics, EdTech, nonprofit platforms, and manufacturing systems.",
+  openGraph: {
+    url: "https://thehashrocket.com/work",
+  },
 };
 
 const caseStudies = getCaseStudySummaries();

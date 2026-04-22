@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
 import { Tag } from "@/components/ui/Tag";
 import { getCaseStudySummaries } from "@/lib/case-studies";
 import { skills, domains } from "@/lib/experience";
+
+export const metadata: Metadata = {
+  openGraph: {
+    url: "https://thehashrocket.com",
+  },
+};
 
 const caseStudies = getCaseStudySummaries();
 
