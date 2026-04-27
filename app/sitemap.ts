@@ -3,7 +3,7 @@ import { locationSlugs } from "@/lib/locations";
 import { caseStudySlugs } from "@/lib/case-studies";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://thehashrocket.com";
+  const baseUrl = "https://www.thehashrocket.com";
 
   const caseStudyEntries: MetadataRoute.Sitemap = caseStudySlugs.map((slug) => ({
     url: `${baseUrl}/work/${slug}`,
