@@ -1,5 +1,81 @@
 # TODOS
 
+## Tech Debt Audit (2026-05-12)
+
+### [P1] Wire case study pages to `setCurrentScene`
+- **What:** Each work/case study page should call `setCurrentScene(slug)` so navigating directly to `/work/pharma-wms` (via back button, bookmark, or shared link) loads the correct 3D scene. Currently no `app/` file calls `setCurrentScene` — the scene only changes via `AtlasCard.startMorph()`, so direct navigation always leaves the canvas on whatever scene it was last on.
+- **Why:** This is the core promise of the persistent-canvas architecture. Without it, the scene-per-case-study feature is broken for any user who doesn't arrive via the atlas cards.
+- **Effort:** S (~1–2 hrs) | **Priority:** P1
+- **Depends on:** Nothing
+- **Risk:** Low. One `useEffect` per page calling `setCurrentScene(slug)` on mount and `resetScene()` on unmount (or navigate away). Can be extracted into a shared `usePageScene(slug)` hook.
+- **Context:** Identified in tech debt audit (2026-05-12). Confirmed by grepping `app/` — zero calls to `setCurrentScene` or `startMorph` outside of `AtlasCard`.
+
+### [P1] Fix Sentry org — currently pointing at `volunteerready`
+- **What:** `next.config.ts` line 14 has `org: "volunteerready"`. That is a different project. Production errors from this site are being routed to the wrong Sentry organization.
+- **Why:** If an error fires in production (WebGL crash, contact form failure, etc.), it won't surface in the right Sentry project.
+- **Effort:** XS (~5 min) | **Priority:** P1
+- **Depends on:** Knowing the correct Sentry org slug for this project
+- **Risk:** None. One-line change.
+- **Context:** Identified in tech debt audit (2026-05-12).
+
+### [P1] Name `MORPH_DURATION_MS` constant and fix AtlasCard navigation logic
+- **What:** `AtlasCard` hardcodes `3000` as the navigation delay with no comment and no named constant. Extract to `MORPH_DURATION_MS = 3000` in `lib/constants.ts`. Longer term, wire `completeMorph()` as the navigation trigger instead of a guessed timeout — the timeout fires unconditionally even if the morph finishes early.
+- **Why:** If the scene morph animation changes duration, the only way to find this magic number is grep. It also creates a UX gap: users wait the full 3 seconds regardless of actual animation state.
+- **Effort:** S (~20 min for constant extraction; ~1 hr for the proper fix) | **Priority:** P1
+- **Depends on:** Nothing for the constant extraction; scene morph completion signal for the proper fix
+- **Risk:** Low for extraction. Medium for the trigger change — needs care to avoid double navigation.
+- **Context:** Identified in tech debt audit (2026-05-12). Same pattern applies to any future scenes that use morph transitions.
+
+### [P2] Extract `usePrefersReducedMotion` and `useMediaQuery` hooks
+- **What:** All 5 scene components duplicate the same `useMemo` block for `prefers-reduced-motion`. `GrantScene` also snapshots `window.innerWidth < 768` at mount time and never updates on resize. Extract both into `lib/hooks.ts` as `usePrefersReducedMotion()` and `useMediaQuery(query: string)`.
+- **Why:** Five copies means five places to update if the logic ever needs to change. The `isMobile` snapshot is also silently wrong for users who resize.
+- **Effort:** S (~45 min) | **Priority:** P2
+- **Depends on:** Nothing
+- **Risk:** None. Pure refactor with no behavior change.
+- **Context:** Identified in tech debt audit (2026-05-12). Files affected: `HeroScene`, `PharmaScene`, `NonprofitScene`, `GrantScene`, `PrintPortalScene`.
+
+### [P2] Pass `accent` color as prop to scenes instead of hardcoding
+- **What:** Each scene component (`PharmaScene`, `NonprofitScene`, `GrantScene`, `PrintPortalScene`) hardcodes its accent hex color (e.g. `"#3b82f6"`) even though the same color is already defined as `accent` in `lib/case-studies.ts`. Extend `SceneProps` with `accent: string` and have `SceneRouter` pass it through from `caseStudies`.
+- **Why:** If a case study's accent color changes, `case-studies.ts` and all scene components must be updated separately. They will drift.
+- **Effort:** S (~1 hr) | **Priority:** P2
+- **Depends on:** Nothing
+- **Risk:** Low. Straightforward prop threading.
+- **Context:** Identified in tech debt audit (2026-05-12). `HeroScene` is already consistent with the global `--accent` token and doesn't need this change.
+
+### [P2] Write foundational E2E tests
+- **What:** Playwright is configured and installed but has zero test files. Write at minimum: (1) contact form happy path, (2) contact form honeypot (bot submission silently succeeds), (3) direct navigation to a case study page validates the correct scene is active.
+- **Why:** The contact form submission path, honeypot, rate limiting, and scene-page wiring are all untested at the integration level. Unit mocks can't catch these.
+- **Effort:** M (~2–3 hrs) | **Priority:** P2
+- **Depends on:** Fix #1 (scene-page wiring) before writing test #3, otherwise the test will document the broken behavior
+- **Risk:** Low. Playwright is already wired; just needs test files.
+- **Context:** Identified in tech debt audit (2026-05-12). No `test/e2e/` directory exists.
+
+### [P2] Upgrade dev toolchain — Vitest 4, eslint 10, then TypeScript 6
+- **What:** Three major version bumps pending in dev dependencies: `vitest` 3.x → 4.x, `eslint` 9.x → 10.x, `typescript` 5.x → 6.x. Also `@vitejs/plugin-react` is two major versions behind (4.x → 6.x).
+- **Why:** The further behind, the harder the eventual jump. TS 6 in particular introduces stricter checking that's easier to absorb incrementally.
+- **Effort:** M (~half day, staggered) | **Priority:** P2
+- **Depends on:** Do in order: Vitest 4 first (lowest risk) → eslint 10 → @vitejs/plugin-react → TS 6 last
+- **Risk:** TS 6 may surface new type errors. Budget time to fix them, don't rush it.
+- **Context:** Identified in tech debt audit (2026-05-12). Prod dependencies (Next, React, three.js, R3F) are current within their minor versions — no breaking changes pending there.
+
+### [P3] Fix `package.json` name
+- **What:** `"name": "temp-scaffold"` — leftover from project bootstrapping. Change to `"thehashrocket-com"`.
+- **Why:** Cosmetic, but shows up in npm/build output and is embarrassing.
+- **Effort:** XS (~2 min) | **Priority:** P3
+- **Depends on:** Nothing
+- **Risk:** None.
+- **Context:** Identified in tech debt audit (2026-05-12).
+
+### [P3] Clean up `next.config.ts` vestigial comment
+- **What:** The `experimental: {}` block has a comment referencing `componentCache: false` for R3F compatibility, but the setting itself is not present. Either restore the setting with a link to the upstream issue, or remove the comment if the issue has been resolved.
+- **Why:** Ambiguous — can't tell if this is a deliberate omission or an accidental drop.
+- **Effort:** XS (~5 min) | **Priority:** P3
+- **Depends on:** Verify whether pmndrs/react-three-fiber#3595 is still open/relevant on current R3F version
+- **Risk:** None. If the issue is closed, delete the comment. If still open, restore the config line.
+- **Context:** Identified in tech debt audit (2026-05-12).
+
+---
+
 ## Deferred from Design Review (2026-04-21) — 3D Scenes
 
 ### Canvas Dimming for Case Study Pages

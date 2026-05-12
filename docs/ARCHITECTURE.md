@@ -39,7 +39,7 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 ```
 User scrolls page
-  → GSAP ScrollTrigger fires
+  → CaseStudyScroll IntersectionObserver / scroll handler fires
     → calls useSceneStore.setScrollProgress(n)
       → SceneRouter reads progress
         → Active scene component animates to position n
