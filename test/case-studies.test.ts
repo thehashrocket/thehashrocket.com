@@ -47,7 +47,7 @@ describe("case-studies", () => {
       expect(summary.subtitle).toBeTruthy();
       expect(summary.accent).toBeTruthy();
       expect(summary.tags.length).toBeGreaterThan(0);
-      expect((summary as Record<string, unknown>).beats).toBeUndefined();
+      expect((summary as unknown as Record<string, unknown>).beats).toBeUndefined();
     }
   });
 
