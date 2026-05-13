@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSceneStore } from "@/lib/store";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import { Tag } from "./Tag";
 
 interface AtlasCardProps {
@@ -30,7 +31,7 @@ export function AtlasCard({ slug, title, subtitle, accent, tags }: AtlasCardProp
     timeoutRef.current = setTimeout(() => {
       completeMorph();
       router.push(`/work/${slug}`);
-    }, 3000);
+    }, MORPH_DURATION_MS);
   }
 
   return (

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Tag } from "@/components/ui/Tag";
 import { CaseStudyScroll } from "@/components/ui/CaseStudyScroll";
+import { SceneSync } from "@/components/ui/SceneSync";
 import Link from "next/link";
 import { caseStudies, caseStudySlugs } from "@/lib/case-studies";
 
@@ -62,6 +63,7 @@ export default async function CaseStudyPage({
 
   return (
     <div className="px-6 pt-32 pb-24">
+      <SceneSync slug={slug} />
       <BreadcrumbListJsonLd slug={slug} title={study.title} />
       <div className="mx-auto max-w-[720px]">
         <Link
@@ -89,7 +91,7 @@ export default async function CaseStudyPage({
       </div>
 
       {/* Scroll-driven narrative */}
-      <CaseStudyScroll beats={study.beats} slug={slug} />
+      <CaseStudyScroll beats={study.beats} />
 
       {/* CTA */}
       <div className="mx-auto mt-24 max-w-[720px] border-t border-[var(--border)] pt-16">
