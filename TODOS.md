@@ -20,13 +20,15 @@
 ### ~~[P2] Write foundational E2E tests~~ ✓ COMPLETED
 - **Completed:** v0.2.1.0 (2026-05-12) — `playwright.config.ts` + `test:e2e` script added; 6 specs in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene wiring (sentinel assertions).
 
-### [P2] Upgrade dev toolchain — Vitest 4, eslint 10, then TypeScript 6
-- **What:** Three major version bumps pending in dev dependencies: `vitest` 3.x → 4.x, `eslint` 9.x → 10.x, `typescript` 5.x → 6.x. Also `@vitejs/plugin-react` is two major versions behind (4.x → 6.x).
-- **Why:** The further behind, the harder the eventual jump. TS 6 in particular introduces stricter checking that's easier to absorb incrementally.
-- **Effort:** M (~half day, staggered) | **Priority:** P2
-- **Depends on:** Do in order: Vitest 4 first (lowest risk) → eslint 10 → @vitejs/plugin-react → TS 6 last
-- **Risk:** TS 6 may surface new type errors. Budget time to fix them, don't rush it.
-- **Context:** Identified in tech debt audit (2026-05-12). Prod dependencies (Next, React, three.js, R3F) are current within their minor versions — no breaking changes pending there.
+### ~~[P2] Upgrade dev toolchain — Vitest 4, eslint 10, then TypeScript 6~~ PARTIALLY COMPLETE (PR4)
+- **Completed (PR4, 2026-05-12):** Removed dead `@vitejs/plugin-react` devDep; upgraded `vitest` 3.2.4 → 4.0.18; upgraded `typescript` 5.9.3 → 6.0.3.
+- **Remaining:** `eslint` 9.x → 10.x is **blocked** — `eslint-plugin-react@7.x` (transitive dep of `eslint-config-next@16.2.3`) uses `context.getFilename()` which was removed in ESLint 10. Cannot upgrade until `eslint-config-next` ships a version that bundles a compatible `eslint-plugin-react`.
+- **Also found (PR4):** 12 pre-existing React Compiler lint errors in scene/hook source files (flagged by `eslint-plugin-react-compiler` via `eslint-config-next`). Not introduced by PR4. Should be fixed in a separate PR.
+- **What:** Upgrade `eslint` 9.x → 10.x when unblocked
+- **Why:** ESLint 10 standardizes flat config and removes legacy APIs; staying on 9.x is fine but gap grows over time.
+- **Effort:** S (CC: ~15 min) | **Priority:** P2
+- **Depends on:** `eslint-config-next` shipping with `eslint-plugin-react` ≥8 (which supports ESLint 10) — check on Next.js 16.x.y patch release notes
+- **Context:** PR4 (2026-05-12). Pre-existing lint errors need a separate cleanup PR before ESLint upgrade is worthwhile.
 
 ### ~~[P3] Fix `package.json` name~~ ✓ COMPLETED
 - **Completed:** v0.2.1.0 (2026-05-12) — `"name"` changed from `"temp-scaffold"` to `"thehashrocket-com"`.

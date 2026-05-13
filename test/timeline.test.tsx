@@ -26,6 +26,7 @@ beforeAll(() => {
   global.IntersectionObserver = class IntersectionObserver {
     readonly root = null;
     readonly rootMargin = "";
+    readonly scrollMargin = "";
     readonly thresholds = [0];
     constructor(private callback: IntersectionObserverCallback) {}
     observe(target: Element) {
