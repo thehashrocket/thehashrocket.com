@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2.0] - 2026-05-12
+
+### For contributors
+- Dead `@vitejs/plugin-react` devDependency removed — it was never imported by `vitest.config.ts` or any source file
+- `vitest` upgraded 3.2.4 → 4.0.18 (exact pin — `^` removed to prevent Dependabot from auto-upgrading to 4.1.x, which requires Vite ≥6)
+- `typescript` upgraded 5.9.3 → 6.0.3
+- Test mock fixed for Vitest 4: `Resend` constructor mock converted from arrow function to `function` keyword (Vitest 4 tightened constructor semantics); duplicate `vi.mock("resend")` removed from test body (was being hoisted and overriding the top-level fix)
+- `IntersectionObserver` mock in `test/timeline.test.tsx` updated with `readonly scrollMargin = ""` to satisfy TypeScript 6's updated DOM interface
+- ESLint 10 upgrade deferred: `eslint-plugin-react@7.x` (transitive via `eslint-config-next@16.2.3`) uses `context.getFilename()` removed in ESLint 10; blocked until `eslint-config-next` ships a compatible version
+
 ## [0.2.1.0] - 2026-05-12
 
 ### Changed
@@ -14,6 +24,12 @@
 - Playwright E2E foundation: `playwright.config.ts`, `test:e2e` script, 6 specs covering contact form honeypot/validation/happy-path and scene-wiring sentinel assertions
 - `TEST_EMAIL_ENABLED` env guard in `lib/actions.ts` — prevents Resend API calls in test environments; `playwright.config.ts` passes the flag to the dev server automatically
 - 15 new unit tests: hooks (9), AtlasCard navigation including double-nav guard (5), updated scene-sync sentinel assertion (1)
+
+### For contributors
+- `package.json` name corrected from `temp-scaffold` to `thehashrocket-com`
+- Dead `experimental: {}` block removed from `next.config.ts` (`componentCache` is not a real Next.js 16 option)
+- `jsdom` pinned to `^26` in devDependencies — v27 introduced an ESM-only transitive dependency (`@exodus/bytes`) that breaks the vitest CJS environment
+- TS2352 double-cast fix in `test/case-studies.test.ts` (`as unknown as Record<string, unknown>`)
 
 ## [0.2.0.0] - 2026-04-22
 

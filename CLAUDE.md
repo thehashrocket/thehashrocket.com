@@ -34,7 +34,7 @@ This project uses nvm for Node version management. The required version is pinne
 
 ## Testing
 Run `npm test` (vitest) for unit tests. Test files live in `test/`.
-Playwright is configured for E2E but not yet populated.
+Run `npm run test:e2e` (Playwright) for E2E tests. Specs live in `test/e2e/`.
 
 ## Conventions
 - 3D scenes go in `components/scenes/`, UI components in `components/ui/`, shell in `components/layout/`
