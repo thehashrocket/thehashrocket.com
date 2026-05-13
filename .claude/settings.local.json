@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gbrain doctor *)",
+      "Bash(echo \"doctor exit=$?\")",
+      "Bash(~/.claude/skills/gstack/bin/gstack-gbrain-repo-policy get *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(nohup gbrain embed --stale)",
+      "Bash(echo \"EMBED_PID=$!\")",
+      "Bash(disown)",
+      "Read(//tmp/**)",
+      "Bash(gh auth *)",
+      "Bash(~/.claude/skills/gstack/bin/gstack-artifacts-init --url-form-supported false)",
+      "Bash(echo \"artifacts-init exit=$?\")",
+      "Bash(~/.claude/skills/gstack/bin/gstack-memory-ingest --probe)",
+      "Bash(echo \"probe exit=$?\")",
+      "Bash(~/.claude/skills/gstack/bin/gstack-config set *)",
+      "Bash(echo \"set transcript_ingest_mode=off exit=$?\")",
+      "Bash(~/.claude/skills/gstack/bin/gstack-config get *)",
+      "Read(//Users/jasonshultz/**)"
+    ]
+  }
+}
