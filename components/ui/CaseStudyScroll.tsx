@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useScroll, useMotionValueEvent } from "motion/react";
 import { useSceneStore } from "@/lib/store";
 
@@ -11,19 +11,12 @@ interface Beat {
 
 interface CaseStudyScrollProps {
   beats: Beat[];
-  slug: string;
 }
 
-export function CaseStudyScroll({ beats, slug }: CaseStudyScrollProps) {
+export function CaseStudyScroll({ beats }: CaseStudyScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
   const setScrollProgress = useSceneStore((s) => s.setScrollProgress);
-  const setCurrentScene = useSceneStore((s) => s.setCurrentScene);
-
-  useEffect(() => {
-    setCurrentScene(slug);
-    return () => setCurrentScene("hero");
-  }, [slug, setCurrentScene]);
 
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     setScrollProgress(value);

@@ -10,13 +10,8 @@
 - **Risk:** Low. One `useEffect` per page calling `setCurrentScene(slug)` on mount and `resetScene()` on unmount (or navigate away). Can be extracted into a shared `usePageScene(slug)` hook.
 - **Context:** Identified in tech debt audit (2026-05-12). Confirmed by grepping `app/` — zero calls to `setCurrentScene` or `startMorph` outside of `AtlasCard`.
 
-### [P1] Fix Sentry org — currently pointing at `volunteerready`
-- **What:** `next.config.ts` line 14 has `org: "volunteerready"`. That is a different project. Production errors from this site are being routed to the wrong Sentry organization.
-- **Why:** If an error fires in production (WebGL crash, contact form failure, etc.), it won't surface in the right Sentry project.
-- **Effort:** XS (~5 min) | **Priority:** P1
-- **Depends on:** Knowing the correct Sentry org slug for this project
-- **Risk:** None. One-line change.
-- **Context:** Identified in tech debt audit (2026-05-12).
+### ~~[P1] Fix Sentry org — currently pointing at `volunteerready`~~ ✓ RESOLVED
+- **Resolution (2026-05-12):** `volunteerready` IS the correct Sentry org slug for this account. `project: "thehashrocket-org"` is also already correct. Config was fine. False alarm in original audit.
 
 ### [P1] Name `MORPH_DURATION_MS` constant and fix AtlasCard navigation logic
 - **What:** `AtlasCard` hardcodes `3000` as the navigation delay with no comment and no named constant. Extract to `MORPH_DURATION_MS = 3000` in `lib/constants.ts`. Longer term, wire `completeMorph()` as the navigation trigger instead of a guessed timeout — the timeout fires unconditionally even if the morph finishes early.
