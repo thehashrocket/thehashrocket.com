@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
+import { usePrefersReducedMotion, useMediaQuery } from "@/lib/hooks";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import type { SceneProps } from "./types";
 
 const STATIONS: [number, number, number][] = [
@@ -17,19 +19,16 @@ const BEAM_POSITIONS = STATIONS.slice(0, -1).map((a, i) => {
   return new Float32Array([a[0], a[1], a[2], b[0], b[1], b[2]]);
 });
 
-export function PrintPortalScene({ progress, active }: SceneProps) {
+export function PrintPortalScene({ progress, active, accent = "#06b6d4", onMorphComplete }: SceneProps) {
   const groupRef = useRef<Group>(null);
+  const prefersReduced = usePrefersReducedMotion();
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
-  const prefersReduced = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
-  const isMobile = useMemo(
-    () => typeof window !== "undefined" && window.innerWidth < 768,
-    [],
-  );
+  useEffect(() => {
+    if (!active || !onMorphComplete) return;
+    const t = setTimeout(onMorphComplete, MORPH_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [active, onMorphComplete]);
 
   useFrame((_, delta) => {
     if (!active || !groupRef.current || prefersReduced || isMobile) return;
@@ -50,12 +49,12 @@ export function PrintPortalScene({ progress, active }: SceneProps) {
   return (
     <group ref={groupRef}>
       <ambientLight intensity={0.25} />
-      <pointLight position={[0, 3, 3]} intensity={0.6} color="#06b6d4" />
+      <pointLight position={[0, 3, 3]} intensity={0.6} color={accent} />
 
       {STATIONS.map((pos, i) => (
         <mesh key={i} position={pos}>
           <boxGeometry args={[0.18, 0.18, 0.18]} />
-          <meshStandardMaterial color="#06b6d4" transparent opacity={0.35} />
+          <meshStandardMaterial color={accent} transparent opacity={0.35} />
         </mesh>
       ))}
 
@@ -67,7 +66,7 @@ export function PrintPortalScene({ progress, active }: SceneProps) {
               args={[positions, 3]}
             />
           </bufferGeometry>
-          <lineBasicMaterial color="#06b6d4" transparent opacity={0.25} />
+          <lineBasicMaterial color={accent} transparent opacity={0.25} />
         </line>
       ))}
 
@@ -75,8 +74,8 @@ export function PrintPortalScene({ progress, active }: SceneProps) {
         <mesh key={i} position={[x, 0, 0]}>
           <planeGeometry args={[0.12, 0.12]} />
           <meshStandardMaterial
-            color="#06b6d4"
-            emissive="#06b6d4"
+            color={accent}
+            emissive={accent}
             emissiveIntensity={1.5}
             transparent
             opacity={0.9}

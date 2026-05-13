@@ -1,19 +1,21 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
+import { usePrefersReducedMotion } from "@/lib/hooks";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import type { SceneProps } from "./types";
 
-export function PharmaScene({ progress, active }: SceneProps) {
+export function PharmaScene({ progress, active, accent = "#4ade80", onMorphComplete }: SceneProps) {
   const groupRef = useRef<Group>(null);
+  const prefersReduced = usePrefersReducedMotion();
 
-  const prefersReduced = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  useEffect(() => {
+    if (!active || !onMorphComplete) return;
+    const t = setTimeout(onMorphComplete, MORPH_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [active, onMorphComplete]);
 
   useFrame((_, delta) => {
     if (!active || !groupRef.current || prefersReduced) return;
@@ -40,13 +42,13 @@ export function PharmaScene({ progress, active }: SceneProps) {
   return (
     <group ref={groupRef}>
       <ambientLight intensity={0.2} />
-      <pointLight position={[3, 3, 3]} intensity={0.6} color="#4ade80" />
+      <pointLight position={[3, 3, 3]} intensity={0.6} color={accent} />
 
       {nodes.slice(0, visibleNodes).map((pos, i) => (
         <mesh key={i} position={pos}>
           <boxGeometry args={[0.15, 0.15, 0.15]} />
           <meshStandardMaterial
-            color="#4ade80"
+            color={accent}
             transparent
             opacity={0.4 + (i / nodes.length) * 0.6}
           />

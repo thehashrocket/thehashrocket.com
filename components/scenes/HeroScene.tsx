@@ -1,20 +1,22 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group, Mesh } from "three";
+import { usePrefersReducedMotion } from "@/lib/hooks";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import type { SceneProps } from "./types";
 
-export function HeroScene({ progress, active }: SceneProps) {
+export function HeroScene({ progress, active, onMorphComplete }: SceneProps) {
   const meshRef = useRef<Mesh>(null);
   const particlesRef = useRef<Group>(null);
+  const prefersReduced = usePrefersReducedMotion();
 
-  const prefersReduced = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
+  useEffect(() => {
+    if (!active || !onMorphComplete) return;
+    const t = setTimeout(onMorphComplete, MORPH_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [active, onMorphComplete]);
 
   const particlePositions = useMemo(
     () =>
