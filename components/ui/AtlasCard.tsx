@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSceneStore } from "@/lib/store";
-import { MORPH_DURATION_MS } from "@/lib/constants";
 import { Tag } from "./Tag";
 
 interface AtlasCardProps {
@@ -17,21 +16,29 @@ interface AtlasCardProps {
 
 export function AtlasCard({ slug, title, subtitle, accent, tags }: AtlasCardProps) {
   const router = useRouter();
-  const { morphRunning, startMorph, completeMorph } = useSceneStore();
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const { morphRunning, startMorph } = useSceneStore();
+  const morphTarget = useRef<string | null>(null);
+  const navigatedRef = useRef(false);
+
+  useEffect(() => {
+    // Navigate once morphRunning goes false after a card click
+    if (!morphRunning && morphTarget.current && !navigatedRef.current) {
+      navigatedRef.current = true;
+      router.push(`/work/${morphTarget.current}`);
+      morphTarget.current = null;
+    }
+    // Reset guard when a new morph starts so the next completion can navigate
+    if (morphRunning) {
+      navigatedRef.current = false;
+    }
+  }, [morphRunning, router]);
 
   function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (morphRunning) return;
-
     e.preventDefault();
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    morphTarget.current = slug;
     startMorph(slug);
-
-    timeoutRef.current = setTimeout(() => {
-      completeMorph();
-      router.push(`/work/${slug}`);
-    }, MORPH_DURATION_MS);
   }
 
   return (
