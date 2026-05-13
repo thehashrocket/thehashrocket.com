@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.1.0] - 2026-05-12
+
+### Changed
+- Reactive `usePrefersReducedMotion` and `useMediaQuery` hooks replace stale `useMemo` snapshots — 3D scene animations now respond to system preference and viewport changes without a page reload
+- `AtlasCard` navigation rewired: `setTimeout`-based `completeMorph` replaced with a `morphRunning` watcher and `navigatedRef` double-navigation guard, eliminating spurious double-pushes on rapid clicks
+- `onMorphComplete` callback threaded through `SceneRouter` conditionally — passed only when `morphRunning` is true, so direct-URL loads no longer fire stray morph timers
+- `SceneSync` renders an sr-only DOM sentinel (`data-testid="current-scene"`) enabling WebGL-free E2E test assertions on active scene state
+- All five case study scenes accept `accent` and `onMorphComplete` props; accent colors extracted from constants instead of hardcoded strings
+
+### Added
+- `lib/hooks.ts` — `usePrefersReducedMotion` and `useMediaQuery` as standalone, reusable hooks
+- Playwright E2E foundation: `playwright.config.ts`, `test:e2e` script, 6 specs covering contact form honeypot/validation/happy-path and scene-wiring sentinel assertions
+- `TEST_EMAIL_ENABLED` env guard in `lib/actions.ts` — prevents Resend API calls in test environments; `playwright.config.ts` passes the flag to the dev server automatically
+- 15 new unit tests: hooks (9), AtlasCard navigation including double-nav guard (5), updated scene-sync sentinel assertion (1)
+
 ## [0.2.0.0] - 2026-04-22
 
 ### Added
