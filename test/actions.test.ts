@@ -6,11 +6,9 @@ vi.stubEnv("RESEND_API_KEY", "re_test_key");
 // Mock resend before importing the module
 const mockSend = vi.fn().mockResolvedValue({ data: { id: "test-id" }, error: null });
 vi.mock("resend", () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    emails: {
-      send: mockSend,
-    },
-  })),
+  Resend: vi.fn().mockImplementation(function () {
+    return { emails: { send: mockSend } };
+  }),
 }));
 
 // Mock upstash modules
@@ -132,11 +130,7 @@ describe("submitContact", () => {
   it("returns failure when RESEND_API_KEY is missing", async () => {
     vi.stubEnv("RESEND_API_KEY", "");
     vi.resetModules();
-    vi.mock("resend", () => ({
-      Resend: vi.fn().mockImplementation(() => ({
-        emails: { send: mockSend },
-      })),
-    }));
+    // Top-level vi.mock("resend") persists after resetModules; no need to re-register
     const mod = await import("../lib/actions");
     const fn = mod.submitContact;
     const result = await fn(
