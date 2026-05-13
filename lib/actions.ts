@@ -65,24 +65,26 @@ export async function submitContact(
     // Fail open — if rate limiting is unavailable, accept the submission
   }
 
-  // Send email
-  try {
-    const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
-    const { error: sendError } = await getResend().emails.send({
-      from: `Contact Form <${fromEmail}>`,
-      to: "jason@thehashrocket.com",
-      subject: `New contact from ${name}${source ? ` (via ${source})` : ""}`,
-      text: `Name: ${name}\nEmail: ${email}${source ? `\nSource: ${source}` : ""}\n\nMessage:\n${message}`,
-    });
+  // Skip email delivery in test environments
+  if (process.env.TEST_EMAIL_ENABLED !== "true") {
+    try {
+      const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
+      const { error: sendError } = await getResend().emails.send({
+        from: `Contact Form <${fromEmail}>`,
+        to: "jason@thehashrocket.com",
+        subject: `New contact from ${name}${source ? ` (via ${source})` : ""}`,
+        text: `Name: ${name}\nEmail: ${email}${source ? `\nSource: ${source}` : ""}\n\nMessage:\n${message}`,
+      });
 
-    if (sendError) {
-      console.error("Resend send failed:", sendError);
+      if (sendError) {
+        console.error("Resend send failed:", sendError);
+        return { success: false, error: "Something went wrong. Please try again." };
+      }
+    } catch (err) {
+      console.error("Contact form error:", err);
       return { success: false, error: "Something went wrong. Please try again." };
     }
-
-    return { success: true, error: null };
-  } catch (err) {
-    console.error("Contact form error:", err);
-    return { success: false, error: "Something went wrong. Please try again." };
   }
+
+  return { success: true, error: null };
 }

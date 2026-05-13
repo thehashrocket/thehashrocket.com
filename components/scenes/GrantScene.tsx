@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, PointsMaterial } from "three";
+import { usePrefersReducedMotion, useMediaQuery } from "@/lib/hooks";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import type { SceneProps } from "./types";
 
 const N = 100;
@@ -18,22 +20,19 @@ function easeProgress(p: number): number {
   return Math.pow(p, 0.6);
 }
 
-export function GrantScene({ progress, active }: SceneProps) {
+export function GrantScene({ progress, active, accent = "#f59e0b", onMorphComplete }: SceneProps) {
   const geoRef = useRef<BufferGeometry>(null);
   const matRef = useRef<PointsMaterial>(null);
   const posAttrRef = useRef<BufferAttribute>(null);
   const prevProgress = useRef(-1);
+  const prefersReduced = usePrefersReducedMotion();
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
-  const prefersReduced = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
-  const isMobile = useMemo(
-    () => typeof window !== "undefined" && window.innerWidth < 768,
-    [],
-  );
+  useEffect(() => {
+    if (!active || !onMorphComplete) return;
+    const t = setTimeout(onMorphComplete, MORPH_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [active, onMorphComplete]);
 
   // Start positions: 80% scatter radius so particles are visible at progress=0
   const startPositions = useMemo(() => {
@@ -100,7 +99,7 @@ export function GrantScene({ progress, active }: SceneProps) {
       <pointLight
         position={[2, 2, 2]}
         intensity={0.3 + progress * 0.3}
-        color="#f59e0b"
+        color={accent}
       />
 
       <points>
@@ -111,7 +110,7 @@ export function GrantScene({ progress, active }: SceneProps) {
             args={[workingPositions, 3]}
           />
         </bufferGeometry>
-        <pointsMaterial ref={matRef} size={0.025} color="#f59e0b" />
+        <pointsMaterial ref={matRef} size={0.025} color={accent} />
       </points>
     </group>
   );

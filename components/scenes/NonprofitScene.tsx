@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
+import { usePrefersReducedMotion, useMediaQuery } from "@/lib/hooks";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import type { SceneProps } from "./types";
 
 const NODE_POSITIONS: [number, number, number][] = [
@@ -26,19 +28,16 @@ const EDGES: [number, number][] = [
   [5, 11], [3, 9], [0, 6],                              // cross-cluster (scroll reveal)
 ];
 
-export function NonprofitScene({ progress, active }: SceneProps) {
+export function NonprofitScene({ progress, active, accent = "#3b82f6", onMorphComplete }: SceneProps) {
   const groupRef = useRef<Group>(null);
+  const prefersReduced = usePrefersReducedMotion();
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
-  const prefersReduced = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
-  );
-  const isMobile = useMemo(
-    () => typeof window !== "undefined" && window.innerWidth < 768,
-    [],
-  );
+  useEffect(() => {
+    if (!active || !onMorphComplete) return;
+    const t = setTimeout(onMorphComplete, MORPH_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [active, onMorphComplete]);
 
   const edgePositions = useMemo(
     () =>
@@ -64,12 +63,12 @@ export function NonprofitScene({ progress, active }: SceneProps) {
   return (
     <group ref={groupRef}>
       <ambientLight intensity={0.25} />
-      <pointLight position={[3, 3, 3]} intensity={0.6} color="#3b82f6" />
+      <pointLight position={[3, 3, 3]} intensity={0.6} color={accent} />
 
       {NODE_POSITIONS.map((pos, i) => (
         <mesh key={i} position={pos}>
           <sphereGeometry args={[0.08, 8, 8]} />
-          <meshStandardMaterial color="#3b82f6" transparent opacity={0.35} />
+          <meshStandardMaterial color={accent} transparent opacity={0.35} />
         </mesh>
       ))}
 
@@ -82,7 +81,7 @@ export function NonprofitScene({ progress, active }: SceneProps) {
             />
           </bufferGeometry>
           <lineBasicMaterial
-            color="#3b82f6"
+            color={accent}
             transparent
             opacity={i < visibleEdges ? 0.6 : 0}
           />

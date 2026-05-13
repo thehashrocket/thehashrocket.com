@@ -31,8 +31,10 @@ describe("SceneSync", () => {
     expect(useSceneStore.getState().currentScene).toBe("nonprofit-matching");
   });
 
-  it("renders nothing (null)", () => {
-    const { container } = render(<SceneSync slug="grant-discovery" />);
-    expect(container.firstChild).toBeNull();
+  it("renders a sr-only sentinel with the active scene slug", () => {
+    const { getByTestId } = render(<SceneSync slug="grant-discovery" />);
+    const sentinel = getByTestId("current-scene");
+    expect(sentinel.getAttribute("data-scene")).toBe("grant-discovery");
+    expect(sentinel.classList.contains("sr-only")).toBe(true);
   });
 });

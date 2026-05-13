@@ -1,13 +1,14 @@
 {
   "name": "temp-scaffold",
-  "version": "0.2.0.0",
+  "version": "0.2.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.4",
