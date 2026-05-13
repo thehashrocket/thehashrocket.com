@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSceneStore } from "@/lib/store";
+import { MORPH_DURATION_MS } from "@/lib/constants";
 import { Tag } from "./Tag";
 
 interface AtlasCardProps {
