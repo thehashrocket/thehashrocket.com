@@ -16,5 +16,12 @@ export function SceneSync({ slug }: SceneSyncProps) {
     return () => resetScene();
   }, [slug, setCurrentScene, resetScene]);
 
-  return null;
+  return (
+    <span
+      aria-label={`current scene: ${slug}`}
+      data-testid="current-scene"
+      data-scene={slug}
+      className="sr-only"
+    />
+  );
 }
