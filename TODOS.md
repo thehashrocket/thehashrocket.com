@@ -28,21 +28,11 @@
 - **Risk:** TS 6 may surface new type errors. Budget time to fix them, don't rush it.
 - **Context:** Identified in tech debt audit (2026-05-12). Prod dependencies (Next, React, three.js, R3F) are current within their minor versions — no breaking changes pending there.
 
-### [P3] Fix `package.json` name
-- **What:** `"name": "temp-scaffold"` — leftover from project bootstrapping. Change to `"thehashrocket-com"`.
-- **Why:** Cosmetic, but shows up in npm/build output and is embarrassing.
-- **Effort:** XS (~2 min) | **Priority:** P3
-- **Depends on:** Nothing
-- **Risk:** None.
-- **Context:** Identified in tech debt audit (2026-05-12).
+### ~~[P3] Fix `package.json` name~~ ✓ COMPLETED
+- **Completed:** v0.2.1.0 (2026-05-12) — `"name"` changed from `"temp-scaffold"` to `"thehashrocket-com"`.
 
-### [P3] Clean up `next.config.ts` vestigial comment
-- **What:** The `experimental: {}` block has a comment referencing `componentCache: false` for R3F compatibility, but the setting itself is not present. Either restore the setting with a link to the upstream issue, or remove the comment if the issue has been resolved.
-- **Why:** Ambiguous — can't tell if this is a deliberate omission or an accidental drop.
-- **Effort:** XS (~5 min) | **Priority:** P3
-- **Depends on:** Verify whether pmndrs/react-three-fiber#3595 is still open/relevant on current R3F version
-- **Risk:** None. If the issue is closed, delete the comment. If still open, restore the config line.
-- **Context:** Identified in tech debt audit (2026-05-12).
+### ~~[P3] Clean up `next.config.ts` vestigial comment~~ ✓ COMPLETED
+- **Completed:** v0.2.1.0 (2026-05-12) — Confirmed `componentCache` is not a real Next.js 16 option (not present in `node_modules/next/dist/`). The `experimental: {}` block was dead code; removed entirely.
 
 ---
 

@@ -8,14 +8,18 @@ Creative developer portfolio built with Next.js 16 (App Router), React 19, and R
 
 ```
 app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
-  ├── <Nav />                         (client — responsive nav + mobile hamburger)
-  ├── <SceneProvider />               (client — persistent 3D canvas wrapper)
-  │   ├── <ErrorBoundary>             (catches WebGL failures)
-  │   │   └── <SceneCanvas />         (lazy-loaded via next/dynamic, ssr: false)
-  │   │       └── <SceneRouter />     (reads Zustand store, renders active scene)
-  │   │           ├── <HeroScene />   (wireframe icosahedron + particles)
-  │   │           └── <PharmaScene /> (warehouse conveyor visualization)
-  │   └── {children}                  (page content, overlaid on canvas)
+  ├── <Nav />                              (client — responsive nav + mobile hamburger)
+  ├── <SceneProvider />                    (client — persistent 3D canvas wrapper)
+  │   ├── <ErrorBoundary>                  (catches WebGL failures)
+  │   │   └── <SceneCanvas />              (lazy-loaded via next/dynamic, ssr: false)
+  │   │       └── <SceneRouter />          (reads Zustand store, renders active scene)
+  │   │           ├── <HeroScene />        (wireframe icosahedron + particles)
+  │   │           ├── <PharmaScene />      (warehouse conveyor visualization)
+  │   │           ├── <NonprofitScene />   (graph node reveal driven by scroll)
+  │   │           ├── <GrantScene />       (particle cluster scatter animation)
+  │   │           └── <PrintPortalScene /> (pipeline flow across 4 print stations)
+  │   └── {children}                       (page content, overlaid on canvas)
+  │       └── <SceneSync />                (sr-only sentinel — syncs DOM ↔ Zustand scene state)
   └── <Footer />
 ```
 
@@ -67,12 +71,14 @@ app/                    Routes (App Router)
   └── not-found.tsx     404 with persistent canvas
 components/
   ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary, JsonLd, LocationJsonLd)
-  ├── scenes/           R3F scene components (HeroScene, PharmaScene, SceneRouter)
-  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, Timeline)
+  ├── scenes/           R3F scene components (HeroScene, PharmaScene, NonprofitScene, GrantScene, PrintPortalScene, SceneRouter)
+  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, Timeline, SceneSync)
       └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
 lib/
   ├── store.ts          Zustand scene state
-  ├── actions.ts        Server Actions (contact form with source attribution)
+  ├── actions.ts        Server Actions (contact form with TEST_EMAIL_ENABLED guard)
+  ├── constants.ts      Shared constants (e.g. MORPH_DURATION_MS)
+  ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
   ├── experience.ts     Career data (entries, skills, domains — used by about, homepage, timeline)
   ├── locations.ts      City configs (Sacramento, Stockton, Modesto) with optional localExperience
@@ -97,12 +103,11 @@ public/                 Static assets
 | Email | Resend | Transactional email for contact form |
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities |
-| E2E | Playwright | Browser testing (configured, not yet populated) |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities — 116 tests |
+| E2E | Playwright | 6 specs in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
 ## Known Constraints
 
-- `componentCache: false` required in `next.config.ts` due to R3F compatibility issue (pmndrs/react-three-fiber#3595)
 - Root layout wraps children in client boundary (SceneProvider) — prevents server component rendering for page content. Acceptable for v1 static portfolio.
 - Mobile: only hero scene renders, other pages show canvas in idle/frozen state

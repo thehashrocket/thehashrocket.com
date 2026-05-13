@@ -15,6 +15,12 @@
 - `TEST_EMAIL_ENABLED` env guard in `lib/actions.ts` — prevents Resend API calls in test environments; `playwright.config.ts` passes the flag to the dev server automatically
 - 15 new unit tests: hooks (9), AtlasCard navigation including double-nav guard (5), updated scene-sync sentinel assertion (1)
 
+### For contributors
+- `package.json` name corrected from `temp-scaffold` to `thehashrocket-com`
+- Dead `experimental: {}` block removed from `next.config.ts` (`componentCache` is not a real Next.js 16 option)
+- `jsdom` pinned to `^26` in devDependencies — v27 introduced an ESM-only transitive dependency (`@exodus/bytes`) that breaks the vitest CJS environment
+- TS2352 double-cast fix in `test/case-studies.test.ts` (`as unknown as Record<string, unknown>`)
+
 ## [0.2.0.0] - 2026-04-22
 
 ### Added
