@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2.1] - 2026-05-14
+
+### Security
+- `next` upgraded 16.2.3 → 16.2.6 — closes 13 Dependabot alerts: 7 high (Middleware/Proxy bypass — GHSA-26hh-7cqf-hhc6, -267c-6grr-h53f, -492v-c6pp-mqqv, -36qx-fr4f-26g5; SSRF via WebSocket upgrades — GHSA-c4j6-fc7j-m34r; DoS in Cache Components / Server Components — GHSA-mg66-mrh9-m8jx, -8h8q-6873-q5fj), 4 medium (XSS / DoS / cache poisoning — GHSA-ffhc-5mcf-pf4q, -gx5p-jg67-6x7h, -h64f-5h5j-jqjh, -wfc6-r584-vfw7), 2 low (cache poisoning — GHSA-3g8h-86w9-wvmq, -vfv6-92ff-j949)
+- `postcss` forced ≥ 8.5.10 across the dependency tree via `pnpm.overrides` — closes GHSA-qx2v-qp2m-jg93 (XSS via unescaped `</style>` in CSS Stringify Output). Next 16.2.6 still hard-pins `postcss@8.4.31`; the override resolves it to `postcss@8.5.14`.
+
+### For contributors
+- Stale `package-lock.json` removed; `pnpm-lock.yaml` is the sole lockfile. `.github/dependabot.yml` already declared `package-ecosystem: "pnpm"`, but the unmanaged npm lockfile was generating fictional `postcss@8.5.9` alerts that didn't match the actual pnpm install. `package-lock.json` and `yarn.lock` added to `.gitignore` so they don't regenerate.
+- `CLAUDE.md` GBrain Search Guidance section refreshed by `/sync-gbrain` — explains the new `.gbrain-source` worktree-pin convention (sibling Conductor worktrees each get their own scoped code index) and points to `gbrain autopilot --install` for background refresh.
+
 ## [0.2.2.0] - 2026-05-12
 
 ### For contributors

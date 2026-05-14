@@ -28,6 +28,7 @@
 - **Why:** ESLint 10 standardizes flat config and removes legacy APIs; staying on 9.x is fine but gap grows over time.
 - **Effort:** S (CC: ~15 min) | **Priority:** P2
 - **Depends on:** `eslint-config-next` shipping with `eslint-plugin-react` ≥8 (which supports ESLint 10) — check on Next.js 16.x.y patch release notes
+- **Checked (2026-05-14):** Bumped to Next 16.2.6; `eslint-config-next@16.2.6` still pins `eslint-plugin-react@^7.37.0`. Still blocked. Re-check on the next minor (16.3.x) or major (17.x) bump.
 - **Context:** PR4 (2026-05-12). Pre-existing lint errors need a separate cleanup PR before ESLint upgrade is worthwhile.
 
 ### ~~[P3] Fix `package.json` name~~ ✓ COMPLETED
