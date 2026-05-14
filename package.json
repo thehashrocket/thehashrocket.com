@@ -43,5 +43,10 @@
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "vitest": "4.0.18"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss@<8.5.10": "^8.5.10"
+    }
   }
 }
