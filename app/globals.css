@@ -49,6 +49,14 @@
 
 html {
   color-scheme: dark;
+  /*
+   * Motion's `useScroll({ target })` defaults `container` to
+   * document.scrollingElement (typically <html>) and warns in dev when
+   * that element is `position: static`. Setting `relative` here resolves
+   * the warning without changing layout — <html> is already the root
+   * containing block for absolute children.
+   */
+  position: relative;
 }
 
 body {

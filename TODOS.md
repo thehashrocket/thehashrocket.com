@@ -105,6 +105,9 @@
 
 ## Completed
 
+### Motion `useScroll` dev warning on /work/[slug] pages (ISSUE-001 from /qa)
+- **Completed:** 2026-05-14 — Added `html { position: relative }` to `app/globals.css`. Motion's `scroll()` defaults `container = document.scrollingElement` (`<html>`), and its dev-time check warns when that container is `position: static`. The fix was verified by cold-restarting the dev server (Turbopack CSS HMR did not pick up `<html>`-level rule changes during the initial QA pass — `pkill -f "next dev" && npm run dev` was required). Zero warnings post-restart across all 4 case study detail pages.
+
 ### 3D Scenes for Non-Pharma Case Studies
 - **What:** Dedicated R3F canvas scenes for nonprofit-matching (graph nodes), grant-discovery (particle clusters), and print-portal (pipeline flow) case studies
 - **Completed:** v0.1.5.0 (2026-04-21)
