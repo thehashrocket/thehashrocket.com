@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2.1] - 2026-05-14
+
+### Changed
+- GBrain Search Guidance in `CLAUDE.md` updated: worktree-pinned source context added, source names corrected (`gstack-brain-jasonshultz`), and `gbrain autopilot` daemon instructions added
+- `.gbrain-source` pin file added to repo root — registers this worktree with its gbrain code source so `gbrain search`/`query` routes correctly without a `--source` flag
+- `package-lock.json` refreshed
+
 ## [0.2.2.0] - 2026-05-12
 
 ### For contributors
