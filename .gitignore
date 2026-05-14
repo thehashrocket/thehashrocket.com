@@ -9,6 +9,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+# project uses pnpm; npm lockfiles cause Dependabot confusion
+package-lock.json
+yarn.lock
 
 # testing
 /coverage
