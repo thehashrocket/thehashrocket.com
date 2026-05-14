@@ -17,7 +17,17 @@
       "Bash(~/.claude/skills/gstack/bin/gstack-config set *)",
       "Bash(echo \"set transcript_ingest_mode=off exit=$?\")",
       "Bash(~/.claude/skills/gstack/bin/gstack-config get *)",
-      "Read(//Users/jasonshultz/**)"
+      "Read(//Users/jasonshultz/**)",
+      "Bash(git -C /Users/jasonshultz/Projects/thehashrocket.com status)",
+      "Bash(git *)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "Bash(node -p \"require\\('./package-lock.json'\\).packages['node_modules/next']?.version\")",
+      "Bash(node -p \"require\\('./package-lock.json'\\).packages['node_modules/postcss']?.version\")",
+      "Bash(npm ls *)",
+      "Bash(npm view *)",
+      "Skill(retro)",
+      "Skill(qa)"
     ]
   }
 }
