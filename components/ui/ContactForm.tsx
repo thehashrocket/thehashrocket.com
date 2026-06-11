@@ -93,7 +93,7 @@ export function ContactForm({ source }: { source?: string }) {
           minLength={10}
           rows={5}
           className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
-          placeholder="Tell me about your project..."
+          placeholder="Tell me about your project…"
         />
       </div>
 
@@ -125,7 +125,7 @@ export function ContactForm({ source }: { source?: string }) {
       )}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Sending..." : "Send message"}
+        {isPending ? "Sending…" : "Send message"}
       </Button>
     </form>
   );
