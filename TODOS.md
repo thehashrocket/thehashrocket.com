@@ -59,6 +59,45 @@
 - **Risk:** None currently. Only becomes a problem on a future three.js upgrade.
 - **Context:** Spotted in Sentry breadcrumbs during WebGL crash investigation. The fix is upstream in R3F, not in our code. Check R3F changelog on next dependency update.
 
+## Deferred from Design Review (2026-06-11)
+
+### [Medium] Geo/locations pages lean on uniform bordered card lists
+- **What:** `components/ui/geo/ServicesSection.tsx`, `components/ui/geo/CaseStudiesSection.tsx`, and `app/locations/page.tsx` use stacked bordered-card lists for marketing composition.
+- **Why:** DESIGN.md direction is editorial/asymmetric, cards only when the card IS the interaction. Uniform card lists read as template, not craft. [codex finding]
+- **Effort:** M (CC: ~30 min) | **Priority:** P2 — needs a layout direction decision, not just CSS.
+
+### [Medium] Mobile "hero only" 3D scene policy unenforced
+- **What:** DESIGN.md Responsive Tiers say mobile renders the hero scene only, but `SceneRouter` mounts case-study scenes on mobile too.
+- **Why:** Mobile GPU/battery cost and spec drift. [codex finding]
+- **Effort:** S (CC: ~20 min) | **Priority:** P2 — pairs well with the existing "Canvas Dimming" TODO above.
+
+### [Medium] First-screen brand signal is soft
+- **What:** Homepage first viewport identifies the person only via the small nav wordmark; the headline carries positioning but not identity.
+- **Why:** Failed cross-model litmus "brand unmistakable in first screen." Brand/content decision (e.g., name/role lockup in hero eyebrow).
+- **Effort:** S | **Priority:** P2
+
+### [Medium] Pharma WMS has no screenshot asset
+- **What:** `public/images/work/pharma-wms.png` doesn't exist; /work now shows an intentional typographic placeholder (FINDING-003, 2026-06-11).
+- **Why:** A real product visual converts better than a placeholder. Content asset, can't be generated truthfully.
+- **Effort:** content task | **Priority:** P2
+
+### [Low] Print Portal cyan accent (#06b6d4) undocumented
+- **What:** `lib/case-studies.ts` uses cyan for print-portal; DESIGN.md case-study tints table only lists green/blue/amber.
+- **Why:** Either document the cyan in DESIGN.md or change the accent. Spec/docs drift.
+- **Effort:** XS | **Priority:** P3
+
+### [Low] Mobile nav lacks full modal semantics
+- **What:** Escape-to-close + scroll lock shipped (FINDING-005); focus trap and background inerting still missing in `components/layout/MobileNav.tsx`.
+- **Effort:** S | **Priority:** P3
+
+### [Low] No mobile viewport E2E coverage
+- **What:** `playwright.config.ts` runs Desktop Chrome only; mobile nav, hero fit, and small-screen layout are untested.
+- **Effort:** S | **Priority:** P3
+
+### [Polish] Heading scale / button padding drift
+- **What:** Homepage H2 is 60px (scale says 48/64); button paddings vary py-2 / py-2.5 / py-3 across Nav, page CTAs, and geo CTASection.
+- **Effort:** S token sweep | **Priority:** P3
+
 ## Geo Landing Pages
 
 ### Google Business Profile Setup
