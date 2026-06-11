@@ -56,6 +56,7 @@ export default function WorkPage() {
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={i < 2}
                     />
                   ) : (
                     <div className="flex h-full w-full flex-col items-start justify-end p-6">
