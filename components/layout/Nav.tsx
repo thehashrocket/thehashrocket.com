@@ -17,7 +17,7 @@ export function Nav() {
       >
         <Link
           href="/"
-          className="font-display text-lg font-bold tracking-tight text-[var(--text-primary)] transition-colors hover:text-[var(--accent)]"
+          className="inline-flex min-h-11 items-center font-display text-lg font-bold tracking-tight text-[var(--text-primary)] transition-colors hover:text-[var(--accent)]"
         >
           Jason Shultz
         </Link>
@@ -28,7 +28,7 @@ export function Nav() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="font-body text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+                className="inline-flex min-h-11 items-center font-body text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
               >
                 {link.label}
               </Link>
@@ -37,7 +37,7 @@ export function Nav() {
           <li>
             <Link
               href="/contact"
-              className="rounded-[var(--radius-sm)] bg-[var(--accent)] px-4 py-2 font-display text-sm font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]"
+              className="inline-flex min-h-11 items-center rounded-[var(--radius-sm)] bg-[var(--accent)] px-4 font-display text-sm font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]"
             >
               Let&apos;s Talk
             </Link>
