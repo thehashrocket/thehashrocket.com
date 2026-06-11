@@ -98,19 +98,28 @@ export function ContactForm({ source }: { source?: string }) {
       </div>
 
       {timedOut && isPending && (
-        <div className="rounded-[var(--radius-sm)] border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]">
-          Still sending... this is taking longer than expected.
+        <div
+          role="status"
+          className="rounded-[var(--radius-sm)] border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]"
+        >
+          Still sending… this is taking longer than expected.
         </div>
       )}
 
       {state.error && (
-        <div className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]">
+        <div
+          role="alert"
+          className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]"
+        >
           {state.error}
         </div>
       )}
 
       {state.success && (
-        <div className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]">
+        <div
+          role="status"
+          className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]"
+        >
           Message sent! I&apos;ll get back to you within 24 hours.
         </div>
       )}
