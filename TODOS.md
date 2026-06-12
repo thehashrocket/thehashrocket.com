@@ -42,7 +42,7 @@
 ## Deferred from Design Review (2026-04-21) — 3D Scenes
 
 ### Canvas Dimming for Case Study Pages
-- **What:** Implement the DESIGN.md spec that says the canvas "dims/freezes when text-heavy sections are in viewport." Currently no scene (PharmaScene or the three new scenes) implements this.
+- **What:** Implement the docs/DESIGN.md spec that says the canvas "dims/freezes when text-heavy sections are in viewport." Currently no scene (PharmaScene or the three new scenes) implements this.
 - **Why:** Bright 3D geometry competing with case study body text hurts readability. Dimming during reading sections lets the text breathe and honors the design system intent.
 - **Effort:** S (CC: ~20 min) | **Priority:** P2
 - **Depends on:** All 3 new scenes shipped (this PR)
@@ -63,11 +63,11 @@
 
 ### [Medium] Geo/locations pages lean on uniform bordered card lists
 - **What:** `components/ui/geo/ServicesSection.tsx`, `components/ui/geo/CaseStudiesSection.tsx`, and `app/locations/page.tsx` use stacked bordered-card lists for marketing composition.
-- **Why:** DESIGN.md direction is editorial/asymmetric, cards only when the card IS the interaction. Uniform card lists read as template, not craft. [codex finding]
+- **Why:** docs/DESIGN.md direction is editorial/asymmetric, cards only when the card IS the interaction. Uniform card lists read as template, not craft. [codex finding]
 - **Effort:** M (CC: ~30 min) | **Priority:** P2 — needs a layout direction decision, not just CSS.
 
 ### [Medium] Mobile "hero only" 3D scene policy unenforced
-- **What:** DESIGN.md Responsive Tiers say mobile renders the hero scene only, but `SceneRouter` mounts case-study scenes on mobile too.
+- **What:** docs/DESIGN.md Responsive Tiers say mobile renders the hero scene only, but `SceneRouter` mounts case-study scenes on mobile too.
 - **Why:** Mobile GPU/battery cost and spec drift. [codex finding]
 - **Effort:** S (CC: ~20 min) | **Priority:** P2 — pairs well with the existing "Canvas Dimming" TODO above.
 
@@ -82,8 +82,8 @@
 - **Effort:** content task | **Priority:** P2
 
 ### [Low] Print Portal cyan accent (#06b6d4) undocumented
-- **What:** `lib/case-studies.ts` uses cyan for print-portal; DESIGN.md case-study tints table only lists green/blue/amber.
-- **Why:** Either document the cyan in DESIGN.md or change the accent. Spec/docs drift.
+- **What:** `lib/case-studies.ts` uses cyan for print-portal; docs/DESIGN.md case-study tints table only lists green/blue/amber.
+- **Why:** Either document the cyan in docs/DESIGN.md or change the accent. Spec/docs drift.
 - **Effort:** XS | **Priority:** P3
 
 ### [Low] Mobile nav lacks full modal semantics

@@ -104,10 +104,10 @@ public/                 Static assets
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
 | Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities — 145 tests |
-| E2E | Playwright | 6 specs in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions |
+| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
 ## Known Constraints
 
 - Root layout wraps children in client boundary (SceneProvider) — prevents server component rendering for page content. Acceptable for v1 static portfolio.
-- Mobile: only hero scene renders, other pages show canvas in idle/frozen state
+- Mobile: SceneRouter mounts all scenes unconditionally; canvas dimming and mobile-only hero policy are deferred (see TODOS.md)

@@ -3,8 +3,8 @@
 ## [0.2.3.0] - 2026-06-11
 
 ### Changed
-- Nav links and the "Let's Talk" CTA now have a 44 px minimum touch target — taps on mobile land correctly without mis-firing adjacent links
-- Above-fold case study images on /work are preloaded, improving Largest Contentful Paint
+- Desktop nav links and the "Let's Talk" CTA now have a 44 px minimum touch target — taps land correctly without mis-firing adjacent links
+- First image on the /work case study list is preloaded, improving Largest Contentful Paint on that page
 - Placeholder typography card shown for case studies that don't yet have a screenshot asset
 
 ### Fixed
@@ -15,7 +15,7 @@
 
 ### For contributors
 - Timeout reference in contact form is now properly cancelled on component unmount (prevents state updates on unmounted components)
-- Honeypot E2E test now actually reaches the submit path (was blocked by HTML5 validation)
+- Honeypot E2E test updated: confirms no success message appears when the honeypot field is filled (HTML5 validation correctly prevents the form from submitting)
 
 ## [0.2.2.1] - 2026-05-14
 
