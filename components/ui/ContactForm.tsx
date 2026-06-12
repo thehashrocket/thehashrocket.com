@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitContact } from "@/lib/actions";
+import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
 import { Button } from "./Button";
 
 const initialState = { success: false, error: null };
@@ -21,19 +22,21 @@ export function ContactForm({ source }: { source?: string }) {
     }
   }, [state.success]);
 
-  // Client-side 10s timeout
   useEffect(() => {
     if (isPending) {
       setTimedOut(false);
       timeoutRef.current = setTimeout(() => {
         setTimedOut(true);
-      }, 10000);
+      }, CONTACT_FORM_TIMEOUT_MS);
     } else {
       setTimedOut(false);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [isPending]);
 
   return (

@@ -2,6 +2,9 @@ import { test, expect } from "@playwright/test";
 
 test("honeypot submission is silently swallowed", async ({ page }) => {
   await page.goto("/contact");
+  await page.getByLabel(/name/i).fill("Test User");
+  await page.getByLabel(/email/i).fill("test@example.com");
+  await page.getByLabel(/message/i).fill("E2E test message that is long enough");
   await page.locator('[name="website"]').fill("http://spam.example.com");
   await page.getByRole("button", { name: /send/i }).click();
   await expect(page.getByText(/message sent/i)).not.toBeVisible();

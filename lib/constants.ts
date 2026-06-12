@@ -1,1 +1,2 @@
 export const MORPH_DURATION_MS = 3000;
+export const CONTACT_FORM_TIMEOUT_MS = 10_000;
