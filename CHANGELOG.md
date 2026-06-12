@@ -3,17 +3,19 @@
 ## [0.2.3.0] - 2026-06-11
 
 ### Changed
-- Nav links and the "Let's Talk" CTA now meet the 44 px touch-target spec on mobile
+- Nav links and the "Let's Talk" CTA now have a 44 px minimum touch target — taps on mobile land correctly without mis-firing adjacent links
 - Above-fold case study images on /work are preloaded, improving Largest Contentful Paint
 - Placeholder typography card shown for case studies that don't yet have a screenshot asset
 
 ### Fixed
-- `--text-muted` color token corrected to #808080 (was #737373, which failed WCAG AA)
+- `--text-muted` color token corrected to #808080 (was #737373, which failed WCAG AA contrast on the dark background)
 - Contact form success and error messages are now announced to screen readers (`role="status"` / `role="alert"`)
 - Mobile nav overlay now closes on Escape and prevents background page scroll while open; scroll state is restored correctly when the overlay closes
-- Timeout reference in contact form is now properly cancelled on component unmount
-- Honeypot E2E test now actually reaches the submit path (was blocked by HTML5 validation)
 - Copy ellipsis changed from three periods to the proper `…` character throughout
+
+### For contributors
+- Timeout reference in contact form is now properly cancelled on component unmount (prevents state updates on unmounted components)
+- Honeypot E2E test now actually reaches the submit path (was blocked by HTML5 validation)
 
 ## [0.2.2.1] - 2026-05-14
 

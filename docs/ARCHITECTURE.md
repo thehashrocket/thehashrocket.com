@@ -77,7 +77,7 @@ components/
 lib/
   ├── store.ts          Zustand scene state
   ├── actions.ts        Server Actions (contact form with TEST_EMAIL_ENABLED guard)
-  ├── constants.ts      Shared constants (e.g. MORPH_DURATION_MS)
+  ├── constants.ts      Shared constants (MORPH_DURATION_MS, CONTACT_FORM_TIMEOUT_MS)
   ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
   ├── experience.ts     Career data (entries, skills, domains — used by about, homepage, timeline)
@@ -103,7 +103,7 @@ public/                 Static assets
 | Email | Resend | Transactional email for contact form |
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities — 116 tests |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities — 145 tests |
 | E2E | Playwright | 6 specs in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
