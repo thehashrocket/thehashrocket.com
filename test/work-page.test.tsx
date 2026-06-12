@@ -8,7 +8,7 @@
  *  - Else branch renders a typographic placeholder div for slugs without images
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { beforeEach, describe, it, expect, vi } from "vitest";
 
 // ── Stubs ─────────────────────────────────────────────────────────────────────
 

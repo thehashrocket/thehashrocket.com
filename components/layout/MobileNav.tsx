@@ -16,10 +16,11 @@ export function MobileNav({ links }: MobileNavProps) {
       if (e.key === "Escape") setOpen(false);
     };
     document.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
+      document.body.style.overflow = prevOverflow;
     };
   }, [open]);
 

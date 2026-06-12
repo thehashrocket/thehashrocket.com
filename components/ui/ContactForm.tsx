@@ -27,15 +27,20 @@ export function ContactForm({ source }: { source?: string }) {
       setTimedOut(false);
       timeoutRef.current = setTimeout(() => {
         setTimedOut(true);
+        timeoutRef.current = null;
       }, CONTACT_FORM_TIMEOUT_MS);
     } else {
       setTimedOut(false);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     }
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
   }, [isPending]);
 
