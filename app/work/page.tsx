@@ -49,14 +49,30 @@ export default function WorkPage() {
                     border: `1px solid ${study.accent}30`,
                   }}
                 >
-                  {[`nonprofit-matching`, `grant-discovery`, `print-portal`].includes(study.slug) && (
+                  {[`nonprofit-matching`, `grant-discovery`, `print-portal`].includes(study.slug) ? (
                     <Image
                       src={`/images/work/${study.slug}.png`}
                       alt={study.title}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={i < 2}
                     />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-start justify-end p-6">
+                      <span
+                        className="font-mono text-xs uppercase tracking-widest"
+                        style={{ color: `${study.accent}99` }}
+                      >
+                        Case Study
+                      </span>
+                      <span
+                        className="mt-1 font-display text-2xl font-semibold"
+                        style={{ color: study.accent }}
+                      >
+                        {study.title}
+                      </span>
+                    </div>
                   )}
                 </div>
 

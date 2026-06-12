@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 
-test("honeypot submission is silently swallowed", async ({ page }) => {
+test("honeypot submission does not send real email", async ({ page }) => {
+  // The server returns {success:true} on honeypot detection (silent accept — bots
+  // think they succeeded but no email is sent). Fill the honeypot only; HTML5
+  // validation prevents the form from submitting so no server round-trip occurs.
   await page.goto("/contact");
   await page.locator('[name="website"]').fill("http://spam.example.com");
   await page.getByRole("button", { name: /send/i }).click();

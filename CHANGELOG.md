@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.3.0] - 2026-06-11
+
+### Changed
+- Desktop nav links and the "Let's Talk" CTA now have a 44 px minimum touch target — taps land correctly without mis-firing adjacent links
+- First image on the /work case study list is preloaded, improving Largest Contentful Paint on that page
+- Placeholder typography card shown for case studies that don't yet have a screenshot asset
+
+### Fixed
+- `--text-muted` color token corrected to #808080 (was #737373, which failed WCAG AA contrast on the dark background)
+- Contact form success and error messages are now announced to screen readers (`role="status"` / `role="alert"`)
+- Mobile nav overlay now closes on Escape and prevents background page scroll while open; scroll state is restored correctly when the overlay closes
+- Copy ellipsis changed from three periods to the proper `…` character throughout
+
+### For contributors
+- Timeout reference in contact form is now properly cancelled on component unmount (prevents state updates on unmounted components)
+- Honeypot E2E test updated: confirms no success message appears when the honeypot field is filled (HTML5 validation correctly prevents the form from submitting)
+
 ## [0.2.2.1] - 2026-05-14
 
 ### Security
