@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # Actions are pinned to full commit SHAs, not tags. A tag is mutable —
+      # whoever controls the action can retag it, and this workflow ends in a
+      # job with contents: write that merges without a human. That is the
+      # tj-actions/changed-files attack shape. Dependabot's github-actions
+      # ecosystem keeps these SHAs (and the version comments) current.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # Matches the Vercel build. A dependency bump that drifts the lockfile
+      # fails here instead of on a production deploy.
+      - run: pnpm install --frozen-lockfile
+
+      # Non-blocking: main already has 12 react-hooks/react-compiler errors
+      # predating this workflow. Flip to blocking once those are cleared —
+      # until then a red lint would permanently block Dependabot auto-merge.
+      - run: pnpm run lint
+        continue-on-error: true
+
+      - run: pnpm exec tsc --noEmit
+
+      - run: pnpm run test
+
+      - run: pnpm run build
+
+  # Security advisories used to sit for months because nobody merged the PR,
+  # and Dependabot keeps only one open PR per group — so one stale PR blocked
+  # every later advisory. This lands security patches on green CI, unattended.
+  #
+  # `needs: verify` is what makes this safe: the merge runs in the same
+  # workflow run, after the checks above pass. It does not rely on branch
+  # protection being configured.
+  #
+  # Scope is deliberately narrow: security-update groups only, patch/minor
+  # only. Majors and routine version bumps still wait for a human.
+  dependabot-auto-merge:
+    name: Auto-merge Dependabot security patches
+    needs: verify
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write # gh label create / --add-label go through the Issues API
+
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # dependency-group comes from the group names in .github/dependabot.yml.
+      - name: Approve and merge
+        if: |
+          startsWith(steps.metadata.outputs.dependency-group, 'security-') &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        # --match-head-commit closes a real race: Dependabot force-pushes
+        # rebases onto its own branches, so without it `verify` can go green
+        # on SHA A while the squash lands SHA B. That would merge untested
+        # code and defeat the whole point of `needs: verify`. If the head
+        # moved mid-run, this fails loudly and the rebase gets its own run.
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --squash --match-head-commit "$HEAD_SHA" "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # A major security bump can break things CI won't catch. Flag it loudly
+      # instead of merging it.
+      - name: Flag major security updates for review
+        if: |
+          startsWith(steps.metadata.outputs.dependency-group, 'security-') &&
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          # Create if missing; never clobber an existing label's color.
+          gh label create "needs-review" --color d93f0b \
+            --description "Needs a human before merge" 2>/dev/null || true
+          gh pr edit "$PR_URL" --add-label "needs-review"
+          gh pr comment "$PR_URL" --body \
+            "Major-version security update — not auto-merged. Review and merge manually."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

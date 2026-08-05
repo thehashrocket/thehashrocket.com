@@ -103,8 +103,11 @@ public/                 Static assets
 | Email | Resend | Transactional email for contact form |
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities — 145 tests |
-| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions |
+| Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in `pnpm.overrides`, which npm ignores — see CLAUDE.md |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, and the Dependabot/CI config — 160 tests |
+| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions. Not run in CI — see TODOS.md |
+| CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, lint (non-blocking), typecheck, unit tests, production build on every PR |
+| Dependency updates | Dependabot | Daily. Security patches (patch/minor) auto-approve and squash-merge once CI passes; majors get a `needs-review` label |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
 ## Known Constraints

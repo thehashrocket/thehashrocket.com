@@ -32,9 +32,19 @@ Read docs/DOMAIN.md for business context, project domains, and brand identity.
 ## Node.js
 This project uses nvm for Node version management. The required version is pinned in `.nvmrc` (currently 24.11). Always run `nvm use` before executing any Node/npm commands to ensure the correct version is active.
 
+## Package manager — pnpm only, never npm
+`pnpm-lock.yaml` is the committed lockfile; `package-lock.json` and `yarn.lock` are gitignored.
+Vercel and CI both build with `pnpm install --frozen-lockfile`. Use `pnpm` for everything.
+
+This is not a style preference. Security pins for transitive dependencies live in the
+`pnpm.overrides` block in `package.json`, and **npm ignores that field entirely** — it only
+reads a top-level `overrides` key, which this project does not have. Running `npm install`
+resolves postcss to 8.4.31 and sharp to 0.34.5, both of which carry open advisories that
+`pnpm install` patches. An npm-installed tree is a vulnerable tree.
+
 ## Testing
-Run `npm test` (vitest) for unit tests. Test files live in `test/`.
-Run `npm run test:e2e` (Playwright) for E2E tests. Specs live in `test/e2e/`.
+Run `pnpm test` (vitest) for unit tests. Test files live in `test/`.
+Run `pnpm run test:e2e` (Playwright) for E2E tests. Specs live in `test/e2e/`.
 
 ## Conventions
 - 3D scenes go in `components/scenes/`, UI components in `components/ui/`, shell in `components/layout/`
