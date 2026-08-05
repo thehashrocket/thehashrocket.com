@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.6.0] - 2026-08-05
+
+### Added
+- `pnpm run typecheck:fast` type checks the project with TypeScript 7, the native Go port — 0.52s against 2.72s for the same clean run, roughly 5x. TypeScript 7 is installed alongside the existing compiler as `typescript7`, an npm alias, so both are available at once.
+- `pnpm run typecheck` runs the TypeScript 6 compiler and is the portable gate CI uses. It replaces the bare `tsc` invocation that CI called before.
+
+### Changed
+- `typescript` deliberately stays on 6.x. TypeScript 7 ships no JavaScript compiler API — `require("typescript")` resolves to a version stub — and no tsserver, so `@typescript-eslint/typescript-estree` crashes at module load reading `ts.ModuleKind.CommonJs` and `pnpm lint` exits 2 before linting a single file. No typescript-eslint release supports TypeScript 7 yet; the current stable and canary both cap their peer range below 6.1. Scoping a TypeScript 6 copy to just the ESLint chain via `pnpm.packageExtensions` does not work either — peer resolution still hands that subtree the root compiler. Next.js 16.2.12 does support TypeScript 7, but only behind `experimental.useTypeScriptCli`, which is not enough on its own while linting is dead.
+- CI type checks with `pnpm run typecheck` instead of `pnpm exec tsc --noEmit`. Installing a second compiler under an alias also installs its `tsc` bin, and the alias wins `node_modules/.bin/tsc` — so a bare `tsc` anywhere in this repo silently runs 7.x rather than 6.x, with no error. Both scripts invoke a compiler by explicit path for that reason, and `test/typescript-toolchain.test.ts` fails loudly if a bare `tsc` is ever reintroduced or either version drifts.
+
+### Fixed
+- The failing contact form E2E test from 0.2.5.0 now passes. It asserted the server-side "Name must be at least 2 characters." message, which a real browser can never reach: `minLength={2}` on the name input means native constraint validation blocks submission and the server action never runs. The test now asserts the behavior that actually occurs — that the browser fires `invalid` on the name field and the form's `submit` event never fires — both tied causally to the click. Product behavior is unchanged; only the assertion was wrong. Whether a short name should also surface a visible inline message, rather than relying on the browser's native tooltip, is still an open design question.
+- `package.json` and the `VERSION` file agree again. 0.2.5.0 moved `VERSION` to 0.2.5.0 but left `package.json` at 0.2.4.0, so the two release markers had been out of step since that merge. Nothing reads either value at runtime, so no behavior changed.
+
 ## [0.2.5.0] - 2026-08-05
 
 ### Changed

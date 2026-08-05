@@ -33,6 +33,20 @@
 - **Now blocks CI (2026-08-05):** v0.2.4.0 added `.github/workflows/ci.yml` with `pnpm run lint` set to `continue-on-error: true` specifically because of these 12 errors. A red lint would permanently block Dependabot auto-merge. Clear the 12 errors, then remove `continue-on-error` from the lint step.
 - **Context:** PR4 (2026-05-12). Pre-existing lint errors need a separate cleanup PR before ESLint upgrade is worthwhile.
 
+### [P2] Finish the TypeScript 7 migration once typescript-eslint supports it
+- **What:** Drop the `typescript7` alias, move `typescript` to ^7, add `experimental.useTypeScriptCli: true` to `next.config.ts`, and point both typecheck scripts back at a bare `tsc`. Then delete the alias-specific assertions in `test/typescript-toolchain.test.ts` and the CI comment that explains them.
+- **Why:** TypeScript 7 type checks this project in 0.52s against 2.72s — roughly 5x. v0.2.6.0 took the speedup as a local-only script because the full swap breaks linting.
+- **Blocked on:** typescript-eslint supporting TypeScript 7. `@typescript-eslint/typescript-estree` reads `ts.ModuleKind.CommonJs` at module load; under TS 7 that object does not exist, so `pnpm lint` exits 2 before linting anything. **Checked 2026-08-05:** latest stable (8.66.0) and canary (8.66.1-alpha.4) both peer on `>=4.8.4 <6.1.0`. Re-check for a release that widens that range.
+- **Already verified (2026-08-05), do not re-derive:** the full swap builds and typechecks clean — `next build` passes with `experimental.useTypeScriptCli` and correctly fails on a planted type error. Linting is the only blocker. Scoping a TS 6 copy to the ESLint chain via `pnpm.packageExtensions` does **not** work; pnpm builds the variant but peer resolution still hands that subtree the root compiler.
+- **Also unverified:** whether Next's `plugins: [{ "name": "next" }]` TS plugin loads under TypeScript 7's LSP. Irrelevant while editors stay on 6; check before the full flip.
+- **Effort:** S (CC: ~15 min once unblocked) | **Priority:** P2
+
+### [P3] Decide whether a too-short name deserves a visible inline error
+- **What:** The contact form's name field relies on the browser's native constraint-validation tooltip. `lib/actions.ts:38` has a matching server-side message that a real browser can never reach, because `minLength={2}` blocks submission first.
+- **Why:** The native tooltip is unstyled, disappears on the next interaction, and is not announced consistently by screen readers. The other fields have the same shape. Either surface the message in the UI or accept the native behavior deliberately.
+- **Context:** Surfaced in v0.2.5.0 as "a product decision about whether validation should be enforced client-side, server-side, or both." v0.2.6.0 fixed the *test* to assert what the product actually does; the design question itself is still open.
+- **Effort:** S (CC: ~20 min) | **Priority:** P3
+
 ---
 
 ## CI & Supply Chain (2026-08-05)
@@ -49,6 +63,7 @@
 - **Effort:** S (CC: ~10 min) | **Priority:** P3
 - **Risk:** E2E flake converts directly into security patches sitting unmerged, which is the failure this automation exists to prevent. Only worth adding if the suite proves stable.
 - **Context:** Explicitly deferred by Jason during the v0.2.4.0 ship — reliability of the auto-merge gate was judged more important than breadth of coverage. Revisit if a bump ever slips through.
+- **Unblocked (2026-08-05, v0.2.6.0):** the stated precondition is now met. The contact form spec that had never been able to pass is fixed, so the suite is 6/6 green and has been for repeated local runs. The remaining cost is browser install time in CI, not flake.
 
 ### ~~[P3] Fix `package.json` name~~ ✓ COMPLETED
 - **Completed:** v0.2.1.0 (2026-05-12) — `"name"` changed from `"temp-scaffold"` to `"thehashrocket-com"`.
