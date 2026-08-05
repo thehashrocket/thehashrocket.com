@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.5.0] - 2026-08-05
+
+### Changed
+- All seven open Dependabot pull requests resolved in one consolidated upgrade. CI had verified each of them individually against `main`, but no job ever built the combination they would produce once merged in sequence — so the set was installed, typechecked, unit-tested, built, and run through Playwright together before landing.
+- Production dependencies: `next` 16.2.11 → 16.2.12, `react` / `react-dom` 19.2.4 → 19.2.8, `@sentry/nextjs` 10.49.0 → 10.69.0, `three` 0.183.2 → 0.185.1, `motion` 12.38.0 → 12.43.0, `resend` 6.12.2 → 6.18.1, `@react-three/fiber` 9.6.0 → 9.7.0, `@upstash/redis` 1.37.0 → 1.38.1, `@next/third-parties` 16.2.4 → 16.2.12, `zustand` 5.0.12 → 5.0.14.
+- Development dependencies: `vite` 7.3.6 → 8.2.0, `jsdom` 26.1.0 → 30.0.1, `@testing-library/jest-dom` 6.9.1 → 7.0.0, `@playwright/test` 1.59.1 → 1.62.1, `tailwindcss` / `@tailwindcss/postcss` 4.2.4 → 4.3.3, `eslint-config-next` 16.2.3 → 16.2.12, `vitest` 4.1.0 → 4.1.10, `happy-dom` 20.9.0 → 20.11.1.
+- `@types/node` taken to ^24.13.3 rather than the ^26.1.2 Dependabot proposed. The runtime is pinned to 24.11 by `.nvmrc`, which is what both CI and Vercel build against; typing against Node 26 would let code compile against APIs that do not exist at runtime. The type major is kept in step with the runtime major deliberately.
+- `@types/three` bumped 0.183.1 → 0.185.4 alongside `three` itself. Dependabot moved the runtime package but not its types, which drift together — the two were left one minor apart on `main`.
+- `@testing-library/dom` added as an explicit dev dependency. `@testing-library/jest-dom` 7.0.0 promotes it to a required peer, and relying on it arriving transitively through `@testing-library/react` leaves resolution to chance.
+
+### Fixed
+- `vitest.config.ts` renamed to `vitest.config.mts`. Vite 8 warns that ESM syntax in a file loaded as CommonJS is unsupported by `configLoader: 'native'`, which becomes the default in a future major. The explicit ESM extension resolves it now rather than at the next breaking upgrade.
+- `/test-results` and `/playwright-report` added to `.gitignore`. Playwright writes both on every local run and neither was ignored, so failure artifacts showed up as untracked files.
+
+### For contributors
+- PR #30 (vitest 4.0.18 → 4.1.0) was closed rather than merged. `main` reached 4.1.0 in 0.2.4.0, so the pull request proposed a version already shipped; it had been conflicting since.
+- `test/e2e/contact-form.spec.ts` has one failing test, and it is not a regression from these upgrades. "contact form shows validation error for short name" asserts the server-side message from `lib/actions.ts`, but the name input carries `minLength={2}`, so the browser's native constraint validation blocks submission and the server action never runs. The `minLength` attribute has been present since the initial commit (#1) while the test arrived later in #22 — it has never been able to pass. E2E does not run in CI, which is why it went unnoticed. Left failing rather than papered over, since the fix is a product decision about whether validation should be enforced client-side, server-side, or both.
+- The `pnpm lint` step remains non-blocking. The same 12 pre-existing `react-hooks` / react-compiler errors on `main` are still present and unchanged by this upgrade.
+
 ## [0.2.4.0] - 2026-08-05
 
 ### Security
