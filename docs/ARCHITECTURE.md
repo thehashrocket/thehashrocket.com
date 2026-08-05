@@ -104,9 +104,10 @@ public/                 Static assets
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
 | Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in `pnpm.overrides`, which npm ignores — see CLAUDE.md |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, and the Dependabot/CI config — 160 tests |
-| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, validation, happy path) and scene-wiring sentinel assertions. Not run in CI — see TODOS.md |
-| CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, lint (non-blocking), typecheck, unit tests, production build on every PR |
+| Language | TypeScript 6 (+ 7 alongside) | `typescript` stays on 6 because typescript-eslint cannot load TypeScript 7. TS 7 is installed as the `typescript7` alias for `pnpm run typecheck:fast` (~5x faster, local only). Never invoke a bare `tsc` — the alias owns `node_modules/.bin/tsc`. See CLAUDE.md |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, and the Dependabot/CI/TypeScript-toolchain config — 166 tests |
+| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path) and scene-wiring sentinel assertions. All green as of 0.2.6.0. Not run in CI — see TODOS.md |
+| CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, lint (non-blocking), `pnpm run typecheck`, unit tests, production build on every PR |
 | Dependency updates | Dependabot | Daily. Security patches (patch/minor) auto-approve and squash-merge once CI passes; majors get a `needs-review` label |
 | Deploy | Vercel | Automatic from GitHub push to main |
 
