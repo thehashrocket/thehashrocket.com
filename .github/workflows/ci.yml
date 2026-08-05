@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # Matches the Vercel build. A dependency bump that drifts the lockfile
+      # fails here instead of on a production deploy.
+      - run: pnpm install --frozen-lockfile
+
+      # Non-blocking: main already has 12 react-hooks/react-compiler errors
+      # predating this workflow. Flip to blocking once those are cleared —
+      # until then a red lint would permanently block Dependabot auto-merge.
+      - run: pnpm run lint
+        continue-on-error: true
+
+      - run: pnpm exec tsc --noEmit
+
+      - run: pnpm run test
+
+      - run: pnpm run build
+
+  # Security advisories used to sit for months because nobody merged the PR,
+  # and Dependabot keeps only one open PR per group — so one stale PR blocked
+  # every later advisory. This lands security patches on green CI, unattended.
+  #
+  # `needs: verify` is what makes this safe: the merge runs in the same
+  # workflow run, after the checks above pass. It does not rely on branch
+  # protection being configured.
+  #
+  # Scope is deliberately narrow: security-update groups only, patch/minor
+  # only. Majors and routine version bumps still wait for a human.
+  dependabot-auto-merge:
+    name: Auto-merge Dependabot security patches
+    needs: verify
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write # gh label create / --add-label go through the Issues API
+
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # dependency-group comes from the group names in .github/dependabot.yml.
+      - name: Approve and merge
+        if: |
+          startsWith(steps.metadata.outputs.dependency-group, 'security-') &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        run: |
+          gh pr review --approve "$PR_URL"
+          gh pr merge --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # A major security bump can break things CI won't catch. Flag it loudly
+      # instead of merging it.
+      - name: Flag major security updates for review
+        if: |
+          startsWith(steps.metadata.outputs.dependency-group, 'security-') &&
+          steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: |
+          gh label create "needs-review" --color d93f0b \
+            --description "Needs a human before merge" --force
+          gh pr edit "$PR_URL" --add-label "needs-review"
+          gh pr comment "$PR_URL" --body \
+            "Major-version security update — not auto-merged. Review and merge manually."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
