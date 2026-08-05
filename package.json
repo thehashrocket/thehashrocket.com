@@ -40,7 +40,7 @@
     "eslint-config-next": "16.2.3",
     "happy-dom": "^20.9.0",
     "js-yaml": "^5.2.3",
-    "jsdom": "^26.0.0",
+    "jsdom": "^30.0.1",
     "tailwindcss": "^4.2.4",
     "typescript": "^6.0.3",
     "vite": "^7.3.6",
