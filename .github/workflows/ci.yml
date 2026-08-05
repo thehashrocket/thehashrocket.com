@@ -94,8 +94,9 @@ jobs:
           startsWith(steps.metadata.outputs.dependency-group, 'security-') &&
           steps.metadata.outputs.update-type == 'version-update:semver-major'
         run: |
+          # Create if missing; never clobber an existing label's color.
           gh label create "needs-review" --color d93f0b \
-            --description "Needs a human before merge" --force
+            --description "Needs a human before merge" 2>/dev/null || true
           gh pr edit "$PR_URL" --add-label "needs-review"
           gh pr comment "$PR_URL" --body \
             "Major-version security update — not auto-merged. Review and merge manually."

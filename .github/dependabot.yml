@@ -68,6 +68,14 @@ updates:
     commit-message:
       prefix: "chore(ci)"
     groups:
+      # Same security- prefix the auto-merge job matches on. Without this,
+      # an Actions advisory arrives ungrouped, dependency-group is empty,
+      # and it silently never auto-merges.
+      security-actions:
+        applies-to: security-updates
+        patterns:
+          - "*"
       actions:
+        applies-to: version-updates
         patterns:
           - "*"
