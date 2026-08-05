@@ -3,11 +3,11 @@
 ## [0.2.4.0] - 2026-08-05
 
 ### Security
-- All 35 open Dependabot alerts closed — 2 critical, 18 high, 12 moderate, 3 low. `pnpm audit` now reports no known vulnerabilities.
+- All 36 open Dependabot alerts closed — 2 critical, 20 high, 12 moderate, 2 low, across 12 packages. `pnpm audit` now reports no known vulnerabilities.
 - `next` upgraded 16.2.6 → 16.2.11 — closes 10 alerts: Middleware/Proxy bypass in App Router with Turbopack and a single locale (GHSA-mgqv-mfjc-4hpr), three SSRF classes (rewrites with attacker-controlled destination hostname, Server Actions on custom servers, internal Server Function endpoint disclosure), cache confusion on requests with bodies including invalid UTF-8 sequences, and DoS in both Server Actions and the SVG path of the Image Optimization API.
 - `vitest` upgraded 4.0.18 → 4.1.0 — closes a critical advisory where an exposed Vitest UI server allows arbitrary file read and execution.
 - `vite` pinned as a direct dev dependency at ^7.3.6 — closes a `server.fs.deny` bypass on Windows alternate paths and NTLMv2 hash disclosure via UNC path handling in launch-editor. A `pnpm.overrides` entry alone would not move it off 7.3.3.
-- Transitive dependencies with no direct upgrade path forced via `pnpm.overrides`: `@babel/core`, `@opentelemetry/core`, `brace-expansion` (both the 1.x and 5.x lines needed separate range selectors), `esbuild`, `fast-uri`, `js-yaml`, `postcss`, `sharp`, `uuid`, and `ws`.
+- Transitive dependencies with no direct upgrade path forced via `pnpm.overrides`: `@babel/core`, `@opentelemetry/core`, `brace-expansion` (both the 1.x and 5.x lines needed separate range selectors), `esbuild`, `fast-uri`, `js-yaml`, `postcss`, `sharp`, `uuid`, and `ws`. The `ws` advisories were found by `pnpm audit` and had no Dependabot alert filed yet.
 
 ### Fixed
 - Dependabot version updates were silently disabled and had never run. `.github/dependabot.yml` declared `package-ecosystem: "pnpm"`, which is not a value GitHub recognizes — npm, yarn, and pnpm all use `"npm"`, and the package manager is inferred from the lockfile. An invalid value makes the whole file fail to parse, with no error surfaced anywhere. Only security updates were getting through, because those do not read the config file.
