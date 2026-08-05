@@ -1,12 +1,14 @@
 {
   "name": "thehashrocket-com",
-  "version": "0.2.4.0",
+  "version": "0.2.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "node node_modules/typescript/lib/tsc.js --noEmit",
+    "typecheck:fast": "node node_modules/typescript7/lib/tsc.js --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },
@@ -44,6 +46,7 @@
     "jsdom": "^30.0.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
+    "typescript7": "npm:typescript@^7.0.2",
     "vite": "^8.2.0",
     "vitest": "4.1.10"
   },

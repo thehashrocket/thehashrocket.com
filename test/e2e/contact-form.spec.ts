@@ -10,13 +10,47 @@ test("honeypot submission does not send real email", async ({ page }) => {
   await expect(page.getByText(/message sent/i)).not.toBeVisible();
 });
 
-test("contact form shows validation error for short name", async ({ page }) => {
+test("contact form blocks submission for a too-short name", async ({ page }) => {
+  // `minLength={2}` on the name input (ContactForm.tsx) means the browser's own
+  // constraint validation rejects a 1-character name before the form is ever
+  // submitted. The server's "Name must be at least 2 characters." (lib/actions.ts)
+  // is a second layer that only runs if a request gets through, so it is
+  // unreachable from a real browser.
+  //
+  // Assert the block causally, not by proxy. `validity.tooShort` is already true
+  // the moment the field is filled, so checking it after the click proves
+  // nothing about the click. These two events only fire (or fail to fire) as a
+  // direct result of attempting to submit:
+  //   - `invalid` on the name field => the browser actively rejected the submit
+  //   - no `submit` on the form     => the submission never started
   await page.goto("/contact");
+
+  await page.evaluate(() => {
+    const w = window as unknown as { __invalid: boolean; __submitted: boolean };
+    w.__invalid = false;
+    w.__submitted = false;
+    const form = document.querySelector("form");
+    const nameInput = document.querySelector('input[name="name"]');
+    if (!form || !nameInput) throw new Error("contact form not found");
+    form.addEventListener("submit", () => {
+      w.__submitted = true;
+    });
+    nameInput.addEventListener("invalid", () => {
+      w.__invalid = true;
+    });
+  });
+
   await page.getByLabel(/name/i).fill("A");
   await page.getByLabel(/email/i).fill("test@example.com");
   await page.getByLabel(/message/i).fill("This is a test message");
   await page.getByRole("button", { name: /send/i }).click();
-  await expect(page.getByText(/at least 2 characters/i)).toBeVisible();
+
+  const result = await page.evaluate(() => {
+    const w = window as unknown as { __invalid: boolean; __submitted: boolean };
+    return { invalid: w.__invalid, submitted: w.__submitted };
+  });
+  expect(result.invalid).toBe(true);
+  expect(result.submitted).toBe(false);
 });
 
 test("contact form happy path shows success", async ({ page }) => {

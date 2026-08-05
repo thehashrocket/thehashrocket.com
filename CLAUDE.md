@@ -42,6 +42,32 @@ reads a top-level `overrides` key, which this project does not have. Running `np
 resolves postcss to 8.4.31 and sharp to 0.34.5, both of which carry open advisories that
 `pnpm install` patches. An npm-installed tree is a vulnerable tree.
 
+## TypeScript — two compilers, never call `tsc` directly
+Type check with `pnpm run typecheck`. Never write a bare `tsc` in a script, a CI step,
+or a terminal command in this repo.
+
+Two compilers are installed on purpose:
+- `typescript` (6.x) is the project compiler. ESLint and `next build` both load its
+  JavaScript compiler API.
+- `typescript7` is an npm alias for `typescript@7`, the native Go port. Use it via
+  `pnpm run typecheck:fast` — same result, roughly 5x faster. This is a local
+  convenience only. It shells out to a prebuilt Go binary shipped as a platform
+  `optionalDependency` (`@typescript/typescript-<os>-<arch>`), so it hard-fails on
+  an unsupported platform or under `--no-optional`. Never wire it into CI or a git
+  hook; `pnpm run typecheck` is the portable gate.
+
+TypeScript 7 cannot be the project compiler yet. It ships no JS compiler API
+(`require("typescript")` resolves to `lib/version.cjs`) and no tsserver, so
+`@typescript-eslint/typescript-estree` crashes at module load reading
+`ts.ModuleKind.CommonJs` — `pnpm lint` dies with exit 2 before linting anything.
+No typescript-eslint release supports TS 7; latest and canary both peer on `<6.1.0`.
+Revisit when that changes.
+
+The trap: `typescript7` also declares a `tsc` bin and it **wins**
+`node_modules/.bin/tsc`. A bare `tsc` or `pnpm exec tsc` therefore runs 7.x, not 6 —
+silently, with no error. Both typecheck scripts invoke a compiler by explicit path
+for this reason, and `test/typescript-toolchain.test.ts` fails if that regresses.
+
 ## Testing
 Run `pnpm test` (vitest) for unit tests. Test files live in `test/`.
 Run `pnpm run test:e2e` (Playwright) for E2E tests. Specs live in `test/e2e/`.
