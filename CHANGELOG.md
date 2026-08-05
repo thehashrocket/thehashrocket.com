@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.2.4.0] - 2026-08-05
+
+### Security
+- All 35 open Dependabot alerts closed — 2 critical, 18 high, 12 moderate, 3 low. `pnpm audit` now reports no known vulnerabilities.
+- `next` upgraded 16.2.6 → 16.2.11 — closes 10 alerts: Middleware/Proxy bypass in App Router with Turbopack and a single locale (GHSA-mgqv-mfjc-4hpr), three SSRF classes (rewrites with attacker-controlled destination hostname, Server Actions on custom servers, internal Server Function endpoint disclosure), cache confusion on requests with bodies including invalid UTF-8 sequences, and DoS in both Server Actions and the SVG path of the Image Optimization API.
+- `vitest` upgraded 4.0.18 → 4.1.0 — closes a critical advisory where an exposed Vitest UI server allows arbitrary file read and execution.
+- `vite` pinned as a direct dev dependency at ^7.3.6 — closes a `server.fs.deny` bypass on Windows alternate paths and NTLMv2 hash disclosure via UNC path handling in launch-editor. A `pnpm.overrides` entry alone would not move it off 7.3.3.
+- Transitive dependencies with no direct upgrade path forced via `pnpm.overrides`: `@babel/core`, `@opentelemetry/core`, `brace-expansion` (both the 1.x and 5.x lines needed separate range selectors), `esbuild`, `fast-uri`, `js-yaml`, `postcss`, `sharp`, `uuid`, and `ws`.
+
+### Fixed
+- Dependabot version updates were silently disabled and had never run. `.github/dependabot.yml` declared `package-ecosystem: "pnpm"`, which is not a value GitHub recognizes — npm, yarn, and pnpm all use `"npm"`, and the package manager is inferred from the lockfile. An invalid value makes the whole file fail to parse, with no error surfaced anywhere. Only security updates were getting through, because those do not read the config file.
+- Security advisories no longer queue behind one another. Dependabot keeps a single open pull request per group, so PR #30 (vitest, opened 2026-06-12) blocked every advisory filed after it for two months. Security updates are now split into separate production and development groups, so a stuck dev-dependency PR cannot hold back a production patch.
+
+### Added
+- Continuous integration. The repository previously had no CI at all. Every pull request now runs `pnpm install --frozen-lockfile`, typecheck, the unit suite, and a production build, matching how Vercel builds.
+- Dependabot security patches are approved and squash-merged automatically once CI passes, so advisories stop waiting on a human. Scope is deliberately narrow: security groups only, patch and minor only. Major security bumps get a `needs-review` label and a comment instead of a merge.
+
+### For contributors
+- This project is pnpm-only, and `CLAUDE.md` now says so explicitly. Security pins for transitive dependencies live in `pnpm.overrides`, which npm ignores entirely — it only reads a top-level `overrides` key. Running `npm install` here resolves `postcss` to 8.4.31 and `sharp` to 0.34.5, both with open advisories. `conductor.json` and the Playwright web server command were still invoking npm and now use pnpm.
+- New `test/dependabot-config.test.ts` (15 tests) locks down both the Dependabot config and the CI workflow. Both root causes of this incident were silent failures that surfaced no error, so a test is the only thing that catches a recurrence. Every assertion is mutation-verified.
+- Auto-merge waits on the exact commit CI tested (`gh pr merge --match-head-commit`). Dependabot force-pushes rebases onto its own branches, so without it the verify job could pass on one commit while the squash landed another.
+- Every GitHub Action is pinned to a full commit SHA rather than a mutable tag, since the auto-merge job runs with `contents: write` and no human in the loop. Dependabot keeps the SHAs current.
+
 ## [0.2.3.0] - 2026-06-11
 
 ### Changed

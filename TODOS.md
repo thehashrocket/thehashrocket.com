@@ -29,7 +29,26 @@
 - **Effort:** S (CC: ~15 min) | **Priority:** P2
 - **Depends on:** `eslint-config-next` shipping with `eslint-plugin-react` ≥8 (which supports ESLint 10) — check on Next.js 16.x.y patch release notes
 - **Checked (2026-05-14):** Bumped to Next 16.2.6; `eslint-config-next@16.2.6` still pins `eslint-plugin-react@^7.37.0`. Still blocked. Re-check on the next minor (16.3.x) or major (17.x) bump.
+- **Checked (2026-08-05):** Bumped to Next 16.2.11; `eslint-config-next` still pinned at 16.2.3 and still on `eslint-plugin-react@7.37.5`. Still blocked.
+- **Now blocks CI (2026-08-05):** v0.2.4.0 added `.github/workflows/ci.yml` with `pnpm run lint` set to `continue-on-error: true` specifically because of these 12 errors. A red lint would permanently block Dependabot auto-merge. Clear the 12 errors, then remove `continue-on-error` from the lint step.
 - **Context:** PR4 (2026-05-12). Pre-existing lint errors need a separate cleanup PR before ESLint upgrade is worthwhile.
+
+---
+
+## CI & Supply Chain (2026-08-05)
+
+### [P2] Machine-enforce that the lockfile stays free of known-vulnerable versions
+- **What:** Add GitHub's `dependency-review-action` to `.github/workflows/ci.yml`.
+- **Why:** v0.2.4.0 closed 35 alerts, but nothing enforces that they stay closed. A future lockfile refresh could reintroduce a vulnerable transitive version and CI would pass. `dependency-review-action` fails only on vulnerabilities a PR *introduces*, so unlike a blanket `pnpm audit` it won't deadlock auto-merge on an unrelated pre-existing advisory.
+- **Effort:** S (CC: ~10 min) | **Priority:** P2
+- **Context:** Raised by Codex adversarial review during the v0.2.4.0 ship. Rated Medium: "'35 alerts closed' is not machine-enforced and can silently regress on the next lockfile refresh."
+
+### [P3] Run the Playwright suite in CI before auto-merging dependency bumps
+- **What:** Add browser install + the 6 e2e specs to the `verify` job.
+- **Why:** Auto-merge currently gates on typecheck, unit tests, and `next build`. A dependency bump that breaks only in a real browser (Server Actions, routing, image optimization) would merge undetected.
+- **Effort:** S (CC: ~10 min) | **Priority:** P3
+- **Risk:** E2E flake converts directly into security patches sitting unmerged, which is the failure this automation exists to prevent. Only worth adding if the suite proves stable.
+- **Context:** Explicitly deferred by Jason during the v0.2.4.0 ship — reliability of the auto-merge gate was judged more important than breadth of coverage. Revisit if a bump ever slips through.
 
 ### ~~[P3] Fix `package.json` name~~ ✓ COMPLETED
 - **Completed:** v0.2.1.0 (2026-05-12) — `"name"` changed from `"temp-scaffold"` to `"thehashrocket-com"`.
