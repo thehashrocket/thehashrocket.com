@@ -45,7 +45,10 @@ jobs:
       - run: pnpm run lint
         continue-on-error: true
 
-      - run: pnpm exec tsc --noEmit
+      # Explicitly the TypeScript 6 compiler. `typescript7` is installed
+      # alongside as an alias and wins the node_modules/.bin/tsc name, so a
+      # bare `tsc` here would silently switch compilers.
+      - run: pnpm run typecheck
 
       - run: pnpm run test
 
