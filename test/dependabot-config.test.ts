@@ -190,6 +190,35 @@ describe(".github/workflows/ci.yml", () => {
     expect(runSteps).not.toContain("--auto");
   });
 
+  it("pins every action to a full commit SHA, not a mutable tag", () => {
+    // This workflow ends in a job with contents: write that merges without a
+    // human. A tag can be retagged by whoever owns the action — that is how
+    // tj-actions/changed-files was compromised. Only a 40-hex SHA is immutable.
+    const allSteps = Object.entries(workflow.jobs).flatMap(([job, j]) =>
+      (j.steps ?? []).map((s) => [job, s] as const),
+    );
+    const uses = allSteps.filter(([, s]) => s.uses);
+    expect(uses.length).toBeGreaterThan(0);
+
+    for (const [job, step] of uses) {
+      const ref = step.uses!.split("@")[1] ?? "";
+      expect(
+        /^[0-9a-f]{40}$/.test(ref),
+        `${job}: "${step.uses}" is not pinned to a full commit SHA`,
+      ).toBe(true);
+    }
+  });
+
+  it("merges only the exact commit that verify tested", () => {
+    // Dependabot force-pushes rebases onto its branches. Without
+    // --match-head-commit, verify can pass on SHA A and the squash can land
+    // SHA B, merging code no job ever ran.
+    const mergeStep = autoMerge.steps?.find((s) =>
+      (s.run ?? "").includes("gh pr merge"),
+    );
+    expect(mergeStep!.run).toContain("--match-head-commit");
+  });
+
   it("only auto-merges patch and minor security updates", () => {
     const mergeStep = autoMerge.steps?.find((s) =>
       (s.run ?? "").includes("gh pr merge"),
