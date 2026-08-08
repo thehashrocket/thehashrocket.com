@@ -21,7 +21,7 @@
     "@upstash/redis": "^1.38.1",
     "@vercel/analytics": "^2.0.1",
     "motion": "^12.43.0",
-    "next": "16.2.12",
+    "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "resend": "^6.18.1",
