@@ -103,11 +103,13 @@ public/                 Static assets
 | Email | Resend | Transactional email for contact form |
 | Rate limiting | Upstash Redis | Serverless-compatible, fail-open |
 | Analytics | @vercel/analytics | Page-level tracking |
-| Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in `pnpm.overrides`, which npm ignores — see CLAUDE.md |
+| Runtime | Node 24 (Active LTS) | Pinned three places that must agree: `.nvmrc` (24.19.0) for local and CI, `engines.node` (`24.x`) for the Vercel build, and `@types/node` (`^24`) for the compiler. `test/typescript-toolchain.test.ts` fails if they drift — types ahead of the runtime make typecheck pass for code that throws in production |
+| Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in `pnpm.overrides`, which npm ignores — see CLAUDE.md. Only `postcss` and `sharp` remain pinned as of 0.2.7.0; the other nine went inert once upstream widened its own ranges |
 | Language | TypeScript 6 (+ 7 alongside) | `typescript` stays on 6 because typescript-eslint cannot load TypeScript 7. TS 7 is installed as the `typescript7` alias for `pnpm run typecheck:fast` (~5x faster, local only). Never invoke a bare `tsc` — the alias owns `node_modules/.bin/tsc`. See CLAUDE.md |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, and the Dependabot/CI/TypeScript-toolchain config — 166 tests |
-| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path) and scene-wiring sentinel assertions. All green as of 0.2.6.0. Not run in CI — see TODOS.md |
-| CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, lint (non-blocking), `pnpm run typecheck`, unit tests, production build on every PR |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 186 tests |
+| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path) and scene-wiring sentinel assertions. Runs on a dedicated port (3178, override with `E2E_PORT`) and always starts its own server — it will not adopt an unrelated process on 3000. All green as of 0.2.7.0. Not run in CI — see TODOS.md |
+| CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, `pnpm audit`, lint (non-blocking), `pnpm run typecheck`, unit tests, production build on every PR |
+| Supply chain | `pnpm audit` in CI | Advisory for humans, blocking for the Dependabot security PRs that auto-merge unattended. The blocking form is scoped to the exact set that merges without review and to the dependency class each can fix (`--prod` / `--dev`), with `--ignore-unfixable` so automation cannot deadlock |
 | Dependency updates | Dependabot | Daily. Security patches (patch/minor) auto-approve and squash-merge once CI passes; majors get a `needs-review` label |
 | Deploy | Vercel | Automatic from GitHub push to main |
 

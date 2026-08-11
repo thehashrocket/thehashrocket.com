@@ -23,6 +23,29 @@ updates:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
       include: "scope"
+
+    # Two majors are blocked on upstream, not on effort. Without these entries
+    # Dependabot re-opens both every day, and each one now fails CI against the
+    # guard tests in test/typescript-toolchain.test.ts. Scoped to major only —
+    # security patches and minor/patch upkeep on both packages still flow.
+    #
+    # Remove an entry when its revisit condition below is met.
+    ignore:
+      # eslint-plugin-react (transitive via eslint-config-next) still calls
+      # context.getFilename(), which ESLint 10 removed. `pnpm lint` dies with
+      # exit 2 before linting a file. 7.37.5 is the newest release and is not
+      # fixed. REVISIT WHEN: eslint-config-next resolves a plugin-react that
+      # supports ESLint 10.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+
+      # @types/node must track the deployed runtime major, which is pinned to
+      # 24.x by engines.node. Types ahead of the runtime make typecheck pass for
+      # code that throws in production. REVISIT WHEN: engines.node moves to 26.x
+      # (Node 26 reaches Active LTS in October 2026).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
     groups:
       # Security updates are split production/development so that one stuck
       # devDependency PR can't hold back a production security patch.
