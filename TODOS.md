@@ -51,11 +51,16 @@
 
 ## CI & Supply Chain (2026-08-05)
 
-### [P2] Machine-enforce that the lockfile stays free of known-vulnerable versions
-- **What:** Add GitHub's `dependency-review-action` to `.github/workflows/ci.yml`.
-- **Why:** v0.2.4.0 closed 35 alerts, but nothing enforces that they stay closed. A future lockfile refresh could reintroduce a vulnerable transitive version and CI would pass. `dependency-review-action` fails only on vulnerabilities a PR *introduces*, so unlike a blanket `pnpm audit` it won't deadlock auto-merge on an unrelated pre-existing advisory.
-- **Effort:** S (CC: ~10 min) | **Priority:** P2
-- **Context:** Raised by Codex adversarial review during the v0.2.4.0 ship. Rated Medium: "'35 alerts closed' is not machine-enforced and can silently regress on the next lockfile refresh."
+### ~~[P2] Machine-enforce that the lockfile stays free of known-vulnerable versions~~ ✓ COMPLETED
+- **Completed:** v0.2.7.0 (2026-08-10) — solved with a scoped `pnpm audit` gate rather than `dependency-review-action`. The concern this item raised against `pnpm audit` was that a blanket run would deadlock auto-merge on an unrelated pre-existing advisory. That is addressed directly: the audit runs advisory-only for humans, and the *blocking* form fires solely on the Dependabot security PRs that auto-merge unattended, scoped with `--prod` / `--dev` so a development advisory cannot hold back a production security patch, and with `--ignore-unfixable` so an advisory with no published resolution cannot deadlock anything. `test/typescript-toolchain.test.ts` asserts the gate's condition stays in sync with the merge step's.
+- **Note:** the coverage is not identical to `dependency-review-action`, which fails only on vulnerabilities a PR *introduces*. This gate fails on any fixable vulnerability in the audited class. Adding `dependency-review-action` as a complement is still reasonable; it is no longer load-bearing.
+
+### [P3] Cover `CaseStudyScroll`'s scroll-driven behavior
+- **What:** `components/ui/CaseStudyScroll.tsx` uses motion's `useScroll` + `useMotionValueEvent` and has no test. `Timeline.tsx` (the other motion consumer) is covered by `test/timeline.test.tsx`.
+- **Why:** It was the one uncovered path in the v0.2.7.0 coverage audit, and it rode through a motion major (12 → 13) unverified. Motion 13's only breaking change was unrelated, so nothing broke — but the next major has no such guarantee.
+- **Effort:** M (CC: ~20 min) | **Priority:** P3
+- **Risk:** Scroll-driven behavior unit-tests badly; a jsdom test that fakes scroll offsets would assert the mock, not the component. Better as an E2E that scrolls a real case study page and checks scene progress — which pairs with the item below.
+- **Context:** Surfaced by the coverage audit during the v0.2.7.0 ship. Coverage passed at 93% (target 80%) with this as the sole gap; not worth faking a passing unit test to close it.
 
 ### [P3] Run the Playwright suite in CI before auto-merging dependency bumps
 - **What:** Add browser install + the 6 e2e specs to the `verify` job.

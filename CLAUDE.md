@@ -30,7 +30,13 @@ Read docs/ARCHITECTURE.md for system architecture, component tree, data flow, an
 Read docs/DOMAIN.md for business context, project domains, and brand identity.
 
 ## Node.js
-This project uses nvm for Node version management. The required version is pinned in `.nvmrc` (currently 24.11). Always run `nvm use` before executing any Node/npm commands to ensure the correct version is active.
+This project uses nvm for Node version management. The required version is pinned in `.nvmrc` (currently 24.19.0). Always run `nvm use` before executing any Node/npm commands to ensure the correct version is active.
+
+Stay on the Node 24 line. It is Active LTS and the Vercel default runtime; Node 26 is
+current but does not reach LTS until October 2026. Keep `@types/node` on the matching
+major (`^24`) — Dependabot will offer a `@types/node` 26 major, and taking it means the
+compiler types APIs the deployed runtime does not have, so `pnpm run typecheck` passes
+for code that throws in production.
 
 ## Package manager — pnpm only, never npm
 `pnpm-lock.yaml` is the committed lockfile; `package-lock.json` and `yarn.lock` are gitignored.
@@ -41,6 +47,14 @@ This is not a style preference. Security pins for transitive dependencies live i
 reads a top-level `overrides` key, which this project does not have. Running `npm install`
 resolves postcss to 8.4.31 and sharp to 0.34.5, both of which carry open advisories that
 `pnpm install` patches. An npm-installed tree is a vulnerable tree.
+
+Those two are the only overrides left, and each one is load-bearing: `next` still depends
+on a vulnerable postcss, and the sharp that `next` pulls in is below the libvips advisory
+floor. Keep the block that small. An override is dead the moment the upstream package
+fixes its own range, and a dead override silently pins the tree to an old resolution.
+To re-audit: delete the `pnpm.overrides` block, run `pnpm install --lockfile-only`, run
+`pnpm audit`, and put back only what the audit actually flags — then `git checkout` the
+lockfile if you are not keeping the change.
 
 ## TypeScript — two compilers, never call `tsc` directly
 Type check with `pnpm run typecheck`. Never write a bare `tsc` in a script, a CI step,
@@ -67,6 +81,15 @@ The trap: `typescript7` also declares a `tsc` bin and it **wins**
 `node_modules/.bin/tsc`. A bare `tsc` or `pnpm exec tsc` therefore runs 7.x, not 6 —
 silently, with no error. Both typecheck scripts invoke a compiler by explicit path
 for this reason, and `test/typescript-toolchain.test.ts` fails if that regresses.
+
+## ESLint — pinned to 9.x, do not take the 10 major
+`eslint` must stay on `^9`. ESLint 10 removed `context.getFilename()`, and
+`eslint-plugin-react` — which `eslint-config-next` depends on transitively — still calls
+it. `pnpm lint` dies with exit 2 and `TypeError: contextOrFilename.getFilename is not a
+function` before linting a single file. 7.37.5 is the newest `eslint-plugin-react` and it
+is not fixed. Revisit when `eslint-config-next` ships a resolution that supports ESLint 10.
+
+`typescript-eslint` already peers on `^10.0.0`, so it is not the blocker — the plugin is.
 
 ## Testing
 Run `pnpm test` (vitest) for unit tests. Test files live in `test/`.
@@ -125,3 +148,13 @@ auto-sync across all worktrees, run `gbrain autopilot --install` once per
 machine — gbrain's daemon handles incremental refresh on a schedule.
 
 <!-- gstack-gbrain-search-guidance:end -->
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

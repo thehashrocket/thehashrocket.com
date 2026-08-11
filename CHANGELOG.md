@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.7.0] - 2026-08-10
+
+### Removed
+- Nine of the eleven `pnpm.overrides` entries are gone. Each was added to force a transitive dependency past a specific advisory, and upstream has since widened its own ranges to cover all nine — verified by deleting the block, re-resolving the lockfile, and auditing the result: `brace-expansion` (1.1.18 / 5.0.9), `esbuild` (0.28.1), `fast-uri` (3.1.5), `js-yaml` (4.3.1) and `ws` (8.21.2) all resolve at or above their old floors unaided, and `@babel/core`, `@opentelemetry/core`, and `uuid` are no longer in the tree at all. An override that pins to the version the resolver already picks protects nothing, and once upstream moves past it, it quietly holds the tree at a stale resolution instead.
+
+### Changed
+- `postcss` and `sharp` are the only overrides left, and both still carry weight: `next` depends on a postcss range that resolves to 8.4.31 (four open advisories) and pulls a sharp below the libvips floor of 0.35.0. The postcss floor moved to `^8.5.23` to match the newest advisory it closes rather than the oldest.
+- Node moves to 24.19.0, the current Active LTS. `engines.node` is now set to `24.x`, which makes this repository the source of truth for the deployed runtime instead of a dashboard setting nothing here can see.
+- `next` 16.2.12 → 16.3.0, `motion` 12.43.0 → 13.1.0, `@sentry/nextjs` 10.69.0 → 10.70.0, `resend` 6.18.1 → 6.19.0, `@react-three/drei` 10.7.7 → 10.7.8, `@next/third-parties` 16.2.12 → 16.3.0. Development: `vite` 8.2.0 → 8.2.1, `happy-dom` 20.11.1 → 20.11.2, `@testing-library/jest-dom` 7.0.0 → 7.0.1. Motion 13's only breaking change drops an optional `@emotion/is-prop-valid` dependency, which nothing here relied on.
+- `pnpm audit` now runs in CI on every pull request. It is advisory for people and blocking for the Dependabot security updates that merge unattended — an advisory nobody can fix should never redden unrelated work, but "read it on the pull request" means nothing on a pull request no human opens. The blocking form is scoped to the exact set that auto-merges, and to the dependency class each of those updates is able to fix, so a development advisory can never hold back a production security patch.
+- `eslint` stays on 9.x. ESLint 10 removed `context.getFilename()`, which `eslint-plugin-react` still calls through `eslint-config-next`, so linting dies before it reads a single file. The newest plugin release does not fix it. Dependabot no longer proposes either this major or `@types/node` 26, with the revisit condition recorded alongside each.
+
+### Fixed
+- `@types/node` returns to the Node 24 line. Release 0.2.5.0 set it there deliberately, so that code could not compile against APIs the deployed runtime does not have; an automated dependency update moved it back to 26 shortly afterward and the reasoning was lost. A test now asserts that `.nvmrc`, `engines.node`, and `@types/node` all name the same Node major, so the next attempt fails loudly instead of silently.
+- End-to-end tests no longer run against whatever happens to be listening on port 3000. Playwright was configured to adopt an existing server, so an unrelated process — Docker, a second checkout — would silently receive the entire suite and produce failures that pointed at innocent application code. The suite now starts its own server on a dedicated port every time.
+
+### Added
+- Twelve tests covering the configuration this release depends on: the two security pins and their advisory floors, the Node version agreement described above, the ESLint pin, the shape of the audit gate, and Playwright's server isolation. Each was verified by breaking the thing it guards and confirming the suite goes red.
+
 ## [0.2.6.0] - 2026-08-05
 
 ### Added
