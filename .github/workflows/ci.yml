@@ -18,6 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    permissions:
+      contents: read
+      pull-requests: read # dependabot/fetch-metadata reads the PR to classify it
+
     steps:
       # Actions are pinned to full commit SHAs, not tags. A tag is mutable —
       # whoever controls the action can retag it, and this workflow ends in a
@@ -38,6 +42,78 @@ jobs:
       # Matches the Vercel build. A dependency bump that drifts the lockfile
       # fails here instead of on a production deploy.
       - run: pnpm install --frozen-lockfile
+
+      # Classify Dependabot PRs so the audit gate below can tell a PR that will
+      # auto-merge unattended from one that waits for a human. Same action and
+      # SHA the merge job uses, so both decisions read the same source.
+      - name: Fetch Dependabot metadata
+        id: metadata
+        if: github.actor == 'dependabot[bot]'
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # The wide net, advisory for everyone. test/security-overrides.test.ts
+      # hard-fails if one of the two known pins regresses; this surfaces a NEW
+      # advisory anywhere in the tree of ~830 packages.
+      #
+      # Never a gate: an upstream advisory with no published fix would turn
+      # every unrelated PR red on something its author cannot fix, and gates
+      # that block work people can't do are the ones that get deleted.
+      - run: pnpm audit
+        continue-on-error: true
+
+      # The gates. These block, but only where "read it on the PR" is a lie.
+      #
+      # dependabot-auto-merge below squash-merges on `needs: verify` with no
+      # human in the loop, so for those PRs a non-blocking audit is not a weak
+      # control — it is no control. A security PR that leaves the tree
+      # vulnerable would merge itself. Red verify -> `needs: verify` unsatisfied
+      # -> no auto-merge -> the PR waits for a human. That is the whole gate.
+      #
+      # Two things keep it from becoming the blunt instrument that would undo
+      # the rest of this workflow's design:
+      #
+      #   --prod / --dev  scopes each gate to the dependency class its PR can
+      #                   actually fix. dependabot.yml splits security updates
+      #                   into production and development groups precisely so a
+      #                   stuck dev advisory cannot hold back a production
+      #                   security patch (PR #30 did exactly that for two
+      #                   months). An unqualified `pnpm audit` here would
+      #                   re-couple them and reintroduce that bug.
+      #
+      #   dependency-group  matches only the auto-merged security groups.
+      #                   Routine version-update PRs are not auto-merged, so
+      #                   they get the advisory step above and nothing more.
+      #
+      #   update-type     matches only patch/minor, mirroring the merge step's
+      #                   condition exactly. The invariant is "gate precisely
+      #                   the set that merges unattended" — nothing wider. A
+      #                   MAJOR security PR is not auto-merged; it gets the
+      #                   needs-review label and a comment from the job below.
+      #                   Gating it would redden verify, `needs: verify` would
+      #                   go unsatisfied, that job would never run, and the
+      #                   label and comment would never fire. The PR would sit
+      #                   red with no explanation of what a human should do.
+      #
+      # --ignore-unfixable keeps an advisory with no published resolution from
+      # deadlocking security automation on work nobody can do.
+      #
+      # Keep these two `if` conditions in sync with the merge step's condition
+      # below. test/typescript-toolchain.test.ts asserts they agree.
+      - name: Audit gate — production security PRs merge unattended
+        if: |
+          steps.metadata.outputs.dependency-group == 'security-production' &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        run: pnpm audit --prod --ignore-unfixable
+
+      - name: Audit gate — development security PRs merge unattended
+        if: |
+          steps.metadata.outputs.dependency-group == 'security-development' &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        run: pnpm audit --dev --ignore-unfixable
 
       # Non-blocking: main already has 12 react-hooks/react-compiler errors
       # predating this workflow. Flip to blocking once those are cleared —
