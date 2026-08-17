@@ -16,7 +16,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@next/third-parties": "^16.3.0",
+    "@next/third-parties": "^16.3.1",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "@sentry/nextjs": "^10.70.0",
@@ -24,12 +24,12 @@
     "@upstash/redis": "^1.38.1",
     "@vercel/analytics": "^2.0.1",
     "motion": "^13.1.0",
-    "next": "16.3.0",
+    "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "resend": "^6.19.0",
+    "resend": "^6.20.0",
     "three": "^0.185.1",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
