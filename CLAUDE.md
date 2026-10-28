@@ -32,11 +32,17 @@ Read docs/DOMAIN.md for business context, project domains, and brand identity.
 ## Node.js
 This project uses nvm for Node version management. The required version is pinned in `.nvmrc` (currently 24.19.0). Always run `nvm use` before executing any Node/npm commands to ensure the correct version is active.
 
-Stay on the Node 24 line. It is Active LTS and the Vercel default runtime; Node 26 is
-current but does not reach LTS until October 2026. Keep `@types/node` on the matching
-major (`^24`) — Dependabot will offer a `@types/node` 26 major, and taking it means the
-compiler types APIs the deployed runtime does not have, so `pnpm run typecheck` passes
-for code that throws in production.
+Stay on the Node 24 line. The gate for Node 26 is **Vercel, not Node's release calendar**:
+as of October 2026 Vercel builds and Functions offer only 24.x (default) and 22.x — Node 26
+is available in Vercel Sandbox only. Setting `engines.node` to 26 before Vercel ships it
+would fail the deploy or silently run on 24. Node 24 has security support until April 2028,
+so there is no urgency. Revisit when 26.x appears in the project's Node.js Version setting
+on Vercel (Settings → Build and Deployment), then move `.nvmrc`, `engines.node`, and
+`@types/node` together.
+
+Keep `@types/node` on the matching major (`^24`) — Dependabot will offer a `@types/node` 26
+major, and taking it means the compiler types APIs the deployed runtime does not have, so
+`pnpm run typecheck` passes for code that throws in production.
 
 ## Package manager — pnpm only, never npm
 `pnpm-lock.yaml` is the committed lockfile; `package-lock.json` and `yarn.lock` are gitignored.
