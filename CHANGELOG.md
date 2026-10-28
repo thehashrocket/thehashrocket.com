@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.4.0] - 2026-10-28
+
+### Changed
+- `@sentry/nextjs` 10.77.1 → 11.9.0, following the [v10 → v11 migration guide](https://docs.sentry.io/platforms/javascript/guides/nextjs/migration/v10-to-v11/):
+  - `withSentryConfig` already imported from `@sentry/nextjs/config` (moved in 0.3.1.0)
+  - Removed `sendDefaultPii: true` from all three `Sentry.init` calls. v11 replaces it with `dataCollection`; leaving that unset keeps the v10 `sendDefaultPii: true` behavior
+  - Removed `enableLogs: true`. v11 captures logs when the logger API or a logging integration is used; this site uses neither, so nothing is lost
+  - Accepted v11's span-streaming tracing default (`traceLifecycle: 'static'` would keep the v10 transaction model, but Sentry calls that temporary)
+  - `tunnelRoute: "/monitoring"` is already a fixed string and there is no middleware, so the v11 tunnel/middleware change doesn't apply
+- Verified in a production build: browser SDK initializes on 11.9.0 with BrowserTracing and Replay, client events route through `/monitoring`, and the server proxies them to Sentry ingest
+
+### Heads-up
+- Sentry 11 reports Vercel environments by their plain names (`production`, `preview`) instead of `vercel-production` / `vercel-preview`. Any Sentry alert or saved search filtering on the old names needs updating
+- `pnpm install` prints an unmet-peer warning for `webpack@^5.112.0` (found 5.106.1, auto-installed as a peer of Sentry's bundler plugin). Harmless: this project builds with Turbopack, so webpack never runs
+
 ## [0.3.3.0] - 2026-10-28
 
 ### Changed
