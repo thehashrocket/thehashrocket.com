@@ -75,6 +75,11 @@
 | Pharma WMS | #4ade80 (green) | Accent bar, 3D scene highlights |
 | Nonprofit Matching | #3b82f6 (blue) | Accent bar, node connections |
 | Grant Discovery | #f59e0b (amber) | Accent bar, matched particles |
+| Print Portal | #06b6d4 (cyan) | Production stations, moving jobs |
+| Storefront Consolidation | #fb923c (orange) | Nine stores converging into one core |
+| WordPress Modernization | #a78bfa (violet) | Layers rebuilding wireframe → solid |
+| Fleet Security Audit | #f87171 (red) | Server ring, sweeping scan beam |
+| Automation Rescue | #f472b6 (pink) | Workflow graph, edges repairing on scroll |
 
 ## Spacing
 - **Base unit:** 4px (Tailwind default scale)

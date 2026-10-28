@@ -7,14 +7,18 @@ import {
 
 describe("case-studies", () => {
   it("exports 4 case studies", () => {
-    expect(caseStudySlugs).toHaveLength(4);
+    expect(caseStudySlugs).toHaveLength(8);
   });
 
-  it("has pharma-wms, nonprofit-matching, grant-discovery, print-portal", () => {
+  it("has all expected slugs", () => {
     expect(caseStudySlugs).toContain("pharma-wms");
     expect(caseStudySlugs).toContain("nonprofit-matching");
     expect(caseStudySlugs).toContain("grant-discovery");
     expect(caseStudySlugs).toContain("print-portal");
+    expect(caseStudySlugs).toContain("storefront-consolidation");
+    expect(caseStudySlugs).toContain("wordpress-modernization");
+    expect(caseStudySlugs).toContain("fleet-security-audit");
+    expect(caseStudySlugs).toContain("automation-rescue");
   });
 
   it("each case study has required fields", () => {
@@ -40,7 +44,7 @@ describe("case-studies", () => {
 
   it("getCaseStudySummaries returns summaries without beats", () => {
     const summaries = getCaseStudySummaries();
-    expect(summaries).toHaveLength(4);
+    expect(summaries).toHaveLength(8);
     for (const summary of summaries) {
       expect(summary.slug).toBeTruthy();
       expect(summary.title).toBeTruthy();

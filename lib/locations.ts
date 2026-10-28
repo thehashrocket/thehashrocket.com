@@ -34,7 +34,7 @@ export const locations: Record<string, Location> = {
       "Senior full-stack engineer in Sacramento building complex systems for startups and enterprises. Custom software, AI pipelines, warehouse logistics, and more.",
     heroHeadline: "I build complex systems\nfor Sacramento businesses",
     heroSubheadline:
-      "14 years engineering high-stakes software. State government modernization, health tech compliance, AI research pipelines — if Sacramento's tech ecosystem needs it built right, I've done it.",
+      "20+ years engineering high-stakes software. State government modernization, health tech compliance, AI research pipelines — if Sacramento's tech ecosystem needs it built right, I've done it.",
     industries: [
       "Government & Public Sector",
       "Healthcare & Life Sciences",
@@ -71,6 +71,7 @@ export const locations: Record<string, Location> = {
       { slug: "pharma-wms", connector: "The kind of operational complexity Sacramento's health tech corridor produces." },
       { slug: "nonprofit-matching", connector: "Connecting communities through intelligent systems — the kind of civic tech Sacramento needs." },
       { slug: "grant-discovery", connector: "AI-powered systems like UC Davis research programs need." },
+      { slug: "wordpress-modernization", connector: "Bringing Sacramento nonprofits' aging websites up to date without starting over." },
     ],
     localExperience: "I spent several years working in Sacramento, building systems for pharmaceutical distribution and nonprofit technology — the kind of compliance-heavy, data-intensive software this region's industries demand.",
   },
@@ -83,7 +84,7 @@ export const locations: Record<string, Location> = {
       "Senior full-stack engineer serving Stockton and San Joaquin County. Custom software for logistics, agriculture, and supply chain operations.",
     heroHeadline: "Senior engineering for\nSan Joaquin County businesses",
     heroSubheadline:
-      "14 years building the systems that power logistics, distribution, and community services. From warehouse management to nonprofit matching — complex problems solved directly, 1:1.",
+      "20+ years building the systems that power logistics, distribution, and community services. From warehouse management to nonprofit matching — complex problems solved directly, 1:1.",
     industries: [
       "Logistics & Supply Chain",
       "Agriculture & Food Processing",
@@ -120,6 +121,7 @@ export const locations: Record<string, Location> = {
       { slug: "pharma-wms", connector: "Logistics systems built for the distribution networks running through San Joaquin County." },
       { slug: "nonprofit-matching", connector: "Connecting Central Valley nonprofits with the communities that need them." },
       { slug: "grant-discovery", connector: "Data-driven tools for the research and agricultural institutions across the region." },
+      { slug: "wordpress-modernization", connector: "Modernizing the websites San Joaquin County nonprofits and small businesses depend on." },
     ],
     localExperience: "Working in the Central Valley, I've built logistics and distribution software for the kind of supply chain operations that run through San Joaquin County every day.",
   },
@@ -132,7 +134,7 @@ export const locations: Record<string, Location> = {
       "Senior full-stack engineer serving Modesto and Stanislaus County. Custom software for food processing, agriculture, healthcare, and manufacturing.",
     heroHeadline: "Complex software systems\nfor Stanislaus County",
     heroSubheadline:
-      "14 years of engineering for industries that can't afford failure. Agricultural supply chains, pharmaceutical distribution, data-driven nonprofits — built by a senior engineer, not an agency.",
+      "20+ years of engineering for industries that can't afford failure. Agricultural supply chains, pharmaceutical distribution, data-driven nonprofits — built by a senior engineer, not an agency.",
     industries: [
       "Food Processing & Safety",
       "Agriculture & Dairy",
@@ -169,6 +171,7 @@ export const locations: Record<string, Location> = {
       { slug: "pharma-wms", connector: "Supply chain software for the agricultural and pharma distribution hubs in Stanislaus County." },
       { slug: "nonprofit-matching", connector: "Matching technology for the nonprofit organizations serving rural Central Valley." },
       { slug: "grant-discovery", connector: "AI-powered discovery tools for research institutions and agricultural programs." },
+      { slug: "wordpress-modernization", connector: "Keeping Stanislaus County organizations' websites secure, current, and maintainable." },
     ],
     localExperience: "Based in the Central Valley, I spent over a year in Modesto building WMS, ERP, and CRM systems for local businesses undergoing digital transformation.",
   },
