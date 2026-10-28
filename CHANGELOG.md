@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2.0] - 2026-10-28
+
+### Changed
+- `react` / `react-dom` 19.2.9 → 19.3.1, with `@types/react` / `@types/react-dom` moved to `^19.3` to match the runtime. `@react-three/fiber` 9.8 peers on `>=19 <19.4`, so this is the newest React the 3D stack supports
+- `three` 0.185 → 0.186.1 (and `@types/three` 0.186). All nine scenes verified rendering with no console errors
+- `vitest` 4.1.12 → 5.0.5. No test changes needed: no nested `vi.mock` calls, no `toThrow('')`, no benchmark or browser-mode usage; `clearMocks` now defaults to true and the suite already resets its own captures
+- CLAUDE.md: Node 26 note now names the real gate — Vercel builds/Functions only offer 24.x and 22.x — and says when to revisit
+
 ## [0.3.1.0] - 2026-10-28
 
 ### Security
