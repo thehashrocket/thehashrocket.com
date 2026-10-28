@@ -139,3 +139,59 @@ describe("SceneRouter routing", () => {
     expect(() => render(<SceneRouter />)).not.toThrow();
   });
 });
+
+describe("ConsolidationScene", () => {
+  it("returns null when inactive", async () => {
+    const { ConsolidationScene } = await import("@/components/scenes/ConsolidationScene");
+    const { container } = render(<ConsolidationScene progress={0} active={false} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders without crash when active at progress 0 and 1", async () => {
+    const { ConsolidationScene } = await import("@/components/scenes/ConsolidationScene");
+    expect(() => render(<ConsolidationScene progress={0} active={true} />)).not.toThrow();
+    expect(() => render(<ConsolidationScene progress={1} active={true} />)).not.toThrow();
+  });
+});
+
+describe("ModernizeScene", () => {
+  it("returns null when inactive", async () => {
+    const { ModernizeScene } = await import("@/components/scenes/ModernizeScene");
+    const { container } = render(<ModernizeScene progress={0} active={false} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders without crash when active at progress 0 and 1", async () => {
+    const { ModernizeScene } = await import("@/components/scenes/ModernizeScene");
+    expect(() => render(<ModernizeScene progress={0} active={true} />)).not.toThrow();
+    expect(() => render(<ModernizeScene progress={1} active={true} />)).not.toThrow();
+  });
+});
+
+describe("AuditScene", () => {
+  it("returns null when inactive", async () => {
+    const { AuditScene } = await import("@/components/scenes/AuditScene");
+    const { container } = render(<AuditScene progress={0} active={false} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders without crash when active at progress 0 and 1", async () => {
+    const { AuditScene } = await import("@/components/scenes/AuditScene");
+    expect(() => render(<AuditScene progress={0} active={true} />)).not.toThrow();
+    expect(() => render(<AuditScene progress={1} active={true} />)).not.toThrow();
+  });
+});
+
+describe("AutomationScene", () => {
+  it("returns null when inactive", async () => {
+    const { AutomationScene } = await import("@/components/scenes/AutomationScene");
+    const { container } = render(<AutomationScene progress={0} active={false} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("renders without crash when active at progress 0 and 1", async () => {
+    const { AutomationScene } = await import("@/components/scenes/AutomationScene");
+    expect(() => render(<AutomationScene progress={0} active={true} />)).not.toThrow();
+    expect(() => render(<AutomationScene progress={1} active={true} />)).not.toThrow();
+  });
+});

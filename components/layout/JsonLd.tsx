@@ -6,7 +6,7 @@ export function PersonJsonLd() {
     url: "https://thehashrocket.com",
     jobTitle: "Senior Full-Stack Engineer",
     description:
-      "Senior full-stack engineer with 14 years specializing in complex systems, warehouse logistics, and AI pipelines.",
+      "Senior full-stack engineer with 20+ years specializing in custom web applications, legacy platform modernization, and the infrastructure that keeps them running.",
     sameAs: [
       "https://www.linkedin.com/in/jasonshultz/",
       "https://github.com/thehashrocket",

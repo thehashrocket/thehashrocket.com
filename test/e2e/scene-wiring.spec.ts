@@ -15,7 +15,15 @@ test("navigating away from case study resets sentinel", async ({ page }) => {
 });
 
 test("each case study slug wires its own scene", async ({ page }) => {
-  const slugs = ["nonprofit-matching", "grant-discovery", "print-portal"];
+  const slugs = [
+    "nonprofit-matching",
+    "grant-discovery",
+    "print-portal",
+    "storefront-consolidation",
+    "wordpress-modernization",
+    "fleet-security-audit",
+    "automation-rescue",
+  ];
   for (const slug of slugs) {
     await page.goto(`/work/${slug}`);
     await expect(page.getByTestId("current-scene")).toHaveAttribute("data-scene", slug);

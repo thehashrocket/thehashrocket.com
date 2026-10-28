@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0.0] - 2026-10-27
+
+### Added
+- Four new case studies from recent work, anonymized (no client or employer names): Storefront Consolidation, WordPress Modernization, Fleet Security Audit, Automation Rescue
+- Homepage "Lab" section (`components/ui/LabSection.tsx`, data in `lib/side-projects.ts`): Money, Skywave, VolunteerReady, Automation Lab (Skywave and VolunteerReady link out)
+- `ConsolidationScene`, `ModernizeScene`, `AuditScene`, `AutomationScene` 3D scenes wired into `SceneRouter`, with unit tests and E2E scene-wiring coverage
+- WordPress Modernization connectors on all three geo landing pages
+
+### Changed
+- Experience claim updated from "14 years" to "20+ years" across metadata, JSON-LD, hero, about, footer, work, OG images, and geo pages (timeline still starts at 2012)
+- Hero, homepage CTA, About bio, and Work intro repositioned toward web application consulting, legacy rescues, and infrastructure
+- Case study order now leads with recent web platform work (Pharma WMS, Print Portal, then the new studies)
+- Current timeline entry and skills/domains reflect current stack (TypeScript, tRPC, Prisma, PHP/WordPress, n8n, nginx/Apache) and engineering-lead role
+- DOMAIN.md: seven-project list plus a confidentiality rule; DESIGN.md: accent tints for all case studies
+
 ## [0.2.2.1] - 2026-05-14
 
 ### Security

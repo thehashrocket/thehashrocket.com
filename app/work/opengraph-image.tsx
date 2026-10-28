@@ -11,7 +11,7 @@ export default async function Image() {
     <OgImageTemplate
       label="Case Studies"
       title="Work"
-      subtitle="14 years building complex systems."
+      subtitle="20+ years building complex systems."
     />,
     {
       ...size,
