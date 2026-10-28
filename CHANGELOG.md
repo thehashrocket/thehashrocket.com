@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.1.0] - 2026-10-28
+
+### Security
+- `next` 16.3.1 → 16.4.3 (and `eslint-config-next`, `@next/third-parties`) — picks up the October 14, 2026 out-of-band release: GHSA-673q-mjm6-r5xr (critical, unauthenticated RCE in `use cache` functions returning typed arrays), GHSA-2464-fhr4-w9xw / CVE-2026-96889 (critical, RCE in Image Optimization via SVG through upstream `sharp`), GHSA-p3m5-59mp-jv5r (high, Server Actions DoS — this site's contact form uses a Server Action), plus the earlier 16.3.x advisories that were never picked up
+- `sharp` override floor raised `^0.35.0` → `^0.35.5`, the version the Next.js advisory names as the fixed `sharp`
+- `react` / `react-dom` 19.2.8 → 19.2.9; `@sentry/nextjs` 10.70.0 → 10.77.1 (critical advisory fixed in ≥10.75.2, staying on the 10.x major)
+- Dev: `vitest` 4.1.10 → 4.1.12, `vite` → 8.3.5, `happy-dom` 20 → 21.0.4 (high advisory fixed in 21.0.4)
+- Remaining transitive advisories (`undici`, `fast-uri`, `brace-expansion`, `js-yaml`, `nanoid`, `source-map-js`, `fflate`, `zod`) cleared by re-resolving within existing ranges — no new overrides
+- `pnpm audit`: 68 vulnerabilities (6 critical, 26 high) → 0
+
+### Changed
+- Other in-range patch/minor bumps from `pnpm update`. `@types/react` / `@types/react-dom` held on `~19.2` to match the React 19.2 runtime
+- `withSentryConfig` now imported from `@sentry/nextjs/config` (the root export is deprecated and removed in Sentry 11)
+
+### Not taken (deliberately)
+- Majors with no security driver: `@sentry/nextjs` 11, `motion` 14, `vitest` 5, `react` 19.3. Toolchain pins per CLAUDE.md: `typescript` 6, `eslint` 9, `@types/node` 24
+
 ## [0.3.0.0] - 2026-10-27
 
 ### Added
