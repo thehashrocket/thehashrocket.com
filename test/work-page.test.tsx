@@ -92,27 +92,15 @@ describe("WorkPage — image vs. typographic placeholder", () => {
     }
   });
 
-  it("nonprofit-matching (array index 1) image has priority=true", () => {
+  it("only images in the first two cards get priority (LCP)", () => {
     render(React.createElement(WorkPage));
-    // Case study order: pharma-wms(0), nonprofit-matching(1), grant-discovery(2), print-portal(3)
-    // Only slugs with images are rendered as <Image>; pharma-wms uses placeholder.
-    // imageProps[0] = nonprofit-matching (i=1 < 2 → priority=true)
-    const nonprofitProps = imageProps.find((p) => (p.src as string).includes("nonprofit-matching"));
-    expect(nonprofitProps?.priority).toBe(true);
-  });
-
-  it("grant-discovery (array index 2) image does NOT have priority", () => {
-    render(React.createElement(WorkPage));
-    // i=2, so priority={2 < 2} = false
-    const grantProps = imageProps.find((p) => (p.src as string).includes("grant-discovery"));
-    expect(grantProps?.priority).toBe(false);
-  });
-
-  it("print-portal (array index 3) image does NOT have priority", () => {
-    render(React.createElement(WorkPage));
-    // i=3, so priority={3 < 2} = false
-    const printProps = imageProps.find((p) => (p.src as string).includes("print-portal"));
-    expect(printProps?.priority).toBe(false);
+    // priority={i < 2}: the first two cards sit above the fold. Derive the
+    // expectation from case study order so reordering studies can't break this.
+    const order = getCaseStudySummaries().map((s) => s.slug);
+    for (const slug of IMAGE_SLUGS) {
+      const props = imageProps.find((p) => (p.src as string).includes(slug));
+      expect(props?.priority, slug).toBe(order.indexOf(slug) < 2);
+    }
   });
 
   it("each non-image card renders the study title", () => {
