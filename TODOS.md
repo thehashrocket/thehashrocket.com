@@ -29,7 +29,46 @@
 - **Effort:** S (CC: ~15 min) | **Priority:** P2
 - **Depends on:** `eslint-config-next` shipping with `eslint-plugin-react` ≥8 (which supports ESLint 10) — check on Next.js 16.x.y patch release notes
 - **Checked (2026-05-14):** Bumped to Next 16.2.6; `eslint-config-next@16.2.6` still pins `eslint-plugin-react@^7.37.0`. Still blocked. Re-check on the next minor (16.3.x) or major (17.x) bump.
+- **Checked (2026-08-05):** Bumped to Next 16.2.11; `eslint-config-next` still pinned at 16.2.3 and still on `eslint-plugin-react@7.37.5`. Still blocked.
+- **Now blocks CI (2026-08-05):** v0.2.4.0 added `.github/workflows/ci.yml` with `pnpm run lint` set to `continue-on-error: true` specifically because of these 12 errors. A red lint would permanently block Dependabot auto-merge. Clear the 12 errors, then remove `continue-on-error` from the lint step.
 - **Context:** PR4 (2026-05-12). Pre-existing lint errors need a separate cleanup PR before ESLint upgrade is worthwhile.
+
+### [P2] Finish the TypeScript 7 migration once typescript-eslint supports it
+- **What:** Drop the `typescript7` alias, move `typescript` to ^7, add `experimental.useTypeScriptCli: true` to `next.config.ts`, and point both typecheck scripts back at a bare `tsc`. Then delete the alias-specific assertions in `test/typescript-toolchain.test.ts` and the CI comment that explains them.
+- **Why:** TypeScript 7 type checks this project in 0.52s against 2.72s — roughly 5x. v0.2.6.0 took the speedup as a local-only script because the full swap breaks linting.
+- **Blocked on:** typescript-eslint supporting TypeScript 7. `@typescript-eslint/typescript-estree` reads `ts.ModuleKind.CommonJs` at module load; under TS 7 that object does not exist, so `pnpm lint` exits 2 before linting anything. **Checked 2026-08-05:** latest stable (8.66.0) and canary (8.66.1-alpha.4) both peer on `>=4.8.4 <6.1.0`. Re-check for a release that widens that range.
+- **Already verified (2026-08-05), do not re-derive:** the full swap builds and typechecks clean — `next build` passes with `experimental.useTypeScriptCli` and correctly fails on a planted type error. Linting is the only blocker. Scoping a TS 6 copy to the ESLint chain via `pnpm.packageExtensions` does **not** work; pnpm builds the variant but peer resolution still hands that subtree the root compiler.
+- **Also unverified:** whether Next's `plugins: [{ "name": "next" }]` TS plugin loads under TypeScript 7's LSP. Irrelevant while editors stay on 6; check before the full flip.
+- **Effort:** S (CC: ~15 min once unblocked) | **Priority:** P2
+
+### [P3] Decide whether a too-short name deserves a visible inline error
+- **What:** The contact form's name field relies on the browser's native constraint-validation tooltip. `lib/actions.ts:38` has a matching server-side message that a real browser can never reach, because `minLength={2}` blocks submission first.
+- **Why:** The native tooltip is unstyled, disappears on the next interaction, and is not announced consistently by screen readers. The other fields have the same shape. Either surface the message in the UI or accept the native behavior deliberately.
+- **Context:** Surfaced in v0.2.5.0 as "a product decision about whether validation should be enforced client-side, server-side, or both." v0.2.6.0 fixed the *test* to assert what the product actually does; the design question itself is still open.
+- **Effort:** S (CC: ~20 min) | **Priority:** P3
+
+---
+
+## CI & Supply Chain (2026-08-05)
+
+### ~~[P2] Machine-enforce that the lockfile stays free of known-vulnerable versions~~ ✓ COMPLETED
+- **Completed:** v0.2.7.0 (2026-08-10) — solved with a scoped `pnpm audit` gate rather than `dependency-review-action`. The concern this item raised against `pnpm audit` was that a blanket run would deadlock auto-merge on an unrelated pre-existing advisory. That is addressed directly: the audit runs advisory-only for humans, and the *blocking* form fires solely on the Dependabot security PRs that auto-merge unattended, scoped with `--prod` / `--dev` so a development advisory cannot hold back a production security patch, and with `--ignore-unfixable` so an advisory with no published resolution cannot deadlock anything. `test/typescript-toolchain.test.ts` asserts the gate's condition stays in sync with the merge step's.
+- **Note:** the coverage is not identical to `dependency-review-action`, which fails only on vulnerabilities a PR *introduces*. This gate fails on any fixable vulnerability in the audited class. Adding `dependency-review-action` as a complement is still reasonable; it is no longer load-bearing.
+
+### [P3] Cover `CaseStudyScroll`'s scroll-driven behavior
+- **What:** `components/ui/CaseStudyScroll.tsx` uses motion's `useScroll` + `useMotionValueEvent` and has no test. `Timeline.tsx` (the other motion consumer) is covered by `test/timeline.test.tsx`.
+- **Why:** It was the one uncovered path in the v0.2.7.0 coverage audit, and it rode through a motion major (12 → 13) unverified. Motion 13's only breaking change was unrelated, so nothing broke — but the next major has no such guarantee.
+- **Effort:** M (CC: ~20 min) | **Priority:** P3
+- **Risk:** Scroll-driven behavior unit-tests badly; a jsdom test that fakes scroll offsets would assert the mock, not the component. Better as an E2E that scrolls a real case study page and checks scene progress — which pairs with the item below.
+- **Context:** Surfaced by the coverage audit during the v0.2.7.0 ship. Coverage passed at 93% (target 80%) with this as the sole gap; not worth faking a passing unit test to close it.
+
+### [P3] Run the Playwright suite in CI before auto-merging dependency bumps
+- **What:** Add browser install + the 6 e2e specs to the `verify` job.
+- **Why:** Auto-merge currently gates on typecheck, unit tests, and `next build`. A dependency bump that breaks only in a real browser (Server Actions, routing, image optimization) would merge undetected.
+- **Effort:** S (CC: ~10 min) | **Priority:** P3
+- **Risk:** E2E flake converts directly into security patches sitting unmerged, which is the failure this automation exists to prevent. Only worth adding if the suite proves stable.
+- **Context:** Explicitly deferred by Jason during the v0.2.4.0 ship — reliability of the auto-merge gate was judged more important than breadth of coverage. Revisit if a bump ever slips through.
+- **Unblocked (2026-08-05, v0.2.6.0):** the stated precondition is now met. The contact form spec that had never been able to pass is fixed, so the suite is 6/6 green and has been for repeated local runs. The remaining cost is browser install time in CI, not flake.
 
 ### ~~[P3] Fix `package.json` name~~ ✓ COMPLETED
 - **Completed:** v0.2.1.0 (2026-05-12) — `"name"` changed from `"temp-scaffold"` to `"thehashrocket-com"`.
@@ -42,7 +81,7 @@
 ## Deferred from Design Review (2026-04-21) — 3D Scenes
 
 ### Canvas Dimming for Case Study Pages
-- **What:** Implement the DESIGN.md spec that says the canvas "dims/freezes when text-heavy sections are in viewport." Currently no scene (PharmaScene or the three new scenes) implements this.
+- **What:** Implement the docs/DESIGN.md spec that says the canvas "dims/freezes when text-heavy sections are in viewport." Currently no scene (PharmaScene or the three new scenes) implements this.
 - **Why:** Bright 3D geometry competing with case study body text hurts readability. Dimming during reading sections lets the text breathe and honors the design system intent.
 - **Effort:** S (CC: ~20 min) | **Priority:** P2
 - **Depends on:** All 3 new scenes shipped (this PR)
@@ -58,6 +97,45 @@
 - **Depends on:** @react-three/fiber releasing a version that uses THREE.Timer internally
 - **Risk:** None currently. Only becomes a problem on a future three.js upgrade.
 - **Context:** Spotted in Sentry breadcrumbs during WebGL crash investigation. The fix is upstream in R3F, not in our code. Check R3F changelog on next dependency update.
+
+## Deferred from Design Review (2026-06-11)
+
+### [Medium] Geo/locations pages lean on uniform bordered card lists
+- **What:** `components/ui/geo/ServicesSection.tsx`, `components/ui/geo/CaseStudiesSection.tsx`, and `app/locations/page.tsx` use stacked bordered-card lists for marketing composition.
+- **Why:** docs/DESIGN.md direction is editorial/asymmetric, cards only when the card IS the interaction. Uniform card lists read as template, not craft. [codex finding]
+- **Effort:** M (CC: ~30 min) | **Priority:** P2 — needs a layout direction decision, not just CSS.
+
+### [Medium] Mobile "hero only" 3D scene policy unenforced
+- **What:** docs/DESIGN.md Responsive Tiers say mobile renders the hero scene only, but `SceneRouter` mounts case-study scenes on mobile too.
+- **Why:** Mobile GPU/battery cost and spec drift. [codex finding]
+- **Effort:** S (CC: ~20 min) | **Priority:** P2 — pairs well with the existing "Canvas Dimming" TODO above.
+
+### [Medium] First-screen brand signal is soft
+- **What:** Homepage first viewport identifies the person only via the small nav wordmark; the headline carries positioning but not identity.
+- **Why:** Failed cross-model litmus "brand unmistakable in first screen." Brand/content decision (e.g., name/role lockup in hero eyebrow).
+- **Effort:** S | **Priority:** P2
+
+### [Medium] Pharma WMS has no screenshot asset
+- **What:** `public/images/work/pharma-wms.png` doesn't exist; /work now shows an intentional typographic placeholder (FINDING-003, 2026-06-11).
+- **Why:** A real product visual converts better than a placeholder. Content asset, can't be generated truthfully.
+- **Effort:** content task | **Priority:** P2
+
+### [Low] Print Portal cyan accent (#06b6d4) undocumented
+- **What:** `lib/case-studies.ts` uses cyan for print-portal; docs/DESIGN.md case-study tints table only lists green/blue/amber.
+- **Why:** Either document the cyan in docs/DESIGN.md or change the accent. Spec/docs drift.
+- **Effort:** XS | **Priority:** P3
+
+### [Low] Mobile nav lacks full modal semantics
+- **What:** Escape-to-close + scroll lock shipped (FINDING-005); focus trap and background inerting still missing in `components/layout/MobileNav.tsx`.
+- **Effort:** S | **Priority:** P3
+
+### [Low] No mobile viewport E2E coverage
+- **What:** `playwright.config.ts` runs Desktop Chrome only; mobile nav, hero fit, and small-screen layout are untested.
+- **Effort:** S | **Priority:** P3
+
+### [Polish] Heading scale / button padding drift
+- **What:** Homepage H2 is 60px (scale says 48/64); button paddings vary py-2 / py-2.5 / py-3 across Nav, page CTAs, and geo CTASection.
+- **Effort:** S token sweep | **Priority:** P3
 
 ## Geo Landing Pages
 

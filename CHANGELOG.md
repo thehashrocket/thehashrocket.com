@@ -15,6 +15,98 @@
 - Current timeline entry and skills/domains reflect current stack (TypeScript, tRPC, Prisma, PHP/WordPress, n8n, nginx/Apache) and engineering-lead role
 - DOMAIN.md: seven-project list plus a confidentiality rule; DESIGN.md: accent tints for all case studies
 
+## [0.2.7.0] - 2026-08-10
+
+### Removed
+- Nine of the eleven `pnpm.overrides` entries are gone. Each was added to force a transitive dependency past a specific advisory, and upstream has since widened its own ranges to cover all nine — verified by deleting the block, re-resolving the lockfile, and auditing the result: `brace-expansion` (1.1.18 / 5.0.9), `esbuild` (0.28.1), `fast-uri` (3.1.5), `js-yaml` (4.3.1) and `ws` (8.21.2) all resolve at or above their old floors unaided, and `@babel/core`, `@opentelemetry/core`, and `uuid` are no longer in the tree at all. An override that pins to the version the resolver already picks protects nothing, and once upstream moves past it, it quietly holds the tree at a stale resolution instead.
+
+### Changed
+- `postcss` and `sharp` are the only overrides left, and both still carry weight: `next` depends on a postcss range that resolves to 8.4.31 (four open advisories) and pulls a sharp below the libvips floor of 0.35.0. The postcss floor moved to `^8.5.23` to match the newest advisory it closes rather than the oldest.
+- Node moves to 24.19.0, the current Active LTS. `engines.node` is now set to `24.x`, which makes this repository the source of truth for the deployed runtime instead of a dashboard setting nothing here can see.
+- `next` 16.2.12 → 16.3.0, `motion` 12.43.0 → 13.1.0, `@sentry/nextjs` 10.69.0 → 10.70.0, `resend` 6.18.1 → 6.19.0, `@react-three/drei` 10.7.7 → 10.7.8, `@next/third-parties` 16.2.12 → 16.3.0. Development: `vite` 8.2.0 → 8.2.1, `happy-dom` 20.11.1 → 20.11.2, `@testing-library/jest-dom` 7.0.0 → 7.0.1. Motion 13's only breaking change drops an optional `@emotion/is-prop-valid` dependency, which nothing here relied on.
+- `pnpm audit` now runs in CI on every pull request. It is advisory for people and blocking for the Dependabot security updates that merge unattended — an advisory nobody can fix should never redden unrelated work, but "read it on the pull request" means nothing on a pull request no human opens. The blocking form is scoped to the exact set that auto-merges, and to the dependency class each of those updates is able to fix, so a development advisory can never hold back a production security patch.
+- `eslint` stays on 9.x. ESLint 10 removed `context.getFilename()`, which `eslint-plugin-react` still calls through `eslint-config-next`, so linting dies before it reads a single file. The newest plugin release does not fix it. Dependabot no longer proposes either this major or `@types/node` 26, with the revisit condition recorded alongside each.
+
+### Fixed
+- `@types/node` returns to the Node 24 line. Release 0.2.5.0 set it there deliberately, so that code could not compile against APIs the deployed runtime does not have; an automated dependency update moved it back to 26 shortly afterward and the reasoning was lost. A test now asserts that `.nvmrc`, `engines.node`, and `@types/node` all name the same Node major, so the next attempt fails loudly instead of silently.
+- End-to-end tests no longer run against whatever happens to be listening on port 3000. Playwright was configured to adopt an existing server, so an unrelated process — Docker, a second checkout — would silently receive the entire suite and produce failures that pointed at innocent application code. The suite now starts its own server on a dedicated port every time.
+
+### Added
+- Twelve tests covering the configuration this release depends on: the two security pins and their advisory floors, the Node version agreement described above, the ESLint pin, the shape of the audit gate, and Playwright's server isolation. Each was verified by breaking the thing it guards and confirming the suite goes red.
+
+## [0.2.6.0] - 2026-08-05
+
+### Added
+- `pnpm run typecheck:fast` type checks the project with TypeScript 7, the native Go port — 0.52s against 2.72s for the same clean run, roughly 5x. TypeScript 7 is installed alongside the existing compiler as `typescript7`, an npm alias, so both are available at once.
+- `pnpm run typecheck` runs the TypeScript 6 compiler and is the portable gate CI uses. It replaces the bare `tsc` invocation that CI called before.
+
+### Changed
+- `typescript` deliberately stays on 6.x. TypeScript 7 ships no JavaScript compiler API — `require("typescript")` resolves to a version stub — and no tsserver, so `@typescript-eslint/typescript-estree` crashes at module load reading `ts.ModuleKind.CommonJs` and `pnpm lint` exits 2 before linting a single file. No typescript-eslint release supports TypeScript 7 yet; the current stable and canary both cap their peer range below 6.1. Scoping a TypeScript 6 copy to just the ESLint chain via `pnpm.packageExtensions` does not work either — peer resolution still hands that subtree the root compiler. Next.js 16.2.12 does support TypeScript 7, but only behind `experimental.useTypeScriptCli`, which is not enough on its own while linting is dead.
+- CI type checks with `pnpm run typecheck` instead of `pnpm exec tsc --noEmit`. Installing a second compiler under an alias also installs its `tsc` bin, and the alias wins `node_modules/.bin/tsc` — so a bare `tsc` anywhere in this repo silently runs 7.x rather than 6.x, with no error. Both scripts invoke a compiler by explicit path for that reason, and `test/typescript-toolchain.test.ts` fails loudly if a bare `tsc` is ever reintroduced or either version drifts.
+
+### Fixed
+- The failing contact form E2E test from 0.2.5.0 now passes. It asserted the server-side "Name must be at least 2 characters." message, which a real browser can never reach: `minLength={2}` on the name input means native constraint validation blocks submission and the server action never runs. The test now asserts the behavior that actually occurs — that the browser fires `invalid` on the name field and the form's `submit` event never fires — both tied causally to the click. Product behavior is unchanged; only the assertion was wrong. Whether a short name should also surface a visible inline message, rather than relying on the browser's native tooltip, is still an open design question.
+- `package.json` and the `VERSION` file agree again. 0.2.5.0 moved `VERSION` to 0.2.5.0 but left `package.json` at 0.2.4.0, so the two release markers had been out of step since that merge. Nothing reads either value at runtime, so no behavior changed.
+
+## [0.2.5.0] - 2026-08-05
+
+### Changed
+- All seven open Dependabot pull requests resolved in one consolidated upgrade. CI had verified each of them individually against `main`, but no job ever built the combination they would produce once merged in sequence — so the set was installed, typechecked, unit-tested, built, and run through Playwright together before landing.
+- Production dependencies: `next` 16.2.11 → 16.2.12, `react` / `react-dom` 19.2.4 → 19.2.8, `@sentry/nextjs` 10.49.0 → 10.69.0, `three` 0.183.2 → 0.185.1, `motion` 12.38.0 → 12.43.0, `resend` 6.12.2 → 6.18.1, `@react-three/fiber` 9.6.0 → 9.7.0, `@upstash/redis` 1.37.0 → 1.38.1, `@next/third-parties` 16.2.4 → 16.2.12, `zustand` 5.0.12 → 5.0.14.
+- Development dependencies: `vite` 7.3.6 → 8.2.0, `jsdom` 26.1.0 → 30.0.1, `@testing-library/jest-dom` 6.9.1 → 7.0.0, `@playwright/test` 1.59.1 → 1.62.1, `tailwindcss` / `@tailwindcss/postcss` 4.2.4 → 4.3.3, `eslint-config-next` 16.2.3 → 16.2.12, `vitest` 4.1.0 → 4.1.10, `happy-dom` 20.9.0 → 20.11.1.
+- `@types/node` taken to ^24.13.3 rather than the ^26.1.2 Dependabot proposed. The runtime is pinned to 24.11 by `.nvmrc`, which is what both CI and Vercel build against; typing against Node 26 would let code compile against APIs that do not exist at runtime. The type major is kept in step with the runtime major deliberately.
+- `@types/three` bumped 0.183.1 → 0.185.4 alongside `three` itself. Dependabot moved the runtime package but not its types, which drift together — the two were left one minor apart on `main`.
+- `@testing-library/dom` added as an explicit dev dependency. `@testing-library/jest-dom` 7.0.0 promotes it to a required peer, and relying on it arriving transitively through `@testing-library/react` leaves resolution to chance.
+
+### Fixed
+- `vitest.config.ts` renamed to `vitest.config.mts`. Vite 8 warns that ESM syntax in a file loaded as CommonJS is unsupported by `configLoader: 'native'`, which becomes the default in a future major. The explicit ESM extension resolves it now rather than at the next breaking upgrade.
+- `/test-results` and `/playwright-report` added to `.gitignore`. Playwright writes both on every local run and neither was ignored, so failure artifacts showed up as untracked files.
+
+### For contributors
+- PR #30 (vitest 4.0.18 → 4.1.0) was closed rather than merged. `main` reached 4.1.0 in 0.2.4.0, so the pull request proposed a version already shipped; it had been conflicting since.
+- `test/e2e/contact-form.spec.ts` has one failing test, and it is not a regression from these upgrades. "contact form shows validation error for short name" asserts the server-side message from `lib/actions.ts`, but the name input carries `minLength={2}`, so the browser's native constraint validation blocks submission and the server action never runs. The `minLength` attribute has been present since the initial commit (#1) while the test arrived later in #22 — it has never been able to pass. E2E does not run in CI, which is why it went unnoticed. Left failing rather than papered over, since the fix is a product decision about whether validation should be enforced client-side, server-side, or both.
+- The `pnpm lint` step remains non-blocking. The same 12 pre-existing `react-hooks` / react-compiler errors on `main` are still present and unchanged by this upgrade.
+
+## [0.2.4.0] - 2026-08-05
+
+### Security
+- All 36 open Dependabot alerts closed — 2 critical, 20 high, 12 moderate, 2 low, across 12 packages. `pnpm audit` now reports no known vulnerabilities.
+- `next` upgraded 16.2.6 → 16.2.11 — closes 10 alerts: Middleware/Proxy bypass in App Router with Turbopack and a single locale (GHSA-mgqv-mfjc-4hpr), three SSRF classes (rewrites with attacker-controlled destination hostname, Server Actions on custom servers, internal Server Function endpoint disclosure), cache confusion on requests with bodies including invalid UTF-8 sequences, and DoS in both Server Actions and the SVG path of the Image Optimization API.
+- `vitest` upgraded 4.0.18 → 4.1.0 — closes a critical advisory where an exposed Vitest UI server allows arbitrary file read and execution.
+- `vite` pinned as a direct dev dependency at ^7.3.6 — closes a `server.fs.deny` bypass on Windows alternate paths and NTLMv2 hash disclosure via UNC path handling in launch-editor. A `pnpm.overrides` entry alone would not move it off 7.3.3.
+- Transitive dependencies with no direct upgrade path forced via `pnpm.overrides`: `@babel/core`, `@opentelemetry/core`, `brace-expansion` (both the 1.x and 5.x lines needed separate range selectors), `esbuild`, `fast-uri`, `js-yaml`, `postcss`, `sharp`, `uuid`, and `ws`. The `ws` advisories were found by `pnpm audit` and had no Dependabot alert filed yet.
+
+### Fixed
+- Dependabot version updates were silently disabled and had never run. `.github/dependabot.yml` declared `package-ecosystem: "pnpm"`, which is not a value GitHub recognizes — npm, yarn, and pnpm all use `"npm"`, and the package manager is inferred from the lockfile. An invalid value makes the whole file fail to parse, with no error surfaced anywhere. Only security updates were getting through, because those do not read the config file.
+- Security advisories no longer queue behind one another. Dependabot keeps a single open pull request per group, so PR #30 (vitest, opened 2026-06-12) blocked every advisory filed after it for two months. Security updates are now split into separate production and development groups, so a stuck dev-dependency PR cannot hold back a production patch.
+
+### Added
+- Continuous integration. The repository previously had no CI at all. Every pull request now runs `pnpm install --frozen-lockfile`, typecheck, the unit suite, and a production build, matching how Vercel builds.
+- Dependabot security patches are approved and squash-merged automatically once CI passes, so advisories stop waiting on a human. Scope is deliberately narrow: security groups only, patch and minor only. Major security bumps get a `needs-review` label and a comment instead of a merge.
+
+### For contributors
+- This project is pnpm-only, and `CLAUDE.md` now says so explicitly. Security pins for transitive dependencies live in `pnpm.overrides`, which npm ignores entirely — it only reads a top-level `overrides` key. Running `npm install` here resolves `postcss` to 8.4.31 and `sharp` to 0.34.5, both with open advisories. `conductor.json` and the Playwright web server command were still invoking npm and now use pnpm.
+- New `test/dependabot-config.test.ts` (15 tests) locks down both the Dependabot config and the CI workflow. Both root causes of this incident were silent failures that surfaced no error, so a test is the only thing that catches a recurrence. Every assertion is mutation-verified.
+- Auto-merge waits on the exact commit CI tested (`gh pr merge --match-head-commit`). Dependabot force-pushes rebases onto its own branches, so without it the verify job could pass on one commit while the squash landed another.
+- Every GitHub Action is pinned to a full commit SHA rather than a mutable tag, since the auto-merge job runs with `contents: write` and no human in the loop. Dependabot keeps the SHAs current.
+
+## [0.2.3.0] - 2026-06-11
+
+### Changed
+- Desktop nav links and the "Let's Talk" CTA now have a 44 px minimum touch target — taps land correctly without mis-firing adjacent links
+- First image on the /work case study list is preloaded, improving Largest Contentful Paint on that page
+- Placeholder typography card shown for case studies that don't yet have a screenshot asset
+
+### Fixed
+- `--text-muted` color token corrected to #808080 (was #737373, which failed WCAG AA contrast on the dark background)
+- Contact form success and error messages are now announced to screen readers (`role="status"` / `role="alert"`)
+- Mobile nav overlay now closes on Escape and prevents background page scroll while open; scroll state is restored correctly when the overlay closes
+- Copy ellipsis changed from three periods to the proper `…` character throughout
+
+### For contributors
+- Timeout reference in contact form is now properly cancelled on component unmount (prevents state updates on unmounted components)
+- Honeypot E2E test updated: confirms no success message appears when the honeypot field is filled (HTML5 validation correctly prevents the form from submitting)
+
 ## [0.2.2.1] - 2026-05-14
 
 ### Security

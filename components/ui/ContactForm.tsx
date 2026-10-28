@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitContact } from "@/lib/actions";
+import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
 import { Button } from "./Button";
 
 const initialState = { success: false, error: null };
@@ -21,19 +22,26 @@ export function ContactForm({ source }: { source?: string }) {
     }
   }, [state.success]);
 
-  // Client-side 10s timeout
   useEffect(() => {
     if (isPending) {
       setTimedOut(false);
       timeoutRef.current = setTimeout(() => {
         setTimedOut(true);
-      }, 10000);
+        timeoutRef.current = null;
+      }, CONTACT_FORM_TIMEOUT_MS);
     } else {
       setTimedOut(false);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [isPending]);
 
   return (
@@ -93,30 +101,39 @@ export function ContactForm({ source }: { source?: string }) {
           minLength={10}
           rows={5}
           className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
-          placeholder="Tell me about your project..."
+          placeholder="Tell me about your project…"
         />
       </div>
 
       {timedOut && isPending && (
-        <div className="rounded-[var(--radius-sm)] border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]">
-          Still sending... this is taking longer than expected.
+        <div
+          role="status"
+          className="rounded-[var(--radius-sm)] border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]"
+        >
+          Still sending… this is taking longer than expected.
         </div>
       )}
 
       {state.error && (
-        <div className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]">
+        <div
+          role="alert"
+          className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]"
+        >
           {state.error}
         </div>
       )}
 
       {state.success && (
-        <div className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]">
+        <div
+          role="status"
+          className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]"
+        >
           Message sent! I&apos;ll get back to you within 24 hours.
         </div>
       )}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Sending..." : "Send message"}
+        {isPending ? "Sending…" : "Send message"}
       </Button>
     </form>
   );

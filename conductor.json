@@ -1,7 +1,7 @@
 {
     "scripts": {
-        "setup": ". \"$NVM_DIR/nvm.sh\" 2>/dev/null; nvm use 2>/dev/null; cp $CONDUCTOR_ROOT_PATH/.env.local .env.local && npm install",
-        "run": ". \"$NVM_DIR/nvm.sh\" 2>/dev/null; nvm use 2>/dev/null; npm run dev",
+        "setup": ". \"$NVM_DIR/nvm.sh\" 2>/dev/null; nvm use 2>/dev/null; cp $CONDUCTOR_ROOT_PATH/.env.local .env.local && pnpm install --frozen-lockfile",
+        "run": ". \"$NVM_DIR/nvm.sh\" 2>/dev/null; nvm use 2>/dev/null; pnpm run dev",
         "archive": ""
     }
 }
