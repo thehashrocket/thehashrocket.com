@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.3.0] - 2026-10-28
+
+### Changed
+- `motion` 13.5.1 → 14.7.1. Motion's upgrade guide lists no breaking changes for React in v14 (internal API deprecations only). The site uses `useScroll` + `useMotionValueEvent` (case-study scroll → scene progress) and `motion.li` + `useInView` (About timeline); both verified in a production build: scroll drives the scene morph end to end, and timeline entries fade from opacity 0 to 1 on scroll
+
 ## [0.3.2.0] - 2026-10-28
 
 ### Changed
