@@ -7,7 +7,7 @@ import { getCaseStudySummaries } from "@/lib/case-studies";
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Case studies from 14 years building complex, high-stakes software — pharma logistics, EdTech, nonprofit platforms, and manufacturing systems.",
+    "Case studies from 20+ years building complex, high-stakes software — web applications, legacy modernization, infrastructure, pharma logistics, nonprofit platforms, and print production systems.",
   openGraph: {
     url: "https://thehashrocket.com/work",
   },
@@ -26,9 +26,10 @@ export default function WorkPage() {
           Work
         </h1>
         <p className="mb-16 max-w-2xl text-xl text-[var(--text-secondary)]">
-          Over 14 years I&apos;ve built systems across pharma logistics, EdTech,
-          nonprofit technology, and manufacturing. These case studies represent
-          the kind of complex, high-stakes problems I solve.
+          Over 20 years I&apos;ve built systems across pharma logistics, EdTech,
+          nonprofit technology, e-commerce, and print production, and kept the
+          infrastructure under them running. Client names stay private; the
+          problems and the work are real.
         </p>
 
         {/* Full-width previews, alternating sides per docs/DESIGN.md */}

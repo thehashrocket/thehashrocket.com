@@ -11,17 +11,21 @@ export interface CareerEntry {
 
 export const careerEntries: CareerEntry[] = [
   {
-    description: "ERP/CRM systems for printing and manufacturing",
-    role: "Senior Software Engineer",
+    description: "Web platforms, infrastructure, and ERP/CRM for printing and manufacturing",
+    role: "Engineering Lead & Senior Software Engineer",
     startYear: 2021,
     endYear: null,
     location: "Remote",
     highlights: [
+      "Lead infrastructure and engineering for a fleet of cloud servers and 125+ production sites while staying hands-on in the code",
+      "Ran a fleet-wide security audit and remediation program, from scripted discovery to a prioritized, estimated workplan",
+      "Consolidating nine legacy e-commerce storefronts into a single multi-tenant Next.js platform",
+      "Modernized aging WordPress sites onto PHP 8, Git-based deploys, and managed hosting",
       "Built a CRM system for a commercial printing company, improving sales workflow efficiency by 19%",
       "Developed ERP modules for inventory management and production scheduling",
       "Migrated legacy systems to modern Rails and React stack",
     ],
-    technologies: ["Ruby on Rails", "React", "Next.js", "Prisma", "PostgreSQL"],
+    technologies: ["Next.js", "TypeScript", "tRPC", "Prisma", "PostgreSQL", "Ruby on Rails", "AWS", "WordPress", "n8n"],
   },
   {
     description: "Digital transformation consulting",
@@ -88,10 +92,10 @@ export const careerEntries: CareerEntry[] = [
 ];
 
 export const skills = {
-  languages: ["Ruby", "JavaScript", "TypeScript", "Python", "HTML5", "CSS3", "SQL"],
-  frameworks: ["Ruby on Rails", "Next.js", "React", "Vue.js", "Angular", "Node.js", "GraphQL"],
+  languages: ["TypeScript", "Ruby", "JavaScript", "Python", "PHP", "SQL", "HTML5", "CSS3"],
+  frameworks: ["Next.js", "React", "tRPC", "Prisma", "Ruby on Rails", "Node.js", "WordPress", "GraphQL", "Vue.js", "Angular"],
   databases: ["PostgreSQL", "MySQL", "ElasticSearch", "MongoDB", "Redis"],
-  infrastructure: ["AWS (EC2, S3, RDS, VPC)", "Docker", "Heroku", "CI/CD"],
+  infrastructure: ["AWS (EC2, S3, RDS, SES, VPC)", "Docker", "nginx", "Apache", "Managed WordPress hosting", "n8n", "CI/CD"],
 };
 
 export const domains = [
@@ -100,6 +104,8 @@ export const domains = [
   "Nonprofit & Civic Tech",
   "Manufacturing",
   "Digital Transformation",
+  "E-commerce",
+  "Security & Infrastructure",
   "Healthcare",
   "AI & Data",
 ];

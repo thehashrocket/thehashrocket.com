@@ -7,6 +7,10 @@ import { PharmaScene } from "./PharmaScene";
 import { NonprofitScene } from "./NonprofitScene";
 import { GrantScene } from "./GrantScene";
 import { PrintPortalScene } from "./PrintPortalScene";
+import { ConsolidationScene } from "./ConsolidationScene";
+import { ModernizeScene } from "./ModernizeScene";
+import { AuditScene } from "./AuditScene";
+import { AutomationScene } from "./AutomationScene";
 
 export function SceneRouter() {
   const currentScene = useSceneStore((s) => s.currentScene);
@@ -46,6 +50,30 @@ export function SceneRouter() {
         progress={scrollProgress}
         active={currentScene === "print-portal"}
         accent={caseStudies["print-portal"].accent}
+        onMorphComplete={morphCallback}
+      />
+      <ConsolidationScene
+        progress={scrollProgress}
+        active={currentScene === "storefront-consolidation"}
+        accent={caseStudies["storefront-consolidation"].accent}
+        onMorphComplete={morphCallback}
+      />
+      <ModernizeScene
+        progress={scrollProgress}
+        active={currentScene === "wordpress-modernization"}
+        accent={caseStudies["wordpress-modernization"].accent}
+        onMorphComplete={morphCallback}
+      />
+      <AuditScene
+        progress={scrollProgress}
+        active={currentScene === "fleet-security-audit"}
+        accent={caseStudies["fleet-security-audit"].accent}
+        onMorphComplete={morphCallback}
+      />
+      <AutomationScene
+        progress={scrollProgress}
+        active={currentScene === "automation-rescue"}
+        accent={caseStudies["automation-rescue"].accent}
         onMorphComplete={morphCallback}
       />
     </>

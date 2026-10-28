@@ -5,7 +5,7 @@ import { careerEntries, skills, domains } from "@/lib/experience";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "14 years of full-stack engineering. From startups to enterprises, I build systems that work.",
+    "20+ years of full-stack engineering. From startups to enterprises, I build systems that work.",
   openGraph: {
     url: "https://thehashrocket.com/about",
   },
@@ -22,23 +22,25 @@ export default function AboutPage() {
 
         <div className="space-y-6 text-lg leading-relaxed text-[var(--text-secondary)]">
           <p>
-            I&apos;m a senior full-stack engineer with over 14 years of
-            experience building complex software systems. I&apos;ve worked
-            across EdTech, pharmaceutical logistics, nonprofit technology, and
-            manufacturing — the kind of domains where software failures have
-            real consequences.
+            I&apos;m a senior full-stack engineer with over 20 years of
+            experience building web applications and the systems behind them.
+            I&apos;ve worked across pharmaceutical logistics, nonprofit
+            technology, EdTech, e-commerce, and print production, the kind of
+            domains where software failures have real consequences.
           </p>
           <p>
-            My career spans the full stack: from database architecture and API
-            design to interactive frontends and 3D visualization. I&apos;ve
-            built warehouse management systems handling $200M+ in distribution,
-            donor matching platforms, AI-powered grant discovery tools, and ERP
-            systems for companies undergoing digital transformation.
+            These days I split my time between leading infrastructure and
+            engineering for a fleet of production sites and writing the code
+            myself. I&apos;ve built warehouse management systems handling
+            $200M+ in distribution and multi-tenant platforms on Next.js and
+            Postgres. I&apos;ve also run the security audits, legacy
+            migrations, and late-night incident calls that keep everything
+            else alive.
           </p>
           <p>
-            When I consult, I bring the perspective of someone who has seen
-            systems succeed and fail at scale. I help teams make architectural
-            decisions that they won&apos;t regret in two years.
+            When you hire me, the person who designs your system is the same
+            person who knows what happens when it breaks. I help teams make
+            architectural decisions they won&apos;t regret in two years.
           </p>
         </div>
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
 import { Tag } from "@/components/ui/Tag";
+import { LabSection } from "@/components/ui/LabSection";
 import { getCaseStudySummaries } from "@/lib/case-studies";
 import { skills, domains } from "@/lib/experience";
 
@@ -28,9 +29,9 @@ export default function Home() {
             that work.
           </h1>
           <p className="mt-6 max-w-xl text-xl leading-relaxed text-[var(--text-secondary)]">
-            14 years of engineering complex, high-stakes software.
-            From warehouse logistics to AI pipelines — if it needs to be
-            reliable, I&apos;ve built it.
+            20+ years building the web applications businesses run on.
+            Custom platforms, legacy rescues, and the infrastructure underneath.
+            If it needs to be reliable, I&apos;ve built it.
           </p>
           <div className="mt-10 flex gap-4">
             <Link
@@ -81,6 +82,8 @@ export default function Home() {
         </div>
       </section>
 
+      <LabSection />
+
       {/* Stack & Domains */}
       <section className="px-6 py-16">
         <div className="mx-auto max-w-[1280px]">
@@ -105,8 +108,9 @@ export default function Home() {
             Have a complex problem?
           </h2>
           <p className="mb-10 max-w-xl text-lg text-[var(--text-secondary)]">
-            I help teams architect and build systems that need to actually work
-            at scale. Let&apos;s talk about what you&apos;re building.
+            A new web application, a legacy platform held together with tape,
+            or infrastructure nobody wants to touch. I&apos;ve been handed all
+            three. Let&apos;s talk about what you&apos;re building.
           </p>
           <Link
             href="/contact"

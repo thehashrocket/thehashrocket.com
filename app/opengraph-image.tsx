@@ -11,7 +11,7 @@ export default async function Image() {
     <OgImageTemplate
       label="Senior Full-Stack Engineer"
       title="I build systems that work."
-      subtitle="14 years of engineering complex, high-stakes software."
+      subtitle="20+ years of engineering complex, high-stakes software."
     />,
     {
       ...size,
