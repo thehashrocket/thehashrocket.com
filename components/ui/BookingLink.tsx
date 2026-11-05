@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getBookingUrl, getContactHref } from "@/lib/site";
+import { BookingAnchor } from "./BookingAnchor";
 
 export const primaryButton =
   "inline-flex min-h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--accent)] px-6 py-2.5 font-display text-sm font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]";
@@ -20,13 +21,8 @@ export function BookingLink({ source }: { source?: string }) {
   }
 
   return (
-    <a
-      href={bookingUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={primaryButton}
-    >
+    <BookingAnchor href={bookingUrl} source={source} className={primaryButton}>
       Book a 20-minute call
-    </a>
+    </BookingAnchor>
   );
 }
