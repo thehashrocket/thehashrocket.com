@@ -1,3 +1,5 @@
+import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
+
 export function PersonJsonLd() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -6,10 +8,10 @@ export function PersonJsonLd() {
     url: "https://thehashrocket.com",
     jobTitle: "Senior Full-Stack Engineer",
     description:
-      "Senior full-stack engineer with 20+ years specializing in custom web applications, legacy platform modernization, and the infrastructure that keeps them running.",
+      "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
     sameAs: [
-      "https://www.linkedin.com/in/jasonshultz/",
-      "https://github.com/thehashrocket",
+      LINKEDIN_URL,
+      GITHUB_URL,
     ],
   };
 

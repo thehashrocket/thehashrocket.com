@@ -1,4 +1,21 @@
 import Link from "next/link";
+import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
+
+const internalLinks = [
+  { href: "/work", label: "Work" },
+  { href: "/about", label: "About" },
+  { href: "/lab", label: "Lab" },
+  { href: "/locations", label: "Locations" },
+  { href: "/contact", label: "Contact" },
+];
+
+const externalLinks = [
+  { href: LINKEDIN_URL, label: "LinkedIn" },
+  { href: GITHUB_URL, label: "GitHub" },
+];
+
+const linkClass =
+  "inline-flex min-h-11 items-center text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]";
 
 export function Footer() {
   return (
@@ -17,31 +34,26 @@ export function Footer() {
         </div>
 
         <nav aria-label="Footer navigation">
-          <ul className="flex gap-6">
-            <li>
-              <Link
-                href="/work"
-                className="text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-              >
-                Work
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/about"
-                className="text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-              >
-                About
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contact"
-                className="text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-              >
-                Contact
-              </Link>
-            </li>
+          <ul className="flex flex-wrap gap-x-6 gap-y-1">
+            {internalLinks.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className={linkClass}>
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+            {externalLinks.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkClass}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
 

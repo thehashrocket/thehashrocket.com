@@ -12,9 +12,10 @@ interface AtlasCardProps {
   subtitle: string;
   accent: string;
   tags: string[];
+  status?: string;
 }
 
-export function AtlasCard({ slug, title, subtitle, accent, tags }: AtlasCardProps) {
+export function AtlasCard({ slug, title, subtitle, accent, tags, status }: AtlasCardProps) {
   const router = useRouter();
   const { morphRunning, startMorph } = useSceneStore();
   const morphTarget = useRef<string | null>(null);
@@ -53,6 +54,7 @@ export function AtlasCard({ slug, title, subtitle, accent, tags }: AtlasCardProp
       </h3>
       <p className="mt-2 text-[var(--text-secondary)]">{subtitle}</p>
       <div className="mt-4 flex flex-wrap gap-2">
+        {status === "In progress" && <Tag>In progress</Tag>}
         {tags.map((tag) => (
           <Tag key={tag}>{tag}</Tag>
         ))}

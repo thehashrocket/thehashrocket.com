@@ -3,7 +3,6 @@ import { MobileNav } from "./MobileNav";
 
 const links = [
   { href: "/work", label: "Work" },
-  { href: "/locations", label: "Locations" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];

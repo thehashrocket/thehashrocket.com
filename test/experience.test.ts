@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { careerEntries, skills, domains } from "../lib/experience";
+import { careerEntries, coreStack, domains } from "../lib/experience";
 import { locationSlugs } from "../lib/locations";
 
 describe("experience", () => {
@@ -41,11 +41,9 @@ describe("experience", () => {
     }
   });
 
-  it("skills object has all 4 categories with non-empty arrays", () => {
-    expect(skills.languages.length).toBeGreaterThan(0);
-    expect(skills.frameworks.length).toBeGreaterThan(0);
-    expect(skills.databases.length).toBeGreaterThan(0);
-    expect(skills.infrastructure.length).toBeGreaterThan(0);
+  it("core stack stays short enough to read as a choice", () => {
+    expect(coreStack.length).toBeGreaterThan(0);
+    expect(coreStack.length).toBeLessThanOrEqual(10);
   });
 
   it("domains array is non-empty", () => {

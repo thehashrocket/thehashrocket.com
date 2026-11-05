@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { ClosingCta } from "@/components/ui/ClosingCta";
 import { Timeline } from "@/components/ui/Timeline";
-import { careerEntries, skills, domains } from "@/lib/experience";
+import { careerEntries, coreStack, domains } from "@/lib/experience";
+import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "20+ years of full-stack engineering. From startups to enterprises, I build systems that work.",
+    "20+ years building, rescuing, and running the software businesses depend on. The person who designs your system is the person who gets the call when it breaks.",
   openGraph: {
     url: "https://thehashrocket.com/about",
   },
@@ -15,6 +19,16 @@ export default function AboutPage() {
   return (
     <div className="px-6 pt-32 pb-24">
       <div className="mx-auto max-w-[720px]">
+        <div className="relative mb-10 aspect-[4/5] w-48 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)]">
+          <Image
+            src="/images/jason-shultz.jpg"
+            alt="Jason Shultz"
+            fill
+            priority
+            sizes="192px"
+            className="object-cover"
+          />
+        </div>
         <p className="mb-2 font-mono text-sm text-[var(--accent)]">About</p>
         <h1 className="mb-8 font-display text-5xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-6xl">
           Jason Shultz
@@ -50,7 +64,7 @@ export default function AboutPage() {
               Core Stack
             </h2>
             <ul className="space-y-2 font-mono text-sm text-[var(--text-secondary)]">
-              {[...skills.languages, ...skills.frameworks].map((skill) => (
+              {coreStack.map((skill) => (
                 <li key={skill}>{skill}</li>
               ))}
             </ul>
@@ -70,18 +84,18 @@ export default function AboutPage() {
         {/* Social Links */}
         <div className="mt-12 flex gap-6">
           <a
-            href="https://www.linkedin.com/in/jasonshultz/"
+            href={LINKEDIN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+            className="inline-flex min-h-11 items-center font-mono text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
           >
             LinkedIn →
           </a>
           <a
-            href="https://github.com/thehashrocket"
+            href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+            className="inline-flex min-h-11 items-center font-mono text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
           >
             GitHub →
           </a>
@@ -94,6 +108,22 @@ export default function AboutPage() {
             Where I&apos;ve been
           </h2>
           <Timeline entries={careerEntries} />
+        </div>
+
+        {/* Lab teaser */}
+        <div className="mt-16">
+          <p className="mb-2 font-mono text-sm text-[var(--accent)]">Outside work</p>
+          <p className="text-lg leading-relaxed text-[var(--text-secondary)]">
+            I still build things nobody asked for: side projects, tools I use
+            every day, and whatever I&apos;m curious about this month.{" "}
+            <Link href="/lab" className="text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]">
+              See the Lab →
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-24 border-t border-[var(--border)] pt-16">
+          <ClosingCta source="about" />
         </div>
       </div>
     </div>

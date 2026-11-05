@@ -67,16 +67,13 @@ export const careerEntries: CareerEntry[] = [
     technologies: ["Ruby on Rails", "Vue.js", "PostgreSQL", "ElasticSearch"],
   },
   {
-    description: "Nonprofit and civic technology",
+    description: "Web application development",
     role: "Software Engineer",
     startYear: 2014,
     endYear: 2016,
     location: "Sacramento, CA",
     locationSlug: "sacramento",
-    highlights: [
-      "Built donor matching and community engagement platforms",
-      "Developed data pipelines for grant discovery and impact reporting",
-    ],
+    highlights: [],
     technologies: ["Ruby on Rails", "Angular", "PostgreSQL", "GraphQL"],
   },
   {
@@ -87,25 +84,36 @@ export const careerEntries: CareerEntry[] = [
     location: "Sacramento, CA",
     locationSlug: "sacramento",
     technologies: ["Ruby on Rails", "JavaScript", "MySQL", "HTML5", "CSS3"],
+    highlights: ["Built Ruby on Rails applications for consulting clients"],
+  },
+  {
+    description: "ISP, agency, and freelance web development",
+    role: "Web Developer",
+    startYear: 2000,
+    endYear: 2012,
+    location: "Various",
     highlights: [],
+    technologies: ["HTML", "CSS", "JavaScript"],
   },
 ];
 
-export const skills = {
-  languages: ["TypeScript", "Ruby", "JavaScript", "Python", "PHP", "SQL", "HTML5", "CSS3"],
-  frameworks: ["Next.js", "React", "tRPC", "Prisma", "Ruby on Rails", "Node.js", "WordPress", "GraphQL", "Vue.js", "Angular"],
-  databases: ["PostgreSQL", "MySQL", "ElasticSearch", "MongoDB", "Redis"],
-  infrastructure: ["AWS (EC2, S3, RDS, SES, VPC)", "Docker", "nginx", "Apache", "Managed WordPress hosting", "n8n", "CI/CD"],
-};
+/** What I'd want to be hired for, not everything I've touched. */
+export const coreStack = [
+  "TypeScript",
+  "Next.js",
+  "React",
+  "Node.js",
+  "Ruby on Rails",
+  "PostgreSQL",
+  "WordPress",
+  "AWS",
+];
 
+/** Keep to domains with a case study behind them. */
 export const domains = [
-  "EdTech",
   "Pharma & Logistics",
-  "Nonprofit & Civic Tech",
-  "Manufacturing",
-  "Digital Transformation",
+  "Print & Manufacturing",
   "E-commerce",
+  "Nonprofit & Civic Tech",
   "Security & Infrastructure",
-  "Healthcare",
-  "AI & Data",
 ];
