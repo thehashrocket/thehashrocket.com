@@ -27,7 +27,8 @@
       "Bash(npm ls *)",
       "Bash(npm view *)",
       "Skill(retro)",
-      "Skill(qa)"
+      "Skill(qa)",
+      "Bash(pkill -f \"next dev\")"
     ]
   }
 }
