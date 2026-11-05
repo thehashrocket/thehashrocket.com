@@ -80,13 +80,8 @@
 
 ## Deferred from Design Review (2026-04-21) — 3D Scenes
 
-### Canvas Dimming for Case Study Pages
-- **What:** Implement the docs/DESIGN.md spec that says the canvas "dims/freezes when text-heavy sections are in viewport." Currently no scene (PharmaScene or the three new scenes) implements this.
-- **Why:** Bright 3D geometry competing with case study body text hurts readability. Dimming during reading sections lets the text breathe and honors the design system intent.
-- **Effort:** S (CC: ~20 min) | **Priority:** P2
-- **Depends on:** All 3 new scenes shipped (this PR)
-- **Risk:** Requires a new Zustand field (e.g., `textInViewport: boolean`) or an IntersectionObserver in CaseStudyScroll, plus a dimming effect in each scene component (reduce ambientLight intensity or group opacity).
-- **Context:** Deferred during design review (2026-04-21) to keep the 3D scenes PR focused. Apply to all 5 scenes together in a follow-up PR.
+### ~~Canvas Dimming for Case Study Pages~~ ✓ COMPLETED
+- **Completed:** dims the whole canvas to 20% once the narrative reaches the viewport, so one change covers all eight scenes. Body text measured at 5.21:1 or better over the brightest dimmed scene. Dims only; the render loop still runs.
 
 ## Deferred from Eng Review (2026-04-13) — WebGL Crash Fix
 

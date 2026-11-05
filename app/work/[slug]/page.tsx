@@ -75,25 +75,28 @@ export default async function CaseStudyPage({
           &larr; Back to work
         </Link>
 
-        <h1
-          className="font-display text-5xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-6xl"
-          style={{ color: study.accent }}
-        >
-          {study.title}
-        </h1>
-        <p className="mt-4 text-xl text-[var(--text-secondary)]">
-          {study.subtitle}
-        </p>
+        {/* Solid background: the scene is at full brightness up here */}
+        <div className="-mx-3 w-fit rounded-[var(--radius-sm)] bg-[var(--bg)] px-3 py-2">
+          <h1
+            className="font-display text-5xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-6xl"
+            style={{ color: study.accent }}
+          >
+            {study.title}
+          </h1>
+          <p className="mt-4 text-xl text-[var(--text-secondary)]">
+            {study.subtitle}
+          </p>
 
-        {/* Result bar */}
-        <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 font-mono text-sm text-[var(--text-primary)]">
-          {study.results.map((result, i) => (
-            <li key={result} className="flex gap-4">
-              {i > 0 && <span aria-hidden="true" className="text-[var(--text-muted)]">&middot;</span>}
-              {result}
-            </li>
-          ))}
-        </ul>
+          {/* Result bar */}
+          <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 font-mono text-sm text-[var(--text-primary)]">
+            {study.results.map((result, i) => (
+              <li key={result} className="flex gap-4">
+                {i > 0 && <span aria-hidden="true" className="text-[var(--text-muted)]">&middot;</span>}
+                {result}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Fact panel */}
         <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-6">
@@ -133,7 +136,7 @@ export default async function CaseStudyPage({
           source={`work-${slug}`}
         />
 
-        <p className="mt-8 text-sm text-[var(--text-muted)]">
+        <p className="mt-8 text-sm text-[var(--text-secondary)]">
           Serving the Central Valley:{" "}
           {getAllLocations().map((location, i) => (
             <span key={location.slug}>
