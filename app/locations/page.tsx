@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ClosingCta } from "@/components/ui/ClosingCta";
 import { getAllLocations } from "@/lib/locations";
 
 export const metadata: Metadata = {
   title: "Locations",
   description:
-    "Senior full-stack engineer serving Sacramento, Stockton, and Modesto. Local software engineering for Central Valley businesses.",
+    "Senior full-stack engineer serving Sacramento, Stockton, Modesto, Manteca, Tracy, and Lathrop. Local software engineering for Central Valley businesses.",
 };
 
 export default function LocationsPage() {
@@ -47,26 +48,18 @@ export default function LocationsPage() {
                 {location.name}
               </h2>
               <p className="mt-2 text-[var(--text-secondary)]">
-                {location.industries.join(" / ")}
+                {location.industries.map((industry) => industry.name).join(" / ")}
               </p>
             </Link>
           ))}
         </div>
 
         <div className="mt-24 border-t border-[var(--border)] pt-16">
-          <h2 className="mb-6 font-display text-3xl font-bold text-[var(--text-primary)]">
-            Don&apos;t see your area?
-          </h2>
-          <p className="mb-8 max-w-xl text-lg text-[var(--text-secondary)]">
-            I work with businesses across California. If you have a complex
-            software challenge, let&apos;s talk.
-          </p>
-          <Link
-            href="/contact"
-            className="inline-flex min-h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--accent)] px-8 py-3 font-display text-sm font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]"
-          >
-            Get in touch
-          </Link>
+          <ClosingCta
+            heading="Don't see your area?"
+            body="I'm based in the Central Valley and work remotely too. Tell me what you're dealing with."
+            source="locations"
+          />
         </div>
       </div>
     </div>

@@ -11,7 +11,7 @@ export default async function Image() {
     <OgImageTemplate
       label="Central Valley"
       title="Software Engineering"
-      subtitle="Serving Sacramento, Stockton, Modesto and beyond."
+      subtitle="Serving the Central Valley and beyond."
     />,
     {
       ...size,
