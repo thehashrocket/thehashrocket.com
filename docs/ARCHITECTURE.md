@@ -35,7 +35,7 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed in `lib/sources.ts`, then goes to the notification email and the Cal.com link. Nothing on the site stores it.
 
-**Booking:** `lib/site.ts` is the only reader of `NEXT_PUBLIC_CALCOM_URL`. `BookingLink` falls back to the contact form when it is unset.
+**Booking:** `lib/site.ts` is the only reader of `NEXT_PUBLIC_CALCOM_URL`. `BookingLink` falls back to the contact form when it is unset or unusable.
 
 **Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data. Cities with `localExperience` get a career credibility block in the "Why local?" card.
 
