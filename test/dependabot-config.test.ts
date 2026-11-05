@@ -219,6 +219,35 @@ describe(".github/workflows/ci.yml", () => {
     expect(mergeStep!.run).toContain("--match-head-commit");
   });
 
+  describe("held PR notice", () => {
+    // A red verify skips dependabot-auto-merge, so this job is the only thing
+    // that tells a human a security PR is stuck.
+    const notice = workflow.jobs["dependabot-held-notice"];
+    const flagStep = notice?.steps?.find((s) => (s.run ?? "").includes("gh pr comment"));
+
+    it("runs only when verify fails, and only for Dependabot", () => {
+      const needs = Array.isArray(notice.needs) ? notice.needs : [notice.needs];
+      expect(needs).toContain("verify");
+      expect(notice.if).toContain("failure()");
+      expect(notice.if).toContain("dependabot[bot]");
+    });
+
+    it("flags exactly the set that would have auto-merged", () => {
+      const condition = flagStep?.if ?? "";
+      expect(condition).toContain("security-");
+      expect(condition).toContain("semver-patch");
+      expect(condition).toContain("semver-minor");
+      expect(condition).not.toContain("semver-major");
+    });
+
+    it("never merges, and does not repeat itself on rebases", () => {
+      const run = flagStep?.run ?? "";
+      expect(run).not.toContain("gh pr merge");
+      expect(run.indexOf("needs-review")).toBeLessThan(run.indexOf("gh pr comment"));
+      expect(run).toContain("exit 0");
+    });
+  });
+
   it("only auto-merges patch and minor security updates", () => {
     const mergeStep = autoMerge.steps?.find((s) =>
       (s.run ?? "").includes("gh pr merge"),
