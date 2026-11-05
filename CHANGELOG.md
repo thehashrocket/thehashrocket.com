@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.1.0] - 2026-11-05
+
+### Fixed
+- The audit steps for Dependabot security PRs can now fail. They used `pnpm audit --ignore-unfixable`, which exits 0 even with fixable advisories, so those PRs could auto-merge with no working check. Each step now runs a plain scoped audit after it.
+- `pnpm audit` reports no known vulnerabilities. Scoped overrides move `minimatch` under `typescript-estree` to 11 and `glob` under Sentry's bundler plugin to 14.
+
+### Heads-up
+- Drop the `glob` override once Sentry is on 11.11 or later, or it will hold that version back.
+- An advisory a PR can't fix now holds that security PR for a human, with no label or comment to explain why. Issue #66 tracks a notifier.
+
 ## [0.4.0.0] - 2026-11-05
 
 ### Added

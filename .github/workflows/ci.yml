@@ -55,7 +55,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # The wide net, advisory for everyone. test/security-overrides.test.ts
-      # hard-fails if one of the two known pins regresses; this surfaces a NEW
+      # hard-fails if one of the known pins regresses; this surfaces a NEW
       # advisory anywhere in the tree of ~830 packages.
       #
       # Never a gate: an upstream advisory with no published fix would turn
@@ -98,7 +98,10 @@ jobs:
       #                   red with no explanation of what a human should do.
       #
       # --ignore-unfixable keeps an advisory with no published resolution from
-      # deadlocking security automation on work nobody can do.
+      # deadlocking security automation on work nobody can do. It writes those
+      # advisories to auditConfig in pnpm-workspace.yaml and exits 0 even when
+      # fixable ones remain. The plain audit after it reads that list and is the
+      # part that can actually fail, so the order matters.
       #
       # Keep these two `if` conditions in sync with the merge step's condition
       # below. test/typescript-toolchain.test.ts asserts they agree.
@@ -107,14 +110,14 @@ jobs:
           steps.metadata.outputs.dependency-group == 'security-production' &&
           (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
            steps.metadata.outputs.update-type == 'version-update:semver-minor')
-        run: pnpm audit --prod --ignore-unfixable
+        run: pnpm audit --prod --ignore-unfixable && pnpm audit --prod
 
       - name: Audit gate — development security PRs merge unattended
         if: |
           steps.metadata.outputs.dependency-group == 'security-development' &&
           (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
            steps.metadata.outputs.update-type == 'version-update:semver-minor')
-        run: pnpm audit --dev --ignore-unfixable
+        run: pnpm audit --dev --ignore-unfixable && pnpm audit --dev
 
       # Non-blocking: main already has 12 react-hooks/react-compiler errors
       # predating this workflow. Flip to blocking once those are cleared —
