@@ -39,8 +39,9 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
-      # Matches the Vercel build. A dependency bump that drifts the lockfile
-      # fails here instead of on a production deploy.
+      # Same command as the Vercel build, on a newer pnpm: Vercel picks 10.x from
+      # the lockfile version. A dependency bump that drifts the lockfile fails
+      # here, but only the Vercel preview proves the install on Vercel's pnpm.
       - run: pnpm install --frozen-lockfile
 
       # Classify Dependabot PRs so the audit gate below can tell a PR that will

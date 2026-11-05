@@ -27,10 +27,10 @@ describe("getBookingUrl", () => {
   });
 
   it("treats an unusable URL as not configured", () => {
-    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "   ");
-    expect(getBookingUrl("home")).toBeNull();
-    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "cal.example/me");
-    expect(getBookingUrl("home")).toBeNull();
+    for (const value of ["   ", "cal.example/me", "localhost:3000/me", "javascript:alert(1)"]) {
+      vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", value);
+      expect(getBookingUrl("home"), value).toBeNull();
+    }
   });
 
   it("omits the query when there is no source", () => {

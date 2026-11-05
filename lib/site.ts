@@ -12,6 +12,7 @@ export function getBookingUrl(source?: string): string | null {
   if (!base || !URL.canParse(base)) return null;
 
   const url = new URL(base);
+  if (url.protocol !== "https:" && url.protocol !== "http:") return null;
   if (source) url.searchParams.set("source", source);
   return url.toString();
 }
