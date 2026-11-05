@@ -2,6 +2,8 @@
 
 import { headers } from "next/headers";
 import { Resend } from "resend";
+import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
+import { normalizeSource } from "@/lib/sources";
 
 let resendClient: Resend | null = null;
 function getResend() {
@@ -11,6 +13,10 @@ function getResend() {
     resendClient = new Resend(key);
   }
   return resendClient;
+}
+
+function pickAllowed(value: FormDataEntryValue | null, allowed: Iterable<string>): string | null {
+  return typeof value === "string" && new Set(allowed).has(value) ? value : null;
 }
 
 interface ContactFormState {
@@ -26,7 +32,9 @@ export async function submitContact(
   const email = formData.get("email") as string;
   const message = formData.get("message") as string;
   const honeypot = formData.get("website") as string;
-  const source = formData.get("source") as string | null;
+  const source = normalizeSource(formData.get("source"));
+  const projectType = pickAllowed(formData.get("projectType"), PROJECT_TYPES);
+  const timeline = pickAllowed(formData.get("timeline"), TIMELINES);
 
   // Honeypot check
   if (honeypot) {
@@ -73,7 +81,18 @@ export async function submitContact(
         from: `Contact Form <${fromEmail}>`,
         to: "jason@thehashrocket.com",
         subject: `New contact from ${name}${source ? ` (via ${source})` : ""}`,
-        text: `Name: ${name}\nEmail: ${email}${source ? `\nSource: ${source}` : ""}\n\nMessage:\n${message}`,
+        text: [
+          `Name: ${name}`,
+          `Email: ${email}`,
+          source && `Source: ${source}`,
+          projectType && `Needs: ${projectType}`,
+          timeline && `Timeline: ${timeline}`,
+          "",
+          "Message:",
+          message,
+        ]
+          .filter((line) => typeof line === "string")
+          .join("\n"),
       });
 
       if (sendError) {

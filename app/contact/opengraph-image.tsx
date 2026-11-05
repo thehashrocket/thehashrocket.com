@@ -11,7 +11,7 @@ export default async function Image() {
     <OgImageTemplate
       label="Contact"
       title="Let's talk."
-      subtitle="Response within 24 hours."
+      subtitle="Reply within one business day."
     />,
     {
       ...size,

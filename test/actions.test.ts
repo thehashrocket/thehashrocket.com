@@ -61,6 +61,43 @@ describe("submitContact", () => {
     expect(result.error).toBeNull();
   });
 
+  it("emails known sources and qualifying answers", async () => {
+    mockSend.mockClear();
+    await submitContact(
+      { success: false, error: null },
+      makeFormData({
+        ...validFields,
+        source: "work-print-portal",
+        projectType: "Rescue",
+        timeline: "1–3 months",
+      }),
+    );
+    const payload = mockSend.mock.calls[0][0];
+    expect(payload.subject).toContain("(via work-print-portal)");
+    expect(payload.text).toContain("Source: work-print-portal");
+    expect(payload.text).toContain("Needs: Rescue");
+    expect(payload.text).toContain("Timeline: 1–3 months");
+  });
+
+  it("drops unknown sources and select values without failing", async () => {
+    mockSend.mockClear();
+    const result = await submitContact(
+      { success: false, error: null },
+      makeFormData({
+        ...validFields,
+        source: "evil\r\nBcc: spam@example.com",
+        projectType: "Anything",
+        timeline: "Whenever",
+      }),
+    );
+    expect(result.success).toBe(true);
+    const payload = mockSend.mock.calls[0][0];
+    expect(payload.subject).not.toContain("via");
+    expect(payload.text).not.toContain("Bcc");
+    expect(payload.text).not.toContain("Anything");
+    expect(payload.text).not.toContain("Whenever");
+  });
+
   it("rejects short name", async () => {
     const result = await submitContact(
       { success: false, error: null },
