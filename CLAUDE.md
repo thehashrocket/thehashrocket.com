@@ -58,9 +58,11 @@ reads a top-level `overrides` key in `package.json`, which this project does not
 resolves postcss to 8.4.31 and sharp to 0.34.5, both of which carry open advisories that
 `pnpm install` patches. An npm-installed tree is a vulnerable tree.
 
-Those two are the only overrides left, and each one is load-bearing: `next` still depends
-on a vulnerable postcss, and the sharp that `next` pulls in is below the libvips advisory
-floor. Keep the block that small. An override is dead the moment the upstream package
+Those four are the only overrides left, and each one is load-bearing: `next` still depends
+on a vulnerable postcss, the sharp that `next` pulls in is below the libvips advisory floor,
+`typescript-estree` pins a vulnerable minimatch, and Sentry's bundler plugin pulled a vulnerable
+glob before 11.11. The last two are scoped to those parents. Drop the glob pin once Sentry is
+on 11.11+. Keep the block that small. An override is dead the moment the upstream package
 fixes its own range, and a dead override silently pins the tree to an old resolution.
 To re-audit: delete the `overrides` block from `pnpm-workspace.yaml`, run `pnpm install --lockfile-only`, run
 `pnpm audit`, and put back only what the audit actually flags — then `git checkout` the

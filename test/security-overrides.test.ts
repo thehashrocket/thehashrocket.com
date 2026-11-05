@@ -12,6 +12,10 @@ import { load } from "js-yaml";
 //             and GHSA-fxqj-rqcc-2cmp. The newest of those is patched in
 //             8.5.23.
 //   sharp   — resolves to 0.34.5, below the libvips advisory floor of 0.35.0.
+//   minimatch — typescript-estree depends on ^10, inside GHSA-g3hv-75wg-m249.
+//               Scoped to that parent; eslint is the only thing that runs it.
+//   glob    — @sentry/bundler-plugins before 11.11 depends on ^13, inside
+//             GHSA-3g3m-2fjr-6pw4. Drop this pin once Sentry is on 11.11+.
 //
 // Nothing else catches a regression here. `pnpm audit` would, but CI does not
 // run it — CI runs lint, typecheck, test, and build. So deleting a pin, or
@@ -41,6 +45,8 @@ const overrides = workspace.overrides ?? {};
 const ADVISORY_FLOORS: Record<string, [number, number, number]> = {
   postcss: [8, 5, 23],
   sharp: [0, 35, 0],
+  "@typescript-eslint/typescript-estree>minimatch": [11, 0, 1],
+  "@sentry/bundler-plugins>glob": [14, 0, 2],
 };
 
 function parseFloor(range: string): [number, number, number] {

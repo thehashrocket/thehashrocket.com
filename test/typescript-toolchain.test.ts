@@ -181,6 +181,14 @@ describe(".github/workflows/ci.yml audit gate", () => {
         expect(gateFor(group)?.run).toContain("--ignore-unfixable");
       });
 
+      it("has a command that can fail", () => {
+        // --ignore-unfixable manages the ignore list and exits 0 even with
+        // fixable advisories, so on its own this gate never blocks anything.
+        const commands = (gateFor(group)?.run ?? "").split("&&").map((c) => c.trim());
+
+        expect(commands).toContain(`pnpm audit ${flag}`);
+      });
+
       it("gates only the patch/minor updates that actually auto-merge", () => {
         // A MAJOR security PR is not auto-merged — it gets a needs-review
         // label and a comment from dependabot-auto-merge. Gating it would
