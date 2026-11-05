@@ -33,11 +33,13 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Progressive enhancement:** `lib/webgl.ts` detects WebGL support (cached per session). `SceneCanvas` checks support via `useEffect` before mounting the R3F Canvas — unsupported devices get `StaticFallback` without ever attempting WebGL context creation. `ErrorBoundary` remains as a safety net for runtime context loss. The site is fully functional without WebGL.
 
-**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead.
+**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed and only reaches the notification email, so nothing stores it.
+
+**Booking:** `lib/site.ts` is the only reader of `NEXT_PUBLIC_CALCOM_URL`. `BookingLink` falls back to the contact form when it is unset.
 
 **Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data. Cities with `localExperience` get a career credibility block in the "Why local?" card.
 
-**Career data:** `lib/experience.ts` holds typed career entries, skills taxonomy, and domain tags. Consumed by the About page (timeline + skills lists), homepage (tech tags + domains), and validated against `lib/locations.ts` slugs. The `Timeline` component uses progressive disclosure (expanded/compact/condensed tiers) with responsive behavior and scroll-reveal animations.
+**Career data:** `lib/experience.ts` holds typed career entries, the core stack, and domain tags. Consumed by the About page (timeline + stack and domain lists) and validated against `lib/locations.ts` slugs. The `Timeline` component uses progressive disclosure (expanded/compact/condensed tiers) with responsive behavior and scroll-reveal animations.
 
 ## Data Flow
 
@@ -59,7 +61,7 @@ User clicks atlas card
 
 ```
 app/                    Routes (App Router)
-  ├── page.tsx          Homepage (hero + systems atlas + CTA)
+  ├── page.tsx          Homepage (hero, proof strip, services, selected work, why me, how it works, CTA)
   ├── opengraph-image.tsx  Homepage OG image (1200×630 via next/og)
   ├── about/            About page + opengraph-image.tsx
   ├── contact/          Contact form + opengraph-image.tsx
@@ -72,7 +74,7 @@ app/                    Routes (App Router)
 components/
   ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary, JsonLd, LocationJsonLd)
   ├── scenes/           R3F scene components (HeroScene, PharmaScene, NonprofitScene, GrantScene, PrintPortalScene, SceneRouter)
-  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, Timeline, SceneSync)
+  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, BookingLink, ClosingCta, ArchitectureDiagram, Timeline, SceneSync)
       └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
 lib/
   ├── store.ts          Zustand scene state
@@ -80,7 +82,7 @@ lib/
   ├── constants.ts      Shared constants (MORPH_DURATION_MS, CONTACT_FORM_TIMEOUT_MS)
   ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
-  ├── experience.ts     Career data (entries, skills, domains — used by about, homepage, timeline)
+  ├── experience.ts     Career data (entries, core stack, domains — used by about, timeline)
   ├── locations.ts      City configs (Sacramento, Stockton, Modesto) with optional localExperience
   ├── fonts.ts          next/font configuration (Space Grotesk, Inter, JetBrains Mono)
   ├── og-fonts.ts       Promise-based font loader for OG image generation (cached, retry-on-failure)

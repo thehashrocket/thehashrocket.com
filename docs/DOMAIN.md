@@ -6,14 +6,16 @@ Jason Shultz is a senior full-stack software engineer with 20+ years of experien
 
 ## What This Site Is
 
-A creative developer portfolio that doubles as a portfolio piece itself. The site converts potential consulting/freelance clients by demonstrating both technical craft (immersive 3D, scroll-driven narratives) and real-world project impact.
+A consulting site that doubles as a portfolio piece itself. It converts owner-operated and mid-size businesses by showing real project results, backed by technical craft (immersive 3D, scroll-driven narratives).
 
 ## Business Model
 
 - Solo consulting/freelance engineering
-- Target clients: startups and growing businesses that need custom web applications, legacy platform rescues, or infrastructure help
-- Positioning: premium (budget range starts at $10k)
-- Primary conversion: contact form inquiry
+- Target clients: owner-operated and mid-size businesses running on paper, spreadsheets, or software nobody wants to touch. Startups can still hire Jason; they just aren't the headline.
+- Services: Build it (custom software), Rescue it (inherited or legacy systems), Keep it running (monthly retainer)
+- Engagement: 20-minute call, then paid discovery with a written plan the client owns, then a fixed-scope build or retainer
+- Positioning: premium (projects typically start at $10,000)
+- Primary conversion: booking a call on Cal.com, with the contact form second
 
 ## Project Domains
 
@@ -28,9 +30,11 @@ The portfolio showcases eight projects (order matches `lib/case-studies.ts`):
 7. **Nonprofit Matching** — Donor/organization matching on a graph model.
 8. **Grant Discovery** — AI-powered grant matching and application tracking.
 
-The homepage **Lab** section lists side projects from `lib/side-projects.ts`.
+The `/lab` page lists side projects from `lib/side-projects.ts`.
 
-**Confidentiality rule:** never name clients or employers in case studies, timeline, or copy. Describe them generically ("a print company", "an agency"). Avoid incident details that would embarrass a client or employer.
+**Claims rule:** only publish a claim the owner can defend on a sales call. Cut anything without a case study behind it, and don't name institutions Jason hasn't worked with. `test/claims.test.ts` fails on known-bad claims, but it cannot tell whether a number is true.
+
+**Confidentiality rule:** never name clients or employers in case studies, timeline, copy, or images, including screenshots and logos in photos. Describe them generically ("a print company", "an agency"). Avoid incident details that would embarrass a client or employer.
 
 Case study content (descriptions, tech stacks, narratives) lives in `lib/case-studies.ts`. This file is the source of truth for project details — do not duplicate here.
 
