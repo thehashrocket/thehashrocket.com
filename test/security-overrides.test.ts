@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { load } from "js-yaml";
 
-// The `pnpm.overrides` block is a security control, not a preference. Two of
+// The `overrides` block in pnpm-workspace.yaml is a security control, not a preference. Two of
 // this project's transitive dependencies resolve to versions with open
 // advisories unless they are pinned above the patch floor:
 //
@@ -26,16 +27,15 @@ import { join } from "node:path";
 
 const repoRoot = join(__dirname, "..");
 
-interface PackageJson {
-  pnpm?: { overrides?: Record<string, string> };
+interface PnpmWorkspace {
   overrides?: Record<string, string>;
 }
 
-const pkg: PackageJson = JSON.parse(
-  readFileSync(join(repoRoot, "package.json"), "utf8"),
-);
+const workspace = load(
+  readFileSync(join(repoRoot, "pnpm-workspace.yaml"), "utf8"),
+) as PnpmWorkspace;
 
-const overrides = pkg.pnpm?.overrides ?? {};
+const overrides = workspace.overrides ?? {};
 
 /** Lowest version an override may pin to, per the newest advisory it closes. */
 const ADVISORY_FLOORS: Record<string, [number, number, number]> = {
@@ -61,7 +61,7 @@ function gte(a: [number, number, number], b: [number, number, number]) {
   return true;
 }
 
-describe("pnpm.overrides security pins", () => {
+describe("pnpm-workspace.yaml security pins", () => {
   for (const [name, floor] of Object.entries(ADVISORY_FLOORS)) {
     it(`pins ${name} at or above ${floor.join(".")}`, () => {
       const range = overrides[name];

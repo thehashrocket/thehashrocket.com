@@ -55,6 +55,16 @@ describe("LocationJsonLd rendering", () => {
     expect(data.description).toBe(location.metaDescription);
   });
 
+  it("lists each city when a page covers several", () => {
+    const location = getLocation("manteca-tracy-lathrop")!;
+    const { container } = render(
+      React.createElement(LocationJsonLd, { location, slug: location.slug }),
+    );
+    const script = container.querySelector('script[type="application/ld+json"]');
+    const data = JSON.parse(script!.innerHTML);
+    expect(data.areaServed.map((c: { name: string }) => c.name)).toEqual(["Manteca", "Tracy", "Lathrop"]);
+  });
+
   it("includes areaServed with city and state", () => {
     const { container } = render(
       <LocationJsonLd location={location} slug="sacramento" />

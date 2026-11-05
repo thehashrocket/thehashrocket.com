@@ -7,14 +7,15 @@ import {
 } from "../lib/locations";
 
 describe("locations", () => {
-  it("exports 3 locations", () => {
-    expect(locationSlugs).toHaveLength(3);
+  it("exports 4 locations", () => {
+    expect(locationSlugs).toHaveLength(4);
   });
 
   it("has sacramento, stockton, and modesto", () => {
     expect(locationSlugs).toContain("sacramento");
     expect(locationSlugs).toContain("stockton");
     expect(locationSlugs).toContain("modesto");
+    expect(locationSlugs).toContain("manteca-tracy-lathrop");
   });
 
   it("getLocation returns a location for valid slug", () => {
@@ -30,7 +31,7 @@ describe("locations", () => {
 
   it("getAllLocations returns all locations as array", () => {
     const all = getAllLocations();
-    expect(all).toHaveLength(3);
+    expect(all).toHaveLength(4);
     expect(all.map((l) => l.slug)).toEqual(locationSlugs);
   });
 

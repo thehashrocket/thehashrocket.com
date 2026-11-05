@@ -1,5 +1,16 @@
 import type { Location, FAQ } from "@/lib/locations";
 
+function city(name: string) {
+  return {
+    "@type": "City",
+    name,
+    containedInPlace: {
+      "@type": "State",
+      name: "California",
+    },
+  };
+}
+
 export function LocationJsonLd({ location, slug }: { location: Location; slug: string }) {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -7,14 +18,7 @@ export function LocationJsonLd({ location, slug }: { location: Location; slug: s
     name: "Jason Shultz — Software Engineering",
     description: location.metaDescription,
     url: `https://thehashrocket.com/locations/${slug}`,
-    areaServed: {
-      "@type": "City",
-      name: location.name,
-      containedInPlace: {
-        "@type": "State",
-        name: "California",
-      },
-    },
+    areaServed: location.cities?.map(city) ?? city(location.name),
     provider: {
       "@type": "Person",
       name: "Jason Shultz",

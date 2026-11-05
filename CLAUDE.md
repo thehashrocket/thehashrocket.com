@@ -48,9 +48,13 @@ major, and taking it means the compiler types APIs the deployed runtime does not
 `pnpm-lock.yaml` is the committed lockfile; `package-lock.json` and `yarn.lock` are gitignored.
 Vercel and CI both build with `pnpm install --frozen-lockfile`. Use `pnpm` for everything.
 
+Local development and CI use pnpm 12.14. Vercel picks its own pnpm from the lockfile version
+(10.x as of October 2026), so `pnpm-workspace.yaml` has to work on both. pnpm 12 fails an
+install on an unreviewed build script, so a new one needs an `allowBuilds` entry there.
+
 This is not a style preference. Security pins for transitive dependencies live in the
-`pnpm.overrides` block in `package.json`, and **npm ignores that field entirely** — it only
-reads a top-level `overrides` key, which this project does not have. Running `npm install`
+`overrides` block in `pnpm-workspace.yaml`, and **npm ignores that file entirely** — it only
+reads a top-level `overrides` key in `package.json`, which this project does not have. Running `npm install`
 resolves postcss to 8.4.31 and sharp to 0.34.5, both of which carry open advisories that
 `pnpm install` patches. An npm-installed tree is a vulnerable tree.
 
@@ -58,7 +62,7 @@ Those two are the only overrides left, and each one is load-bearing: `next` stil
 on a vulnerable postcss, and the sharp that `next` pulls in is below the libvips advisory
 floor. Keep the block that small. An override is dead the moment the upstream package
 fixes its own range, and a dead override silently pins the tree to an old resolution.
-To re-audit: delete the `pnpm.overrides` block, run `pnpm install --lockfile-only`, run
+To re-audit: delete the `overrides` block from `pnpm-workspace.yaml`, run `pnpm install --lockfile-only`, run
 `pnpm audit`, and put back only what the audit actually flags — then `git checkout` the
 lockfile if you are not keeping the change.
 

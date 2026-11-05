@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.4.0.0] - 2026-11-05
+
+### Added
+- Visitors can book a call from the homepage, `/contact`, `/about`, `/work`, every case study and every location page. If the booking URL is missing or unusable, the buttons fall back to the contact form.
+- `/contact` now shows the $10,000 project floor, what happens next, two optional questions (what you need, rough timeline) and a plain email address.
+- `/lab` holds the side projects, linked from About and the footer.
+- A Manteca, Tracy & Lathrop location page.
+- Case studies open with a result bar and a fact panel, end with a CTA written for that study, and show an architecture diagram.
+- `test/claims.test.ts` fails the test suite if a known-bad claim returns, `cal.com` is hardcoded, or a location points at a study that does not exist.
+
+### Changed
+- The homepage now speaks to owner-operated businesses running on paper and spreadsheets, with a photo, proof strip, services, four featured studies, and how it works.
+- `/work` is grouped by what a buyer is shopping for and leads with outcomes. Storefront Consolidation is tagged In progress and its results are written as targets.
+- Location pages show the three most relevant studies, and each industry tile says how the work applies.
+- About has a photo, a shorter stack and domain list, and a timeline back to 2000.
+- Locations moved from the top nav to the footer, which also gained Lab, LinkedIn and GitHub.
+- `?source=` is now limited to values the site generates, plus `linkedin` and `referral` for shared links.
+- Moved to pnpm 12.14. The security overrides now live in `pnpm-workspace.yaml`, because pnpm 12 ignores the `pnpm` field in `package.json`. Vercel still builds with pnpm 10.
+
+### Removed
+- Claims with no case study behind them: government work, food-safety experience, and named institutions on the location pages.
+- The unbacked Nonprofit Matching and Grant Discovery numbers.
+- All case study screenshots, including one that showed a client name.
+- The nonprofit and grant highlights from the 2014-2016 timeline entry, which described later work.
+
 ## [0.3.4.0] - 2026-10-28
 
 ### Changed

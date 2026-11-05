@@ -84,7 +84,7 @@ describe("geo page data integration", () => {
       ...locationSlugs.map((slug) => `${baseUrl}/locations/${slug}`),
     ];
 
-    expect(urls).toHaveLength(4);
+    expect(urls).toHaveLength(locationSlugs.length + 1);
     for (const url of urls) {
       expect(url).toMatch(/^https:\/\/thehashrocket\.com\/locations/);
     }

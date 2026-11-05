@@ -8,18 +8,27 @@ export interface CaseStudyConnector {
   connector: string;
 }
 
+export interface Industry {
+  name: string;
+  /** How my work applies. An industry I can't say this about gets cut. */
+  line: string;
+}
+
 export interface Location {
   slug: string;
   name: string;
+  /** Cities for structured data, when one page covers several. */
+  cities?: string[];
   region: string;
   metaTitle: string;
   metaDescription: string;
   heroHeadline: string;
   heroSubheadline: string;
-  industries: string[];
+  industries: Industry[];
   economicContext: string;
   whyLocal: string;
   faqs: FAQ[];
+  /** The studies shown on this page, in order. Keep to the three most relevant. */
   caseStudyConnectors: CaseStudyConnector[];
   localExperience?: string;
 }
@@ -31,35 +40,29 @@ export const locations: Record<string, Location> = {
     region: "Sacramento County, CA",
     metaTitle: "Software Engineer in Sacramento, CA",
     metaDescription:
-      "Senior full-stack engineer in Sacramento building complex systems for startups and enterprises. Custom software, AI pipelines, warehouse logistics, and more.",
+      "Senior full-stack engineer in Sacramento building custom software for businesses running on paper, spreadsheets, or systems nobody wants to touch.",
     heroHeadline: "I build complex systems\nfor Sacramento businesses",
     heroSubheadline:
-      "20+ years engineering high-stakes software. State government modernization, health tech compliance, AI research pipelines — if Sacramento's tech ecosystem needs it built right, I've done it.",
+      "20+ years engineering high-stakes software, including years in Sacramento building pharmaceutical distribution systems. You work directly with the engineer who builds it.",
     industries: [
-      "Government & Public Sector",
-      "Healthcare & Life Sciences",
-      "AgTech & Food Systems",
-      "Clean Energy & Climate Tech",
+      { name: "Distribution & Life Sciences", line: "Audited inventory movements and temperature excursion alerts, built for pharmaceutical distribution." },
+      { name: "Nonprofits & Civic Tech", line: "Nonprofit platforms, plus aging WordPress sites brought up to date without starting over." },
+      { name: "Owner-Operated Businesses", line: "Custom software to replace the paper, spreadsheets, and disconnected tools you've outgrown." },
     ],
     economicContext:
-      "Sacramento is California's capital and a growing tech hub. With major healthcare systems like UC Davis Health and Sutter Health, a booming government technology sector, and an emerging AgTech corridor, the region needs engineers who understand both enterprise scale and startup speed.",
+      "Sacramento is California's capital and a growing tech hub, with large healthcare systems, a deep nonprofit sector, and an emerging AgTech corridor. The businesses around them need software that holds up without an enterprise budget.",
     whyLocal:
-      "Based in the Central Valley, I understand the unique challenges Sacramento businesses face — bridging the gap between Silicon Valley expectations and local operational realities. I work directly with teams here, no timezone juggling required.",
+      "I'm based in the Central Valley and I work directly with your team, with no account manager in between. When something breaks before the morning shift, I'm not three timezones away.",
     faqs: [
       {
         question: "What types of software do you build for Sacramento businesses?",
         answer:
-          "I build custom web applications, internal tools, data pipelines, and AI-powered systems. Recent work includes warehouse management systems handling $200M+ in distribution, nonprofit matching platforms, and AI grant discovery tools.",
-      },
-      {
-        question: "Do you work with Sacramento government agencies?",
-        answer:
-          "Yes. I have experience building systems that meet government compliance requirements, including audit trails, role-based access control, and data security standards.",
+          "I build custom web applications, internal tools, data pipelines, and AI-powered systems. Work includes warehouse management systems handling $200M+ in distribution, nonprofit matching platforms, and AI grant discovery tools.",
       },
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000 for focused builds. Enterprise engagements and ongoing consulting relationships are scoped individually based on complexity and timeline.",
+          "Projects typically start at $10,000. Retainers are scoped to what you run.",
       },
       {
         question: "How do you handle ongoing maintenance?",
@@ -68,12 +71,11 @@ export const locations: Record<string, Location> = {
       },
     ],
     caseStudyConnectors: [
-      { slug: "pharma-wms", connector: "The kind of operational complexity Sacramento's health tech corridor produces." },
-      { slug: "nonprofit-matching", connector: "Connecting communities through intelligent systems — the kind of civic tech Sacramento needs." },
-      { slug: "grant-discovery", connector: "AI-powered systems like UC Davis research programs need." },
-      { slug: "wordpress-modernization", connector: "Bringing Sacramento nonprofits' aging websites up to date without starting over." },
+      { slug: "pharma-wms", connector: "Compliance-heavy warehouse software from my years working in Sacramento." },
+      { slug: "wordpress-modernization", connector: "How I bring aging nonprofit and e-commerce sites up to date without starting over." },
+      { slug: "nonprofit-matching", connector: "Relevant if your organization runs on donors and community relationships." },
     ],
-    localExperience: "I spent several years working in Sacramento, building systems for pharmaceutical distribution and nonprofit technology — the kind of compliance-heavy, data-intensive software this region's industries demand.",
+    localExperience: "I spent several years working in Sacramento, building pharmaceutical distribution systems — the kind of compliance-heavy, data-intensive software this region's industries demand.",
   },
   stockton: {
     slug: "stockton",
@@ -81,20 +83,19 @@ export const locations: Record<string, Location> = {
     region: "San Joaquin County, CA",
     metaTitle: "Software Engineer in Stockton & San Joaquin County, CA",
     metaDescription:
-      "Senior full-stack engineer serving Stockton and San Joaquin County. Custom software for logistics, agriculture, and supply chain operations.",
+      "Senior full-stack engineer serving Stockton and San Joaquin County. Custom software for logistics, distribution, and manufacturing operations.",
     heroHeadline: "Senior engineering for\nSan Joaquin County businesses",
     heroSubheadline:
       "20+ years building the systems that power logistics, distribution, and community services. From warehouse management to nonprofit matching — complex problems solved directly, 1:1.",
     industries: [
-      "Logistics & Supply Chain",
-      "Agriculture & Food Processing",
-      "Port & Maritime Operations",
-      "Manufacturing & Distribution",
+      { name: "Logistics & Supply Chain", line: "Barcode-driven warehouse workflows and real-time inventory, proven across four pharmaceutical distribution facilities." },
+      { name: "Manufacturing & Distribution", line: "Live production queues and job tracking in place of paper tickets and walking the floor." },
+      { name: "Agriculture & Food Processing", line: "I haven't built for this industry yet, but the audit trails and inventory discipline carry over from pharma." },
     ],
     economicContext:
-      "Stockton sits at the crossroads of California logistics. The Port of Stockton, one of the state's busiest inland ports, drives a massive logistics and distribution network. Combined with San Joaquin County's agricultural output — one of the top-producing counties in the nation — the region runs on operational software that needs to be reliable, fast, and auditable.",
+      "Stockton sits at the crossroads of California logistics. An inland port drives a large logistics and distribution network, and San Joaquin County's agricultural output adds to it. The region runs on operational software that needs to be reliable, fast, and auditable.",
     whyLocal:
-      "I live in the Central Valley and work directly with local businesses. When your warehouse management system needs a fix at 6am before the morning shift, I'm not three timezones away. I understand the operational tempo of logistics and agriculture-driven businesses.",
+      "I live in the Central Valley and work directly with local businesses. When your warehouse management system needs a fix at 6am before the morning shift, I'm not three timezones away.",
     faqs: [
       {
         question: "Do you build software for logistics and warehouse operations?",
@@ -109,21 +110,20 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000 for focused builds. Enterprise engagements and ongoing consulting relationships are scoped individually based on complexity and timeline.",
+          "Projects typically start at $10,000. Retainers are scoped to what you run.",
       },
       {
         question: "How quickly can you start on a new project?",
         answer:
-          "I typically begin discovery within one week of engagement. For urgent operational issues, I can provide same-day consulting to assess the situation and plan a fix.",
+          "I reply within one business day. After a 20-minute call, I can tell you honestly when I could start.",
       },
     ],
     caseStudyConnectors: [
-      { slug: "pharma-wms", connector: "Logistics systems built for the distribution networks running through San Joaquin County." },
-      { slug: "nonprofit-matching", connector: "Connecting Central Valley nonprofits with the communities that need them." },
-      { slug: "grant-discovery", connector: "Data-driven tools for the research and agricultural institutions across the region." },
-      { slug: "wordpress-modernization", connector: "Modernizing the websites San Joaquin County nonprofits and small businesses depend on." },
+      { slug: "pharma-wms", connector: "Barcode workflows and live inventory, the same problems a San Joaquin County distributor has." },
+      { slug: "print-portal", connector: "What it looks like when a production floor comes off paper." },
+      { slug: "fleet-security-audit", connector: "For when nobody can say what's running on your servers." },
     ],
-    localExperience: "Working in the Central Valley, I've built logistics and distribution software for the kind of supply chain operations that run through San Joaquin County every day.",
+    localExperience: "I've built warehouse and distribution software for pharmaceutical logistics, and spent over a year in Modesto on WMS, ERP, and CRM systems for local businesses.",
   },
   modesto: {
     slug: "modesto",
@@ -131,35 +131,34 @@ export const locations: Record<string, Location> = {
     region: "Stanislaus County, CA",
     metaTitle: "Software Engineer in Modesto & Stanislaus County, CA",
     metaDescription:
-      "Senior full-stack engineer serving Modesto and Stanislaus County. Custom software for food processing, agriculture, healthcare, and manufacturing.",
+      "Senior full-stack engineer serving Modesto and Stanislaus County. Custom software for manufacturing, distribution, and operations teams replacing paper and spreadsheets.",
     heroHeadline: "Complex software systems\nfor Stanislaus County",
     heroSubheadline:
-      "20+ years of engineering for industries that can't afford failure. Agricultural supply chains, pharmaceutical distribution, data-driven nonprofits — built by a senior engineer, not an agency.",
+      "20+ years of engineering for industries that can't afford failure. Pharmaceutical distribution and print production, plus over a year building WMS, ERP, and CRM systems in Modesto. Built by a senior engineer, not an agency.",
     industries: [
-      "Food Processing & Safety",
-      "Agriculture & Dairy",
-      "Healthcare Systems",
-      "Manufacturing & Quality Control",
+      { name: "Manufacturing & Operations", line: "WMS, ERP, and CRM systems, including over a year building them for Modesto businesses." },
+      { name: "Distribution & Warehousing", line: "Barcode workflows and audited inventory, proven in pharmaceutical distribution." },
+      { name: "Food Processing", line: "I haven't built for food processing yet, but pharma compliance is the same discipline." },
     ],
     economicContext:
-      "Modesto and Stanislaus County are the heart of California's food processing industry. From Gallo Winery to major almond and dairy processors, the region's businesses need software that handles compliance, traceability, and operational scale. Healthcare systems like Doctors Medical Center also drive demand for reliable, secure software.",
+      "Modesto and Stanislaus County are the heart of California's food processing industry. From wineries to almond and dairy processors, the region's businesses need software that handles compliance, traceability, and operational scale.",
     whyLocal:
-      "I'm based in the Central Valley, minutes from Modesto. I understand the food safety compliance requirements, agricultural cycles, and manufacturing workflows that drive business here. Local presence means faster response times and better understanding of your operations.",
+      "I'm based in the Central Valley, a short drive from Modesto, and I've worked here. When something breaks before the morning shift, I'm not three timezones away.",
     faqs: [
       {
         question: "Do you build software for food processing companies?",
         answer:
-          "Yes. I build traceability systems, compliance tracking, and operational dashboards for food processing and manufacturing. My experience with pharmaceutical warehouse compliance translates directly to food safety requirements like FSMA.",
+          "I haven't built for food processing yet, but pharma compliance is the same discipline: lot tracking, audit trails, and excursion alerts. If that's the problem you have, I'm glad to talk through how it would carry over.",
       },
       {
         question: "Can you build AI-powered tools for my business?",
         answer:
-          "Yes. I've built AI-powered grant discovery systems and intelligent matching platforms. I can apply similar techniques to document processing, quality inspection, demand forecasting, and other data-intensive problems.",
+          "Yes. I've built AI-powered grant discovery and matching systems using LLM parsing, semantic search, and scored matches. If you have a similar problem, I'm glad to talk it through.",
       },
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000 for focused builds. Enterprise engagements and ongoing consulting relationships are scoped individually based on complexity and timeline.",
+          "Projects typically start at $10,000. Retainers are scoped to what you run.",
       },
       {
         question: "Do you offer ongoing support?",
@@ -168,12 +167,60 @@ export const locations: Record<string, Location> = {
       },
     ],
     caseStudyConnectors: [
-      { slug: "pharma-wms", connector: "Supply chain software for the agricultural and pharma distribution hubs in Stanislaus County." },
-      { slug: "nonprofit-matching", connector: "Matching technology for the nonprofit organizations serving rural Central Valley." },
-      { slug: "grant-discovery", connector: "AI-powered discovery tools for research institutions and agricultural programs." },
-      { slug: "wordpress-modernization", connector: "Keeping Stanislaus County organizations' websites secure, current, and maintainable." },
+      { slug: "pharma-wms", connector: "The closest thing I've built to food-safety compliance: audit trails and excursion alerts." },
+      { slug: "print-portal", connector: "A production floor taken from paper tickets to live queues." },
+      { slug: "automation-rescue", connector: "For automations that grew piece by piece and stopped working." },
     ],
     localExperience: "Based in the Central Valley, I spent over a year in Modesto building WMS, ERP, and CRM systems for local businesses undergoing digital transformation.",
+  },
+  "manteca-tracy-lathrop": {
+    slug: "manteca-tracy-lathrop",
+    name: "Manteca, Tracy & Lathrop",
+    cities: ["Manteca", "Tracy", "Lathrop"],
+    region: "South San Joaquin County, CA",
+    metaTitle: "Software Engineer in Manteca, Tracy & Lathrop, CA",
+    metaDescription:
+      "Senior full-stack engineer based in Manteca, building custom software for Manteca, Tracy, and Lathrop businesses running on paper and spreadsheets.",
+    heroHeadline: "Your local engineer\nin Manteca, Tracy & Lathrop",
+    heroSubheadline:
+      "I live in Manteca. 20+ years building warehouse systems, production software, and the infrastructure under them, for businesses that can't afford to go down.",
+    industries: [
+      { name: "Warehousing & Distribution", line: "Barcode-driven workflows and real-time inventory, proven across four pharmaceutical distribution facilities." },
+      { name: "Manufacturing", line: "Live production queues and job tracking in place of paper tickets." },
+      { name: "Owner-Operated Businesses", line: "Custom software to replace the spreadsheets and disconnected tools you've outgrown." },
+    ],
+    economicContext:
+      "The I-5 and 205 corridor through Tracy, Lathrop, and Manteca is one of the Central Valley's busiest warehouse and distribution areas, with plenty of family-owned businesses alongside it. Most of them run on software that has to work every shift.",
+    whyLocal:
+      "This is where I live. If you're in Manteca, Tracy, or Lathrop, I'm a short drive away, and the person you talk to is the person who built your system. When something breaks at 6am before the morning shift, you're not opening a ticket with someone three timezones away.",
+    faqs: [
+      {
+        question: "Do you actually work on-site?",
+        answer:
+          "When it helps, yes. I live in Manteca, so sitting down with your team or walking your floor is easy to arrange. Most day-to-day work happens remotely.",
+      },
+      {
+        question: "Do you build software for warehouses and distribution?",
+        answer:
+          "Yes. I built a pharmaceutical warehouse management system that handles $200M+ in annual distribution across 4 facilities, with barcode-driven workflows, real-time inventory, and compliance automation.",
+      },
+      {
+        question: "What is your typical project budget?",
+        answer:
+          "Projects typically start at $10,000 for focused builds. Ongoing support is on a monthly retainer, scoped to what you run.",
+      },
+      {
+        question: "Can you take over a system someone else built?",
+        answer:
+          "Yes. I start by figuring out what it actually does, then tell you plainly what it'll take. Legacy apps, WordPress sites, and automations have all landed on my desk that way.",
+      },
+    ],
+    caseStudyConnectors: [
+      { slug: "pharma-wms", connector: "The kind of warehouse problem this corridor runs on." },
+      { slug: "print-portal", connector: "What it looks like when a production floor comes off paper." },
+      { slug: "automation-rescue", connector: "Taking over a system nobody fully understood." },
+    ],
+    localExperience: "I live in Manteca, and I've spent years building software in Sacramento and Modesto.",
   },
 };
 

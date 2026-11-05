@@ -3,15 +3,28 @@ export interface CaseStudyBeat {
   body: string;
 }
 
+export type CaseStudyGroup = "build" | "rescue" | "infra" | "other";
+export type CaseStudyStatus = "Shipped" | "Completed" | "In progress";
+
 export interface CaseStudySummary {
   slug: string;
   title: string;
   subtitle: string;
+  /** One line, result first. Used on cards; subtitle stays for meta and OG. */
+  outcome: string;
   accent: string;
   tags: string[];
+  group: CaseStudyGroup;
+  status: CaseStudyStatus;
+  /** Flow steps for ArchitectureDiagram. */
+  diagram: string[];
 }
 
 export interface CaseStudy extends CaseStudySummary {
+  industry: string;
+  /** Result bar under the title. Only claims the owner can defend on a call. */
+  results: string[];
+  cta: { heading: string; body: string };
   beats: CaseStudyBeat[];
 }
 
@@ -21,8 +34,19 @@ export const caseStudies: Record<string, CaseStudy> = {
     title: "Pharma WMS",
     subtitle:
       "Warehouse management system for pharmaceutical distribution",
+    outcome:
+      "Warehouse software that scaled a distributor from one facility to four without a rebuild.",
     accent: "#4ade80",
     tags: ["Ruby on Rails", "React", "PostgreSQL", "Redis"],
+    group: "build",
+    status: "Shipped",
+    diagram: ["Barcode scanners", "Rails API", "PostgreSQL + Redis", "Compliance jobs"],
+    industry: "Pharmaceutical distribution",
+    results: ["$200M+ annual distribution", "1 → 4 facilities", "98% fewer compliance incidents"],
+    cta: {
+      heading: "Running a warehouse on spreadsheets?",
+      body: "I build inventory and compliance systems that hold up when the auditor shows up. Tell me what you're working with.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -30,7 +54,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Approach",
-        body: "I designed a real-time warehouse management system with barcode-driven workflows, automated compliance checks, and multi-facility inventory synchronization. Every movement is audited. Every temperature excursion is flagged instantly.",
+        body: "I replaced the spreadsheets with one real-time warehouse system: barcode-driven workflows, automated compliance checks, and inventory that stays in sync across facilities. Every movement is audited, and every temperature excursion gets flagged the moment it happens.",
       },
       {
         heading: "The Architecture",
@@ -38,7 +62,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "98% reduction in compliance incidents. 3x faster order fulfillment. Successfully scaled from 1 to 4 facilities without architecture changes. The system now handles $200M+ in annual pharmaceutical distribution.",
+        body: "98% reduction in compliance incidents. 3x faster order fulfillment. Scaled from 1 to 4 facilities without architecture changes. The system handles $200M+ in annual pharmaceutical distribution. These figures come from the distributor's own numbers.",
       },
     ],
   },
@@ -46,8 +70,19 @@ export const caseStudies: Record<string, CaseStudy> = {
     slug: "print-portal",
     title: "Print Portal",
     subtitle: "Production management portal for a print shop operator",
+    outcome:
+      "A print shop went from paper job tickets to live production queues in four departments, with QuickBooks syncing itself.",
     accent: "#06b6d4",
     tags: ["Next.js", "TypeScript", "tRPC", "PostgreSQL", "QuickBooks"],
+    group: "build",
+    status: "Shipped",
+    diagram: ["Quote", "Work order", "Order", "Invoice", "QuickBooks"],
+    industry: "Commercial printing",
+    results: ["200 jobs a week", "4 departments", "0 paper tickets"],
+    cta: {
+      heading: "Still running production on paper?",
+      body: "Let's talk. Tell me how a job moves through your shop today and I'll tell you what it would take to get it off paper.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -63,7 +98,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "Eliminated paper job tickets entirely. Every department has live production status without walking the floor. Clients approve proofs online instead of by fax or email. Finance syncs directly to QuickBooks without re-keying data.",
+        body: "Eliminated paper job tickets entirely. The portal handles 200 jobs a week. Every department has live production status without walking the floor. Clients approve proofs online instead of by fax or email. Finance syncs directly to QuickBooks without re-keying data.",
       },
     ],
   },
@@ -71,9 +106,20 @@ export const caseStudies: Record<string, CaseStudy> = {
     slug: "storefront-consolidation",
     title: "Storefront Consolidation",
     subtitle:
-      "Nine legacy e-commerce storefronts rebuilt as one multi-tenant platform",
+      "Nine legacy e-commerce storefronts being rebuilt as one multi-tenant platform",
+    outcome:
+      "Nine aging e-commerce stores, nine patch schedules, being collapsed into one platform.",
     accent: "#fb923c",
     tags: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Multi-tenant"],
+    group: "build",
+    status: "In progress",
+    diagram: ["9 storefronts", "1 Next.js app", "PostgreSQL", "Production system"],
+    industry: "Commercial printing and e-commerce",
+    results: ["Target: 9 stores on 1 platform", "Target: 1 patch cycle instead of 9"],
+    cta: {
+      heading: "Patching the same store over and over?",
+      body: "If you're paying to maintain several versions of one business, I'll tell you plainly whether to fix them or fold them into one.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -89,7 +135,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "Nine codebases become one. Security patches ship once instead of nine times. A new customer program launches as a tenant configuration instead of a new server, and orders land in production without anyone retyping them.",
+        body: "This one is still being built, so these are targets, not results yet. Nine codebases become one. Security patches ship once instead of nine times. A new customer program launches as a tenant configuration instead of a new server, and orders land in production without anyone retyping them.",
       },
     ],
   },
@@ -98,8 +144,19 @@ export const caseStudies: Record<string, CaseStudy> = {
     title: "WordPress Modernization",
     subtitle:
       "Moving aging nonprofit and e-commerce sites onto a modern, maintainable stack",
+    outcome:
+      "82 aging sites moved onto supported PHP, with Git deploys and staging, without a rebuild.",
     accent: "#a78bfa",
     tags: ["WordPress", "PHP 8", "WooCommerce", "Git", "Managed Hosting"],
+    group: "rescue",
+    status: "Completed",
+    diagram: ["Theme repo", "Build", "Staging", "Production"],
+    industry: "Nonprofit and e-commerce",
+    results: ["82 sites", "Up to PHP 8.4", "Git deploys and staging"],
+    cta: {
+      heading: "Got a pile of aging WordPress sites?",
+      body: "I'll get them onto supported PHP, then keep them patched and backed up on a monthly maintenance retainer.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -115,7 +172,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "Sites that were one deprecation away from going dark now run on supported PHP, with backups, staging, and a deploy history. The process is a repeatable playbook, so each new site needs less discovery than the last.",
+        body: "82 sites now run on supported PHP, with backups, staging, and a deploy history. The process is a repeatable playbook, so each new site needs less discovery than the last.",
       },
     ],
   },
@@ -124,8 +181,19 @@ export const caseStudies: Record<string, CaseStudy> = {
     title: "Fleet Security Audit",
     subtitle:
       "Auditing 125 production sites across eight servers, then fixing what mattered first",
+    outcome:
+      "125 sites on eight servers, turned from a vague sense of dread into a ranked fix list with real estimates.",
     accent: "#f87171",
     tags: ["AWS EC2", "nginx", "Apache", "Bash", "WordPress", "Security"],
+    group: "infra",
+    status: "Completed",
+    diagram: ["Audit scripts", "Normalized dataset", "Remediation workbook", "Workstreams"],
+    industry: "Multi-client web hosting",
+    results: ["125 sites audited", "Servers patched and hardened", "2 servers shut down"],
+    cta: {
+      heading: "Not sure what's running on your servers?",
+      body: "I'll audit it. You get a ranked list of what's wrong, what it'll take to fix, and what can wait.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -141,7 +209,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "Leadership got a prioritized remediation plan with real estimates in place of a vague sense of dread. The audit scripts are reusable, so the next audit is a rerun instead of a project.",
+        body: "Leadership got a prioritized remediation plan with real estimates in place of a vague sense of dread. Then the fixes shipped: servers patched and security-hardened, and two shut down entirely. The audit scripts are reusable, so the next audit is a rerun instead of a project.",
       },
     ],
   },
@@ -150,8 +218,19 @@ export const caseStudies: Record<string, CaseStudy> = {
     title: "Automation Rescue",
     subtitle:
       "Assessing and repairing a recruiting pipeline built on n8n, Airtable, and Microsoft 365",
+    outcome:
+      "A failing recruiting pipeline mapped end to end, scoped honestly, and working again.",
     accent: "#f472b6",
     tags: ["n8n", "Airtable", "Microsoft Graph", "Automation", "Assessment"],
+    group: "rescue",
+    status: "Completed",
+    diagram: ["Airtable", "n8n", "Microsoft Graph", "Microsoft 365"],
+    industry: "Recruiting",
+    results: ["Every workflow mapped", "2 discovery reports", "Pipeline working again"],
+    cta: {
+      heading: "Got an automation nobody understands anymore?",
+      body: "I'll figure out what it actually does, tell you plainly what it'll take, and get it working again.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -167,7 +246,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "Two discovery reports: one for engineers with the technical findings, and one for the client explaining in plain language why the work needed two more weeks. The client approved the expanded scope knowing exactly what they were paying for and why.",
+        body: "Two discovery reports: one for engineers with the technical findings, and one for the client explaining in plain language why the work needed two more weeks. The client approved the expanded scope knowing exactly what they were paying for and why, and the pipeline was working when the job was done.",
       },
     ],
   },
@@ -176,12 +255,23 @@ export const caseStudies: Record<string, CaseStudy> = {
     title: "Nonprofit Matching",
     subtitle:
       "Connecting donors with organizations through intelligent matching",
+    outcome:
+      "Graph-based matching that helps donors find organizations aligned with their values.",
     accent: "#3b82f6",
     tags: ["Next.js", "GraphQL", "Neo4j", "TypeScript"],
+    group: "other",
+    status: "Shipped",
+    diagram: ["Donor preferences", "GraphQL API", "Neo4j graph", "Recommendations"],
+    industry: "Nonprofit",
+    results: ["Graph-based matching", "Real-time recommendations"],
+    cta: {
+      heading: "Have data that should be connecting people?",
+      body: "If your organization has the relationships but not the system to use them, tell me what you're trying to match.",
+    },
     beats: [
       {
         heading: "The Problem",
-        body: "Donors struggled to find nonprofits aligned with their values. Existing platforms offered basic search but no intelligent matching. Millions in potential donations were lost to decision fatigue.",
+        body: "Donors struggled to find nonprofits aligned with their values. Existing platforms offered basic search but no intelligent matching.",
       },
       {
         heading: "The Approach",
@@ -193,7 +283,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "4x increase in donor engagement. Average donation size increased 60% through better matching. Platform facilitated $2M+ in donations in the first year.",
+        body: "Donors get matches built from their preferences and giving patterns instead of a keyword search, and recommendations update as they interact.",
       },
     ],
   },
@@ -201,8 +291,19 @@ export const caseStudies: Record<string, CaseStudy> = {
     slug: "grant-discovery",
     title: "Grant Discovery",
     subtitle: "AI-powered grant matching and application tracking",
+    outcome:
+      "An AI pipeline that matches applicants with grants they would otherwise miss.",
     accent: "#f59e0b",
     tags: ["Python", "LLM", "PostgreSQL", "FastAPI"],
+    group: "other",
+    status: "Shipped",
+    diagram: ["Grant feeds", "LLM parsing", "pgvector search", "Matching engine", "Alerts"],
+    industry: "Grant funding",
+    results: ["Nightly grant feeds", "LLM eligibility parsing", "Semantic search"],
+    cta: {
+      heading: "Is your team buried in manual research?",
+      body: "If people are spending weeks on work a pipeline could do overnight, tell me what they're searching through.",
+    },
     beats: [
       {
         heading: "The Problem",
@@ -218,7 +319,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
       {
         heading: "The Results",
-        body: "Researchers discovered 3x more relevant grants. Time spent searching reduced by 80%. The platform now indexes 50,000+ active grant opportunities.",
+        body: "Searching dozens of databases by hand gives way to scored matches and automated alerts, with application deadlines tracked in one place.",
       },
     ],
   },
@@ -227,11 +328,34 @@ export const caseStudies: Record<string, CaseStudy> = {
 export const caseStudySlugs = Object.keys(caseStudies);
 
 export function getCaseStudySummaries(): CaseStudySummary[] {
-  return Object.values(caseStudies).map(({ slug, title, subtitle, accent, tags }) => ({
-    slug,
-    title,
-    subtitle,
-    accent,
-    tags,
+  return Object.values(caseStudies).map(
+    ({ slug, title, subtitle, outcome, accent, tags, group, status, diagram }) => ({
+      slug,
+      title,
+      subtitle,
+      outcome,
+      accent,
+      tags,
+      group,
+      status,
+      diagram,
+    }),
+  );
+}
+
+const GROUP_LABELS: Record<CaseStudyGroup, string> = {
+  build: "Custom builds",
+  rescue: "Rescues and modernization",
+  infra: "Infrastructure and security",
+  other: "Nonprofit and research",
+};
+
+/** Studies grouped by what a buyer is shopping for, in display order. */
+export function getCaseStudyGroups() {
+  const studies = getCaseStudySummaries();
+  return (Object.keys(GROUP_LABELS) as CaseStudyGroup[]).map((group) => ({
+    group,
+    label: GROUP_LABELS[group],
+    studies: studies.filter((study) => study.group === group),
   }));
 }

@@ -1,0 +1,13 @@
+# Security pins for transitive dependencies. Current pnpm no longer reads the
+# "pnpm" field in package.json, so they live here.
+# test/security-overrides.test.ts enforces the floors. See CLAUDE.md before
+# adding one.
+overrides:
+  postcss: ^8.5.23
+  sharp: ^0.35.5
+
+# pnpm 12 fails the install on an unreviewed build script. Neither of these has
+# ever run here, so this keeps that behavior explicit.
+allowBuilds:
+  esbuild: false
+  unrs-resolver: false

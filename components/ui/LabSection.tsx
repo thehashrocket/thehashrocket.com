@@ -7,15 +7,15 @@ const SPANS = ["md:col-span-7", "md:col-span-5 md:mt-16", "md:col-span-5", "md:c
 
 export function LabSection() {
   return (
-    <section className="px-6 py-24 md:py-32" aria-labelledby="lab-heading">
+    <section className="px-6 pt-32 pb-24" aria-labelledby="lab-heading">
       <div className="mx-auto max-w-[1280px]">
         <p className="mb-2 font-mono text-sm text-[var(--accent)]">Lab</p>
-        <h2
+        <h1
           id="lab-heading"
           className="mb-4 font-display text-5xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-6xl"
         >
           Things I build for fun
-        </h2>
+        </h1>
         <p className="mb-16 max-w-xl text-lg text-[var(--text-secondary)]">
           Side projects, tools I use every day, and
           whatever I&apos;m curious about this month.
@@ -28,7 +28,7 @@ export function LabSection() {
               className={`relative rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-6 transition-colors md:p-8 ${project.url ? "hover:border-[var(--accent)]" : ""} ${SPANS[i % SPANS.length]}`}
             >
               <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="font-display text-2xl font-semibold text-[var(--text-primary)]">
+                <h2 className="font-display text-2xl font-semibold text-[var(--text-primary)]">
                   {project.url ? (
                     <a
                       href={project.url}
@@ -42,7 +42,7 @@ export function LabSection() {
                   ) : (
                     project.name
                   )}
-                </h3>
+                </h2>
                 <span className="font-mono text-xs uppercase tracking-wide text-[var(--text-muted)]">
                   {project.status}
                 </span>

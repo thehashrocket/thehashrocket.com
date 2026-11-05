@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: "%s | Jason Shultz",
   },
   description:
-    "Senior full-stack engineer with 20+ years building web applications and the infrastructure behind them. Consulting and custom development for startups and growing businesses.",
+    "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
   metadataBase: new URL("https://thehashrocket.com"),
   openGraph: {
     type: "website",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "Jason Shultz",
     title: "Jason Shultz — Senior Full-Stack Engineer",
     description:
-      "Senior full-stack engineer with 20+ years building web applications and the infrastructure behind them. Consulting and custom development for startups and growing businesses.",
+      "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
   },
 };
 

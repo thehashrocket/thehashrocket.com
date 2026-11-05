@@ -28,6 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...caseStudyEntries,
     ...locationEntries,
     { url: `${baseUrl}/about`, lastModified: "2025-01-01", changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/lab`, lastModified: "2026-11-04", changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/contact`, lastModified: "2025-01-01", changeFrequency: "yearly", priority: 0.5 },
   ];
 }

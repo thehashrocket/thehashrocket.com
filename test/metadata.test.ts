@@ -8,7 +8,7 @@ describe("metadata", () => {
     // These values are hardcoded in app/layout.tsx and validated here as constants
     const ogTitle = "Jason Shultz — Senior Full-Stack Engineer";
     const ogDescription =
-      "Senior full-stack engineer with 20+ years building web applications and the infrastructure behind them. Consulting and custom development for startups and growing businesses.";
+      "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.";
     expect(ogTitle).toBeTruthy();
     expect(ogDescription).toBeTruthy();
   });

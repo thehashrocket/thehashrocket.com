@@ -1,8 +1,8 @@
 # Design System — thehashrocket.com
 
 ## Product Context
-- **What this is:** Creative developer portfolio with immersive 3D elements, converting potential clients into consulting leads
-- **Who it's for:** Potential clients looking to hire a senior full-stack engineer for complex systems
+- **What this is:** Consulting site with immersive 3D elements, converting owner-operated and mid-size businesses into leads
+- **Who it's for:** Businesses running on paper, spreadsheets, or software nobody wants to touch
 - **Space/industry:** Creative developer portfolios (references: itssharl.ee, dunks1980.com, tamalsen.dev, cydstumpel.nl)
 - **Project type:** Marketing/portfolio site with R3F 3D scenes, scroll-driven narratives, and interactive experiments
 
@@ -111,7 +111,7 @@
   - No 3-column feature grids
   - No centered-everything layouts
   - Left-aligned text default, asymmetric compositions
-  - Atlas: 3 problem sections staggered vertically with different sizes
+  - Selected work: four featured studies staggered left and right
   - Lab: masonry or staggered grid with varying card dimensions
   - Work page: full-width case study previews, alternating image/text sides
 
@@ -193,3 +193,5 @@
 | 2026-04-10 | Asymmetric editorial layout | Anti-template move. Reference sites (cydstumpel) prove irregular layouts feel human. |
 | 2026-04-10 | 3 motion roles only | Codex + Claude cross-model consensus: too much motion competes with message. Constrain to hero atmosphere, narrative transitions, scroll reveals. |
 | 2026-04-10 | Budget range starts at $10k | Positioning is premium. "Under $5k" attracts wrong clients for an experienced senior engineer. |
+| 2026-11-04 | Homepage hero uses the 64px page-title size, not 96px | The longer headline and the photo column do not fit at hero display size. |
+| 2026-11-04 | Selected work replaces the Atlas sections | The homepage plan features four outcome-first studies. |

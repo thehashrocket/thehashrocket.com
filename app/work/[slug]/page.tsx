@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Tag } from "@/components/ui/Tag";
-import { CaseStudyScroll } from "@/components/ui/CaseStudyScroll";
-import { SceneSync } from "@/components/ui/SceneSync";
 import Link from "next/link";
+import { ArchitectureDiagram } from "@/components/ui/ArchitectureDiagram";
+import { CaseStudyScroll } from "@/components/ui/CaseStudyScroll";
+import { ClosingCta } from "@/components/ui/ClosingCta";
+import { SceneSync } from "@/components/ui/SceneSync";
 import { caseStudies, caseStudySlugs } from "@/lib/case-studies";
+import { getAllLocations } from "@/lib/locations";
 
 const studies = caseStudies;
 
@@ -68,16 +70,10 @@ export default async function CaseStudyPage({
       <div className="mx-auto max-w-[720px]">
         <Link
           href="/work"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
+          className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)]"
         >
           &larr; Back to work
         </Link>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {study.tags.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
-          ))}
-        </div>
 
         <h1
           className="font-display text-5xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-6xl"
@@ -88,34 +84,67 @@ export default async function CaseStudyPage({
         <p className="mt-4 text-xl text-[var(--text-secondary)]">
           {study.subtitle}
         </p>
+
+        {/* Result bar */}
+        <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-2 font-mono text-sm text-[var(--text-primary)]">
+          {study.results.map((result, i) => (
+            <li key={result} className="flex gap-4">
+              {i > 0 && <span aria-hidden="true" className="text-[var(--text-muted)]">&middot;</span>}
+              {result}
+            </li>
+          ))}
+        </ul>
+
+        {/* Fact panel */}
+        <dl className="mt-8 flex flex-wrap gap-x-12 gap-y-4 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-6">
+          <div>
+            <dt className="font-mono text-xs text-[var(--text-muted)]">Industry</dt>
+            <dd className="mt-1 text-sm text-[var(--text-primary)]">{study.industry}</dd>
+          </div>
+          <div>
+            <dt className="font-mono text-xs text-[var(--text-muted)]">Status</dt>
+            <dd className="mt-1 text-sm text-[var(--text-primary)]">{study.status}</dd>
+          </div>
+        </dl>
+
+        <ArchitectureDiagram
+          title={study.title}
+          steps={study.diagram}
+          accent={study.accent}
+          className="mt-8 rounded-[var(--radius-md)]"
+        />
       </div>
 
       {/* Scroll-driven narrative */}
       <CaseStudyScroll beats={study.beats} />
 
-      {/* CTA */}
-      <div className="mx-auto mt-24 max-w-[720px] border-t border-[var(--border)] pt-16">
-        <h2 className="font-display text-3xl font-bold text-[var(--text-primary)]">
-          Interested in working together?
-        </h2>
-        <p className="mt-3 text-lg text-[var(--text-secondary)]">
-          I help teams build systems like this. Let&apos;s talk about your
-          project.
+      <div className="mx-auto mt-16 max-w-[720px]">
+        <p className="text-sm text-[var(--text-muted)]">
+          Built with {study.tags.join(", ")}
         </p>
-        <Link
-          href="/contact"
-          className="mt-8 inline-flex min-h-[44px] items-center rounded-[var(--radius-sm)] bg-[var(--accent)] px-8 py-3 font-display text-sm font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]"
-        >
-          Get in touch
-        </Link>
+      </div>
+
+      {/* CTA */}
+      <div className="mx-auto mt-16 max-w-[720px] border-t border-[var(--border)] pt-16">
+        <ClosingCta
+          heading={study.cta.heading}
+          body={study.cta.body}
+          source={`work-${slug}`}
+        />
 
         <p className="mt-8 text-sm text-[var(--text-muted)]">
           Serving the Central Valley:{" "}
-          <Link href="/locations/sacramento" className="transition-colors hover:text-[var(--text-primary)]">Sacramento</Link>
-          {" · "}
-          <Link href="/locations/stockton" className="transition-colors hover:text-[var(--text-primary)]">Stockton</Link>
-          {" · "}
-          <Link href="/locations/modesto" className="transition-colors hover:text-[var(--text-primary)]">Modesto</Link>
+          {getAllLocations().map((location, i) => (
+            <span key={location.slug}>
+              {i > 0 && " · "}
+              <Link
+                href={`/locations/${location.slug}`}
+                className="transition-colors hover:text-[var(--text-primary)]"
+              >
+                {location.name}
+              </Link>
+            </span>
+          ))}
         </p>
       </div>
     </div>

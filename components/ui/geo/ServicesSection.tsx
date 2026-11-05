@@ -38,11 +38,14 @@ export function ServicesSection({ location }: { location: Location }) {
           {/* Right column: industry relevance */}
           <div className="flex flex-col gap-4">
             {location.industries.map((industry) => (
-              <div key={industry} className="border-l-2 border-[var(--accent)] pl-4">
+              <div key={industry.name} className="border-l-2 border-[var(--accent)] pl-4">
                 <p className="font-mono text-xs text-[var(--accent)]">Industry</p>
                 <h3 className="font-display text-lg font-semibold text-[var(--text-primary)]">
-                  {industry}
+                  {industry.name}
                 </h3>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                  {industry.line}
+                </p>
               </div>
             ))}
           </div>

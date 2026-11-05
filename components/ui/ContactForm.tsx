@@ -3,9 +3,13 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { submitContact } from "@/lib/actions";
 import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
+import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
 import { Button } from "./Button";
 
 const initialState = { success: false, error: null };
+
+const selectClass =
+  "min-h-[44px] rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none";
 
 export function ContactForm({ source }: { source?: string }) {
   const [state, formAction, isPending] = useActionState(
@@ -87,6 +91,35 @@ export function ContactForm({ source }: { source?: string }) {
         />
       </div>
 
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="projectType" className="text-sm text-[var(--text-secondary)]">
+            What do you need? (optional)
+          </label>
+          <select id="projectType" name="projectType" defaultValue="" className={selectClass}>
+            <option value="">Choose one</option>
+            {PROJECT_TYPES.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
+            Rough timeline (optional)
+          </label>
+          <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
+            <option value="">Choose one</option>
+            {TIMELINES.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="message"
@@ -128,7 +161,7 @@ export function ContactForm({ source }: { source?: string }) {
           role="status"
           className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]"
         >
-          Message sent! I&apos;ll get back to you within 24 hours.
+          Message sent! I&apos;ll reply within one business day.
         </div>
       )}
 
