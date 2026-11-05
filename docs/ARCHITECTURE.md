@@ -2,7 +2,7 @@
 
 ## Overview
 
-Creative developer portfolio built with Next.js 16 (App Router), React 19, and React Three Fiber v9. The site uses a persistent 3D canvas overlaid with DOM content, scroll-driven scene transitions, and progressive WebGL enhancement.
+Consulting site for owner-operated and mid-size businesses, built with Next.js 16 (App Router), React 19, and React Three Fiber v9. The site uses a persistent 3D canvas overlaid with DOM content, scroll-driven scene transitions, and progressive WebGL enhancement.
 
 ## Component Tree
 
@@ -37,7 +37,7 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Booking:** `lib/site.ts` is the only reader of `NEXT_PUBLIC_CALCOM_URL`. `BookingLink` falls back to the contact form when it is unset or unusable.
 
-**Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data. Cities with `localExperience` get a career credibility block in the "Why local?" card.
+**Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data. Cities with `localExperience` get a career credibility block in the "Why a local engineer?" card.
 
 **Career data:** `lib/experience.ts` holds typed career entries, the core stack, and domain tags. Consumed by the About page (timeline + stack and domain lists) and validated against `lib/locations.ts` slugs. The `Timeline` component uses progressive disclosure (expanded/compact/condensed tiers) with responsive behavior and scroll-reveal animations.
 
@@ -65,6 +65,7 @@ app/                    Routes (App Router)
   ├── opengraph-image.tsx  Homepage OG image (1200×630 via next/og)
   ├── about/            About page + opengraph-image.tsx
   ├── contact/          Contact form + opengraph-image.tsx
+  ├── lab/              Side projects page + opengraph-image.tsx
   ├── work/             Case studies index + opengraph-image.tsx
   │   └── [slug]/       Individual case study + opengraph-image.tsx
   ├── locations/        Geo landing pages hub + opengraph-image.tsx
@@ -73,17 +74,21 @@ app/                    Routes (App Router)
   └── not-found.tsx     404 with persistent canvas
 components/
   ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary, JsonLd, LocationJsonLd)
-  ├── scenes/           R3F scene components (HeroScene, PharmaScene, NonprofitScene, GrantScene, PrintPortalScene, SceneRouter)
-  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, BookingLink, ClosingCta, ArchitectureDiagram, Timeline, SceneSync)
+  ├── scenes/           R3F scene components (HeroScene, PharmaScene, NonprofitScene, GrantScene, PrintPortalScene, ConsolidationScene, ModernizeScene, AuditScene, AutomationScene, SceneRouter)
+  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, BookingLink, ClosingCta, ArchitectureDiagram, LabSection, Timeline, SceneSync)
       └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
 lib/
   ├── store.ts          Zustand scene state
   ├── actions.ts        Server Actions (contact form with TEST_EMAIL_ENABLED guard)
+  ├── contact-options.ts  Contact form project types and timelines (shared by client and server)
   ├── constants.ts      Shared constants (MORPH_DURATION_MS, CONTACT_FORM_TIMEOUT_MS)
   ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
   ├── experience.ts     Career data (entries, core stack, domains — used by about, timeline)
   ├── locations.ts      City configs (Sacramento, Stockton, Modesto, Manteca/Tracy/Lathrop) with optional localExperience
+  ├── side-projects.ts  Side project data (used by /lab)
+  ├── site.ts           Contact email, social URLs, booking and contact link helpers
+  ├── sources.ts        ?source= allow-list
   ├── fonts.ts          next/font configuration (Space Grotesk, Inter, JetBrains Mono)
   ├── og-fonts.ts       Promise-based font loader for OG image generation (cached, retry-on-failure)
   ├── og-image.tsx      Shared OG image template component (1200×630, Space Grotesk/Inter)
@@ -108,8 +113,8 @@ public/                 Static assets
 | Runtime | Node 24 (Active LTS) | Pinned three places that must agree: `.nvmrc` (24.19.0) for local and CI, `engines.node` (`24.x`) for the Vercel build, and `@types/node` (`^24`) for the compiler. `test/typescript-toolchain.test.ts` fails if they drift — types ahead of the runtime make typecheck pass for code that throws in production |
 | Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in the `overrides` block of `pnpm-workspace.yaml`, which npm ignores — see CLAUDE.md. Only `postcss` and `sharp` remain pinned as of 0.2.7.0; the other nine went inert once upstream widened its own ranges |
 | Language | TypeScript 6 (+ 7 alongside) | `typescript` stays on 6 because typescript-eslint cannot load TypeScript 7. TS 7 is installed as the `typescript7` alias for `pnpm run typecheck:fast` (~5x faster, local only). Never invoke a bare `tsc` — the alias owns `node_modules/.bin/tsc`. See CLAUDE.md |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 186 tests |
-| E2E | Playwright | 6 tests across 2 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path) and scene-wiring sentinel assertions. Runs on a dedicated port (3178, override with `E2E_PORT`) and always starts its own server — it will not adopt an unrelated process on 3000. All green as of 0.2.7.0. Not run in CI — see TODOS.md |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, booking CTAs, source allow-list, published claims, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 216 tests |
+| E2E | Playwright | 10 tests across 3 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path), scene-wiring sentinel assertions, and site structure (Lab page, nav, footer, Manteca page, qualifying fields). Runs on a dedicated port (3178, override with `E2E_PORT`) and always starts its own server — it will not adopt an unrelated process on 3000. All green as of 0.4.0.0. Not run in CI — see TODOS.md |
 | CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, `pnpm audit`, lint (non-blocking), `pnpm run typecheck`, unit tests, production build on every PR |
 | Supply chain | `pnpm audit` in CI | Advisory for humans, blocking for the Dependabot security PRs that auto-merge unattended. The blocking form is scoped to the exact set that merges without review and to the dependency class each can fix (`--prod` / `--dev`), with `--ignore-unfixable` so automation cannot deadlock |
 | Dependency updates | Dependabot | Daily. Security patches (patch/minor) auto-approve and squash-merge once CI passes; majors get a `needs-review` label |
