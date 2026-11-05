@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { load } from "js-yaml";
 
-// The `overrides` block in pnpm-workspace.yaml is a security control, not a preference. Two of
+// The `overrides` block in pnpm-workspace.yaml is a security control, not a preference. Four of
 // this project's transitive dependencies resolve to versions with open
 // advisories unless they are pinned above the patch floor:
 //
@@ -17,13 +17,13 @@ import { load } from "js-yaml";
 //   glob    — @sentry/bundler-plugins before 11.11 depends on ^13, inside
 //             GHSA-3g3m-2fjr-6pw4. Drop this pin once Sentry is on 11.11+.
 //
-// Nothing else catches a regression here. `pnpm audit` would, but CI does not
-// run it — CI runs lint, typecheck, test, and build. So deleting a pin, or
+// Nothing else catches a regression here on ordinary PRs. `pnpm audit` would, but
+// it only blocks Dependabot security PRs; everywhere else it is advisory. So deleting a pin, or
 // letting a Dependabot bump rewrite one to a lower floor, would ship a
 // vulnerable tree on green CI. That is the same silent-failure shape that let
 // 35 alerts sit for twelve weeks, so it gets the same treatment: a test.
 //
-// These floors are correct as of 2026-08-10. Raise them when a new advisory
+// These floors are correct as of 2026-11-05. Raise them when a new advisory
 // lands; never lower them. The block should stay exactly this small — an
 // override outlives its advisory and then silently pins the tree to a stale
 // resolution, so re-audit (delete the block, `pnpm install --lockfile-only`,
@@ -79,6 +79,33 @@ describe("pnpm-workspace.yaml security pins", () => {
       ).toBe(true);
     });
   }
+
+  it("holds only the documented pins", () => {
+    // Each override needs an advisory behind it. A dead pin silently holds the
+    // tree at a stale resolution.
+    expect(Object.keys(overrides).sort()).toEqual(Object.keys(ADVISORY_FLOORS).sort());
+  });
+
+  it("resolves no vulnerable glob or minimatch in the lockfile", () => {
+    // A scoped pin goes inert if its parent is renamed, and it cannot reach a
+    // second parent. The lockfile is what actually ships.
+    const lock = readFileSync(join(repoRoot, "pnpm-lock.yaml"), "utf8");
+    const resolved = (name: string) =>
+      [...lock.matchAll(new RegExp(`^  ${name}@(\\d+)\\.(\\d+)\\.(\\d+):$`, "gm"))].map(
+        (match) => [Number(match[1]), Number(match[2]), Number(match[3])] as [number, number, number],
+      );
+
+    expect(resolved("glob").length).toBeGreaterThan(0);
+    for (const version of resolved("glob")) {
+      expect(gte(version, [14, 0, 2]), `glob ${version.join(".")}`).toBe(true);
+    }
+
+    expect(resolved("minimatch").length).toBeGreaterThan(0);
+    for (const version of resolved("minimatch")) {
+      const affected = gte(version, [7, 0, 0]) && !gte(version, [11, 0, 1]);
+      expect(affected, `minimatch ${version.join(".")}`).toBe(false);
+    }
+  });
 
   it("keeps a caret range so patch releases still flow in", () => {
     // An exact pin (no caret) freezes the dependency and stops future patches

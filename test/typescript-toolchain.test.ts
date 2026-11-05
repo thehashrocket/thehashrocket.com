@@ -182,11 +182,15 @@ describe(".github/workflows/ci.yml audit gate", () => {
       });
 
       it("has a command that can fail", () => {
-        // --ignore-unfixable manages the ignore list and exits 0 even with
+        // --ignore-unfixable writes the ignore list and exits 0 even with
         // fixable advisories, so on its own this gate never blocks anything.
+        // It has to run first, or an unfixable advisory deadlocks the plain audit.
         const commands = (gateFor(group)?.run ?? "").split("&&").map((c) => c.trim());
 
-        expect(commands).toContain(`pnpm audit ${flag}`);
+        expect(commands).toEqual([
+          `pnpm audit ${flag} --ignore-unfixable`,
+          `pnpm audit ${flag}`,
+        ]);
       });
 
       it("gates only the patch/minor updates that actually auto-merge", () => {

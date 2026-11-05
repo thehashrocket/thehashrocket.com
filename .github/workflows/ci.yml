@@ -55,7 +55,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # The wide net, advisory for everyone. test/security-overrides.test.ts
-      # hard-fails if one of the two known pins regresses; this surfaces a NEW
+      # hard-fails if one of the known pins regresses; this surfaces a NEW
       # advisory anywhere in the tree of ~830 packages.
       #
       # Never a gate: an upstream advisory with no published fix would turn
@@ -98,9 +98,10 @@ jobs:
       #                   red with no explanation of what a human should do.
       #
       # --ignore-unfixable keeps an advisory with no published resolution from
-      # deadlocking security automation on work nobody can do. It only manages
-      # the ignore list and exits 0 even when fixable advisories remain, so the
-      # plain audit after it is the part that can actually fail.
+      # deadlocking security automation on work nobody can do. It writes those
+      # advisories to auditConfig in pnpm-workspace.yaml and exits 0 even when
+      # fixable ones remain. The plain audit after it reads that list and is the
+      # part that can actually fail, so the order matters.
       #
       # Keep these two `if` conditions in sync with the merge step's condition
       # below. test/typescript-toolchain.test.ts asserts they agree.
