@@ -62,3 +62,6 @@ public/images/headshots/
 # Local planning notes
 .sources/
 eng-reviews/
+
+# Per-machine Claude Code permissions
+.claude/settings.local.json

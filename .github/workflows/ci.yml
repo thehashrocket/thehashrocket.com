@@ -197,3 +197,47 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # A red verify skips dependabot-auto-merge, so a held security PR would
+  # otherwise wait with nothing to say why. That is how advisories sat for
+  # months. An advisory the PR can't fix fails the audit gate on purpose, so
+  # this tells a human instead of failing silently.
+  dependabot-held-notice:
+    name: Flag held Dependabot security PRs
+    needs: verify
+    if: failure() && github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write # gh label create / --add-label go through the Issues API
+
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Same set the merge step above would have merged. Dependabot rebases
+      # rerun this, so the label doubles as the "already told them" marker.
+      - name: Flag the held PR for review
+        if: |
+          startsWith(steps.metadata.outputs.dependency-group, 'security-') &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        run: |
+          if gh pr view "$PR_URL" --json labels --jq '.labels[].name' | grep -qx "needs-review"; then
+            exit 0
+          fi
+          # Create if missing; never clobber an existing label's color.
+          gh label create "needs-review" --color d93f0b \
+            --description "Needs a human before merge" 2>/dev/null || true
+          gh pr edit "$PR_URL" --add-label "needs-review"
+          gh pr comment "$PR_URL" --body \
+            "CI failed, so this security update was not auto-merged. See $RUN_URL. If the audit gate failed, the advisory may not be one this PR can fix."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
