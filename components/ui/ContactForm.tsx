@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { sendGAEvent } from "@next/third-parties/google";
 import { submitContact } from "@/lib/actions";
 import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
 import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
@@ -25,6 +26,13 @@ export function ContactForm({ source }: { source?: string }) {
       formRef.current?.reset();
     }
   }, [state.success]);
+
+  // Keyed on state, not state.success, so a second message in a row still counts.
+  useEffect(() => {
+    if (state.success) {
+      sendGAEvent("event", "generate_lead", { method: "contact_form", source: source ?? "direct" });
+    }
+  }, [state, source]);
 
   useEffect(() => {
     if (isPending) {
