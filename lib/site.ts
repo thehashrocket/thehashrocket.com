@@ -4,13 +4,16 @@ export const GITHUB_URL = "https://github.com/thehashrocket";
 
 /**
  * The Cal.com booking URL, tagged with where the visitor came from. Returns
- * null when NEXT_PUBLIC_CALCOM_URL is unset (local dev, some previews), so
- * callers can fall back to the contact form instead of rendering a dead button.
+ * null when NEXT_PUBLIC_CALCOM_URL is unset or invalid, so callers can fall back
+ * to the contact form instead of rendering a dead button.
  */
 export function getBookingUrl(source?: string): string | null {
-  const base = process.env.NEXT_PUBLIC_CALCOM_URL;
-  if (!base) return null;
-  return source ? `${base}?source=${encodeURIComponent(source)}` : base;
+  const base = process.env.NEXT_PUBLIC_CALCOM_URL?.trim();
+  if (!base || !URL.canParse(base)) return null;
+
+  const url = new URL(base);
+  if (source) url.searchParams.set("source", source);
+  return url.toString();
 }
 
 export function getContactHref(source?: string): string {

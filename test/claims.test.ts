@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { caseStudies, caseStudySlugs } from "../lib/case-studies";
 import { locations, locationSlugs } from "../lib/locations";
+import { normalizeSource } from "../lib/sources";
 
 const SOURCE_DIRS = ["app", "components", "lib"];
 
@@ -48,6 +49,14 @@ describe("claims", () => {
   it("cal.com is never hardcoded", () => {
     const hits = sources.filter(({ text }) => /https?:\/\/(www\.)?cal\.com/i.test(text));
     expect(hits.map((h) => h.path)).toEqual([]);
+  });
+
+  it("every source the site hardcodes survives the allow-list", () => {
+    const literals = sources.flatMap(({ text }) =>
+      [...text.matchAll(/source="([^"]+)"/g)].map((match) => match[1]),
+    );
+    expect(literals.length).toBeGreaterThan(0);
+    for (const source of literals) expect(normalizeSource(source), source).toBe(source);
   });
 
   it("every study has a result bar, a specific CTA, and a visual", () => {

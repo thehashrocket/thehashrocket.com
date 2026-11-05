@@ -6,6 +6,9 @@ const KNOWN_SOURCES = new Set<string>([
   "work",
   "about",
   "locations",
+  // Tags for links shared off-site, such as /contact?source=linkedin.
+  "linkedin",
+  "referral",
   ...locationSlugs,
   ...caseStudySlugs.map((slug) => `work-${slug}`),
 ]);

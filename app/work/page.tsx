@@ -55,7 +55,7 @@ export default function WorkPage() {
                           title={study.title}
                           steps={study.diagram}
                           accent={study.accent}
-                          className="aspect-video w-full rounded-[var(--radius-sm)] md:w-1/2"
+                          className="w-full rounded-[var(--radius-sm)] md:w-1/2 lg:aspect-video"
                         />
 
                         <div className="md:w-1/2">

@@ -58,3 +58,7 @@ next-env.d.ts
 # Original headshots carry EXIF/GPS data. Only the stripped derivative
 # (public/images/jason-shultz.jpg) ships.
 public/images/headshots/
+
+# Local planning notes
+.sources/
+eng-reviews/

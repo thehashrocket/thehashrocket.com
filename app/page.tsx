@@ -19,9 +19,8 @@ const FEATURED_SLUGS = [
   "fleet-security-audit",
 ];
 
-const featuredStudies = getCaseStudySummaries().filter((study) =>
-  FEATURED_SLUGS.includes(study.slug),
-);
+const summaries = new Map(getCaseStudySummaries().map((study) => [study.slug, study]));
+const featuredStudies = FEATURED_SLUGS.flatMap((slug) => summaries.get(slug) ?? []);
 
 const proofPoints = [
   { value: "$200M+", label: "a year in pharma distribution runs on a system I built" },

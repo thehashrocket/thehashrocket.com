@@ -14,6 +14,8 @@ describe("normalizeSource", () => {
       "work",
       "about",
       "locations",
+      "linkedin",
+      "referral",
       ...locationSlugs,
       ...caseStudySlugs.map((slug) => `work-${slug}`),
     ];

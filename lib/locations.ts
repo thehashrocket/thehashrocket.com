@@ -17,6 +17,8 @@ export interface Industry {
 export interface Location {
   slug: string;
   name: string;
+  /** Cities for structured data, when one page covers several. */
+  cities?: string[];
   region: string;
   metaTitle: string;
   metaDescription: string;
@@ -174,6 +176,7 @@ export const locations: Record<string, Location> = {
   "manteca-tracy-lathrop": {
     slug: "manteca-tracy-lathrop",
     name: "Manteca, Tracy & Lathrop",
+    cities: ["Manteca", "Tracy", "Lathrop"],
     region: "South San Joaquin County, CA",
     metaTitle: "Software Engineer in Manteca, Tracy & Lathrop, CA",
     metaDescription:

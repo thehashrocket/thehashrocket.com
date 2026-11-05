@@ -33,7 +33,7 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Progressive enhancement:** `lib/webgl.ts` detects WebGL support (cached per session). `SceneCanvas` checks support via `useEffect` before mounting the R3F Canvas — unsupported devices get `StaticFallback` without ever attempting WebGL context creation. `ErrorBoundary` remains as a safety net for runtime context loss. The site is fully functional without WebGL.
 
-**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed and only reaches the notification email, so nothing stores it.
+**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed in `lib/sources.ts`, then goes to the notification email and the Cal.com link. Nothing on the site stores it.
 
 **Booking:** `lib/site.ts` is the only reader of `NEXT_PUBLIC_CALCOM_URL`. `BookingLink` falls back to the contact form when it is unset.
 
@@ -83,7 +83,7 @@ lib/
   ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
   ├── experience.ts     Career data (entries, core stack, domains — used by about, timeline)
-  ├── locations.ts      City configs (Sacramento, Stockton, Modesto) with optional localExperience
+  ├── locations.ts      City configs (Sacramento, Stockton, Modesto, Manteca/Tracy/Lathrop) with optional localExperience
   ├── fonts.ts          next/font configuration (Space Grotesk, Inter, JetBrains Mono)
   ├── og-fonts.ts       Promise-based font loader for OG image generation (cached, retry-on-failure)
   ├── og-image.tsx      Shared OG image template component (1200×630, Space Grotesk/Inter)

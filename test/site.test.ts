@@ -21,6 +21,18 @@ describe("getBookingUrl", () => {
     expect(getBookingUrl("a&b=c")).toBe("https://example.com/me?source=a%26b%3Dc");
   });
 
+  it("keeps a query the configured URL already has", () => {
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "https://example.com/me?overlayCalendar=true");
+    expect(getBookingUrl("home")).toBe("https://example.com/me?overlayCalendar=true&source=home");
+  });
+
+  it("treats an unusable URL as not configured", () => {
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "   ");
+    expect(getBookingUrl("home")).toBeNull();
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "cal.example/me");
+    expect(getBookingUrl("home")).toBeNull();
+  });
+
   it("omits the query when there is no source", () => {
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "https://example.com/me");
     expect(getBookingUrl()).toBe("https://example.com/me");

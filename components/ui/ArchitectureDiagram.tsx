@@ -9,7 +9,7 @@ interface ArchitectureDiagramProps {
 export function ArchitectureDiagram({ title, steps, accent, className = "" }: ArchitectureDiagramProps) {
   return (
     <div
-      className={`overflow-hidden ${className}`}
+      className={className}
       style={{
         backgroundColor: `${accent}10`,
         border: `1px solid ${accent}30`,
