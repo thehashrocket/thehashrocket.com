@@ -35,6 +35,8 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed in `lib/sources.ts`, then goes to the notification email and the Cal.com link. Nothing on the site stores it.
 
+**Canvas dimming:** `CaseStudyScroll` sets `canvasDimmed` in the store once the narrative reaches the lower quarter of the viewport, and `SceneCanvas` drops the whole canvas to 20% opacity. Doing it at the canvas covers every scene. It stays dim past the narrative because the closing CTA sits on the canvas too.
+
 **Booking:** `lib/site.ts` is the only reader of `NEXT_PUBLIC_CALCOM_URL`. `BookingLink` falls back to the contact form when it is unset or unusable.
 
 **Geo landing pages:** Data-driven architecture via `lib/locations.ts`. Each city gets a statically generated page at `/locations/[slug]` with `dynamicParams = false`. Adding a new city is config-only: add an entry to `lib/locations.ts` and it automatically gets a page, OG image, sitemap entry, and JSON-LD structured data. Cities with `localExperience` get a career credibility block in the "Why a local engineer?" card.
@@ -113,7 +115,7 @@ public/                 Static assets
 | Runtime | Node 24 (Active LTS) | Pinned three places that must agree: `.nvmrc` (24.19.0) for local and CI, `engines.node` (`24.x`) for the Vercel build, and `@types/node` (`^24`) for the compiler. `test/typescript-toolchain.test.ts` fails if they drift — types ahead of the runtime make typecheck pass for code that throws in production |
 | Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in the `overrides` block of `pnpm-workspace.yaml`, which npm ignores — see CLAUDE.md. `postcss`, `sharp`, and scoped pins for `minimatch` and `glob` are the only overrides; see CLAUDE.md |
 | Language | TypeScript 6 (+ 7 alongside) | `typescript` stays on 6 because typescript-eslint cannot load TypeScript 7. TS 7 is installed as the `typescript7` alias for `pnpm run typecheck:fast` (~5x faster, local only). Never invoke a bare `tsc` — the alias owns `node_modules/.bin/tsc`. See CLAUDE.md |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, booking CTAs, source allow-list, published claims, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 222 tests |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, booking CTAs, source allow-list, published claims, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 228 tests |
 | E2E | Playwright | 10 tests across 3 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path), scene-wiring sentinel assertions, and site structure (Lab page, nav, footer, Manteca page, qualifying fields). Runs on a dedicated port (3178, override with `E2E_PORT`) and always starts its own server — it will not adopt an unrelated process on 3000. All green as of 0.4.0.0. Not run in CI — see TODOS.md |
 | CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, `pnpm audit`, lint (non-blocking), `pnpm run typecheck`, unit tests, production build on every PR |
 | Supply chain | `pnpm audit` in CI | Advisory for humans, blocking for the Dependabot security PRs that auto-merge unattended. The blocking form is scoped to the exact set that merges without review and to the dependency class each can fix (`--prod` / `--dev`). `--ignore-unfixable` runs first to list advisories with no published fix, then a plain scoped audit does the blocking, so a fixable advisory the PR does not resolve holds it for a human |
@@ -123,4 +125,4 @@ public/                 Static assets
 ## Known Constraints
 
 - Root layout wraps children in client boundary (SceneProvider) — prevents server component rendering for page content. Acceptable for v1 static portfolio.
-- Mobile: SceneRouter mounts all scenes unconditionally; canvas dimming and mobile-only hero policy are deferred (see TODOS.md)
+- Mobile: SceneRouter mounts all scenes unconditionally; the mobile-only hero policy is deferred (see TODOS.md)

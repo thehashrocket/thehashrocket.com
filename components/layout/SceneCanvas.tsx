@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { setConsoleFunction, getConsoleFunction } from "three";
 import { SceneRouter } from "../scenes/SceneRouter";
+import { useSceneStore } from "@/lib/store";
 import { isWebGLSupported } from "@/lib/webgl";
 import { StaticFallback } from "./StaticFallback";
 
@@ -20,6 +21,7 @@ setConsoleFunction((type, message, ...rest) => {
 
 export default function SceneCanvas() {
   const [webgl, setWebgl] = useState<boolean | null>(null);
+  const dimmed = useSceneStore((s) => s.canvasDimmed);
 
   useEffect(() => {
     setWebgl(isWebGLSupported());
@@ -31,7 +33,7 @@ export default function SceneCanvas() {
 
   return (
     <Canvas
-      className="!fixed !inset-0 !-z-10"
+      className={`!fixed !inset-0 !-z-10 transition-opacity duration-[350ms] ease-out motion-reduce:transition-none ${dimmed ? "opacity-20" : ""}`}
       camera={{ position: [0, 0, 5], fov: 50 }}
       dpr={[1, 2]}
       aria-hidden

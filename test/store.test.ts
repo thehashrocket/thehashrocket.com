@@ -18,6 +18,14 @@ describe("useSceneStore", () => {
     expect(useSceneStore.getState().currentScene).toBe("pharma-wms");
   });
 
+  it("clears the canvas dim on resetScene", () => {
+    useSceneStore.getState().setCanvasDimmed(true);
+    expect(useSceneStore.getState().canvasDimmed).toBe(true);
+
+    useSceneStore.getState().resetScene();
+    expect(useSceneStore.getState().canvasDimmed).toBe(false);
+  });
+
   it("setScrollProgress clamps to the given value", () => {
     useSceneStore.getState().setScrollProgress(0.75);
     expect(useSceneStore.getState().scrollProgress).toBe(0.75);
