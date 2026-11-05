@@ -67,7 +67,7 @@ export const careerEntries: CareerEntry[] = [
     technologies: ["Ruby on Rails", "Vue.js", "PostgreSQL", "ElasticSearch"],
   },
   {
-    description: "Web application development",
+    description: "Full-stack web application development",
     role: "Software Engineer",
     startYear: 2014,
     endYear: 2016,
