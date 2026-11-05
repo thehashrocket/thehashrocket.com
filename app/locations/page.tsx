@@ -38,7 +38,9 @@ export default function LocationsPage() {
                   ? "md:w-3/4"
                   : i === 1
                     ? "md:ml-auto md:w-2/3"
-                    : "md:w-1/2"
+                    : i % 2 === 0
+                      ? "md:w-1/2"
+                      : "md:ml-auto md:w-1/2"
               }`}
             >
               <p className="mb-1 font-mono text-xs text-[var(--accent)]">
