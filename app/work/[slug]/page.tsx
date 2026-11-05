@@ -119,7 +119,8 @@ export default async function CaseStudyPage({
       <CaseStudyScroll beats={study.beats} />
 
       <div className="mx-auto mt-16 max-w-[720px]">
-        <p className="text-sm text-[var(--text-muted)]">
+        {/* Solid background: this line sits directly on the 3D scene */}
+        <p className="-ml-3 inline-block rounded-[var(--radius-sm)] bg-[var(--bg)] px-3 py-1.5 text-sm text-[var(--text-muted)]">
           Built with {study.tags.join(", ")}
         </p>
       </div>
