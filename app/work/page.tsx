@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
+import { ArchitectureDiagram } from "@/components/ui/ArchitectureDiagram";
+import { ClosingCta } from "@/components/ui/ClosingCta";
 import { Tag } from "@/components/ui/Tag";
-import { getCaseStudySummaries } from "@/lib/case-studies";
+import { getCaseStudyGroups } from "@/lib/case-studies";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
   },
 };
 
-const caseStudies = getCaseStudySummaries();
+const groups = getCaseStudyGroups();
+const orderedSlugs = groups.flatMap((g) => g.studies.map((s) => s.slug));
 
 export default function WorkPage() {
   return (
@@ -33,66 +35,54 @@ export default function WorkPage() {
         </p>
 
         {/* Full-width previews, alternating sides per docs/DESIGN.md */}
-        <div className="flex flex-col gap-16">
-          {caseStudies.map((study, i) => (
-            <Link
-              key={study.slug}
-              href={`/work/${study.slug}`}
-              className="group block rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] transition-colors hover:border-[var(--accent)]"
-            >
-              <div
-                className={`flex flex-col gap-8 p-8 md:flex-row md:items-center md:p-12 ${i % 2 === 1 ? "md:flex-row-reverse" : ""
-                  }`}
-              >
-                <div className="relative aspect-video w-full overflow-hidden rounded-[var(--radius-sm)] md:w-1/2"
-                  style={{
-                    backgroundColor: `${study.accent}10`,
-                    border: `1px solid ${study.accent}30`,
-                  }}
-                >
-                  {[`nonprofit-matching`, `grant-discovery`, `print-portal`].includes(study.slug) ? (
-                    <Image
-                      src={`/images/work/${study.slug}.png`}
-                      alt={study.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      priority={i < 2}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full flex-col items-start justify-end p-6">
-                      <span
-                        className="font-mono text-xs uppercase tracking-widest"
-                        style={{ color: `${study.accent}99` }}
+        <div className="flex flex-col gap-24">
+          {groups.map(({ group, label, studies }) => (
+            <section key={group} aria-label={label}>
+              <h2 className="mb-8 font-mono text-sm text-[var(--accent)]">{label}</h2>
+              <div className="flex flex-col gap-16">
+                {studies.map((study) => {
+                  const i = orderedSlugs.indexOf(study.slug);
+                  return (
+                    <Link
+                      key={study.slug}
+                      href={`/work/${study.slug}`}
+                      className="group block rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] transition-colors hover:border-[var(--accent)]"
+                    >
+                      <div
+                        className={`flex flex-col gap-8 p-8 md:flex-row md:items-center md:p-12 ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
                       >
-                        Case Study
-                      </span>
-                      <span
-                        className="mt-1 font-display text-2xl font-semibold"
-                        style={{ color: study.accent }}
-                      >
-                        {study.title}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                        <ArchitectureDiagram
+                          title={study.title}
+                          steps={study.diagram}
+                          accent={study.accent}
+                          className="aspect-video w-full rounded-[var(--radius-sm)] md:w-1/2"
+                        />
 
-                <div className="md:w-1/2">
-                  <h2 className="font-display text-3xl font-bold tracking-[-0.02em] text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]">
-                    {study.title}
-                  </h2>
-                  <p className="mt-3 text-lg leading-relaxed text-[var(--text-secondary)]">
-                    {study.subtitle}
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    {study.tags.map((tag) => (
-                      <Tag key={tag}>{tag}</Tag>
-                    ))}
-                  </div>
-                </div>
+                        <div className="md:w-1/2">
+                          <h3 className="font-display text-3xl font-bold tracking-[-0.02em] text-[var(--text-primary)] transition-colors group-hover:text-[var(--accent)]">
+                            {study.title}
+                          </h3>
+                          <p className="mt-3 text-lg leading-relaxed text-[var(--text-secondary)]">
+                            {study.outcome}
+                          </p>
+                          <div className="mt-6 flex flex-wrap gap-2">
+                            {study.status === "In progress" && <Tag>In progress</Tag>}
+                            {study.tags.map((tag) => (
+                              <Tag key={tag}>{tag}</Tag>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
-            </Link>
+            </section>
           ))}
+        </div>
+
+        <div className="mt-24 border-t border-[var(--border)] pt-16">
+          <ClosingCta source="work" />
         </div>
       </div>
     </div>
