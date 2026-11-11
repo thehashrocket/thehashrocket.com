@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://thehashrocket.com/sitemap.xml",
+    sitemap: "https://www.jasonshultz.com/sitemap.xml",
   };
 }

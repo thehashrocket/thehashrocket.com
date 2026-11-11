@@ -30,7 +30,7 @@ export async function generateMetadata({
     title: study.title,
     description: study.subtitle,
     openGraph: {
-      url: `https://thehashrocket.com/work/${slug}`,
+      url: `https://www.jasonshultz.com/work/${slug}`,
     },
   };
 }
@@ -40,9 +40,9 @@ function BreadcrumbListJsonLd({ slug, title }: { slug: string; title: string }) 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://thehashrocket.com" },
-      { "@type": "ListItem", position: 2, name: "Work", item: "https://thehashrocket.com/work" },
-      { "@type": "ListItem", position: 3, name: title, item: `https://thehashrocket.com/work/${slug}` },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.jasonshultz.com" },
+      { "@type": "ListItem", position: 2, name: "Work", item: "https://www.jasonshultz.com/work" },
+      { "@type": "ListItem", position: 3, name: title, item: `https://www.jasonshultz.com/work/${slug}` },
     ],
   };
   return (

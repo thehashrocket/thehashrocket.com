@@ -33,7 +33,7 @@ export async function generateMetadata({
       title: location.metaTitle,
       description: location.metaDescription,
       type: "website",
-      url: `https://thehashrocket.com/locations/${slug}`,
+      url: `https://www.jasonshultz.com/locations/${slug}`,
     },
   };
 }

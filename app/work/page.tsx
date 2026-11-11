@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description:
     "Case studies from 20+ years building complex, high-stakes software — web applications, legacy modernization, infrastructure, pharma logistics, nonprofit platforms, and print production systems.",
   openGraph: {
-    url: "https://thehashrocket.com/work",
+    url: "https://www.jasonshultz.com/work",
   },
 };
 

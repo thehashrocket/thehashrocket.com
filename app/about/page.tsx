@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     "20+ years building, rescuing, and running the software businesses depend on. The person who designs your system is the person who gets the call when it breaks.",
   openGraph: {
-    url: "https://thehashrocket.com/about",
+    url: "https://www.jasonshultz.com/about",
   },
 };
 

@@ -37,8 +37,8 @@ describe("metadata", () => {
   });
 
   it("each page has openGraph.url", () => {
-    expect(workMetadata.openGraph?.url).toBe("https://thehashrocket.com/work");
-    expect(aboutMetadata.openGraph?.url).toBe("https://thehashrocket.com/about");
-    expect(contactMetadata.openGraph?.url).toBe("https://thehashrocket.com/contact");
+    expect(workMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/work");
+    expect(aboutMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/about");
+    expect(contactMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/contact");
   });
 });

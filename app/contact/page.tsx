@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "Running on spreadsheets, duct tape, or software nobody wants to touch? Book a 20-minute call or send a message. Projects typically start at $10,000. Reply within one business day.",
   openGraph: {
-    url: "https://thehashrocket.com/contact",
+    url: "https://www.jasonshultz.com/contact",
   },
 };
 

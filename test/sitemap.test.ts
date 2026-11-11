@@ -9,21 +9,21 @@ describe("sitemap", () => {
 
   it("includes all case study slugs", () => {
     for (const slug of caseStudySlugs) {
-      expect(urls).toContain(`https://www.thehashrocket.com/work/${slug}`);
+      expect(urls).toContain(`https://www.jasonshultz.com/work/${slug}`);
     }
   });
 
   it("includes all location slugs", () => {
     for (const slug of locationSlugs) {
-      expect(urls).toContain(`https://www.thehashrocket.com/locations/${slug}`);
+      expect(urls).toContain(`https://www.jasonshultz.com/locations/${slug}`);
     }
   });
 
   it("includes core pages", () => {
-    expect(urls).toContain("https://www.thehashrocket.com");
-    expect(urls).toContain("https://www.thehashrocket.com/work");
-    expect(urls).toContain("https://www.thehashrocket.com/about");
-    expect(urls).toContain("https://www.thehashrocket.com/contact");
+    expect(urls).toContain("https://www.jasonshultz.com");
+    expect(urls).toContain("https://www.jasonshultz.com/work");
+    expect(urls).toContain("https://www.jasonshultz.com/about");
+    expect(urls).toContain("https://www.jasonshultz.com/contact");
   });
 
   it("all lastModified are static strings, not dynamic Date instances", () => {

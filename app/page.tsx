@@ -8,7 +8,7 @@ import { getCaseStudySummaries } from "@/lib/case-studies";
 
 export const metadata: Metadata = {
   openGraph: {
-    url: "https://thehashrocket.com",
+    url: "https://www.jasonshultz.com",
   },
 };
 

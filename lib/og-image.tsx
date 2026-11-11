@@ -63,7 +63,7 @@ export function OgImageTemplate({ title, subtitle, label }: OgImageTemplateProps
           fontSize: 18,
         }}
       >
-        thehashrocket.com
+        jasonshultz.com
       </div>
     </div>
   );

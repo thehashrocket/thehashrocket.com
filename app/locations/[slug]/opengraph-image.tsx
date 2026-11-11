@@ -87,7 +87,7 @@ export default async function OGImage({
             fontFamily: "Inter",
           }}
         >
-          thehashrocket.com
+          jasonshultz.com
         </div>
       </div>
     ),
