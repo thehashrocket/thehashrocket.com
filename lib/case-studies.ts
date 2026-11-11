@@ -85,20 +85,24 @@ export const caseStudies: Record<string, CaseStudy> = {
     },
     beats: [
       {
-        heading: "The Problem",
-        body: "A print shop operator was managing the entire production lifecycle on paper and spreadsheets — customer quotes, job tickets, typesetting proofs, press runs, and invoicing. Each job touched four departments (Prepress, Press, Bindery, Shipping) with no shared visibility. Status checks required walking the floor. QuickBooks was updated by hand.",
+        heading: "Before",
+        body: "Every job at this print shop lived on a paper ticket. Quotes, proofs, press runs, and invoices were tracked on paper and in spreadsheets, and each job passed through four departments (Prepress, Press, Bindery, Shipping) that couldn't see each other's work. Finding out where a job stood meant walking the floor and asking. When a job shipped, someone typed the invoice into QuickBooks by hand.",
       },
       {
-        heading: "The Approach",
-        body: "I built a portal where every job follows a defined path: quote to work order, work order to order, order to invoice. Typesetting proofs route through multi-iteration client approvals online. Each department sees its own live queue. Shipping dispatches via FedEx, UPS, USPS, or courier. QuickBooks syncs customers, invoices, and payments bidirectionally.",
+        heading: "What I Built",
+        body: "One portal that every job moves through in a fixed order: quote, work order, order, invoice. Each step is created from the one before it, so nothing gets retyped along the way. Clients review typesetting proofs online and can go as many rounds as the job needs. Shipping dispatches by FedEx, UPS, USPS, or courier from the same system.",
       },
       {
-        heading: "The Architecture",
-        body: "T3 stack: Next.js App Router with tRPC (32 routers) and Prisma over PostgreSQL (38 models). NextAuth with Google OAuth and magic links. AG Grid for order management. Pusher for real-time production status. jsPDF for invoice generation. QuickBooks Online OAuth integration. Role-based access across 9 staff roles with 45 granular permissions.",
+        heading: "What Changed on the Floor",
+        body: "Each department opens its own live queue and sees what's waiting and what's running. A status question gets answered from a desk instead of a walk. Staff see only the screens their job needs, across nine roles. Customers, invoices, and payments sync with QuickBooks in both directions, so the books match the floor without anyone re-keying.",
+      },
+      {
+        heading: "Under the Hood",
+        body: "Next.js and TypeScript with tRPC and Prisma over PostgreSQL. Pusher sends status changes to every open queue as they happen. QuickBooks Online connects over OAuth. Sign-in is Google or an emailed magic link, so nobody has another password to manage. Invoices are generated as PDFs from the same order data the floor works from.",
       },
       {
         heading: "The Results",
-        body: "Eliminated paper job tickets entirely. The portal handles 200 jobs a week. Every department has live production status without walking the floor. Clients approve proofs online instead of by fax or email. Finance syncs directly to QuickBooks without re-keying data.",
+        body: "No paper job tickets are left. The portal handles 200 jobs a week across four departments. Clients approve proofs online instead of by fax or email. Finance no longer re-keys invoices into QuickBooks.",
       },
     ],
   },
