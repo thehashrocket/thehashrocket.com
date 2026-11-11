@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Side projects, tools I use every day, and whatever I'm curious about this month.",
   openGraph: {
-    url: "https://thehashrocket.com/lab",
+    url: "https://www.jasonshultz.com/lab",
   },
 };
 

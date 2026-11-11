@@ -8,7 +8,7 @@ describe("LocationJsonLd data shape", () => {
       const jsonLd = {
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
-        url: `https://thehashrocket.com/locations/${slug}`,
+        url: `https://www.jasonshultz.com/locations/${slug}`,
         areaServed: {
           "@type": "City",
           name: location.name,

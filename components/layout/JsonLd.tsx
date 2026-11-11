@@ -5,7 +5,7 @@ export function PersonJsonLd() {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Jason Shultz",
-    url: "https://thehashrocket.com",
+    url: "https://www.jasonshultz.com",
     jobTitle: "Senior Full-Stack Engineer",
     description:
       "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
@@ -28,7 +28,7 @@ export function WebSiteJsonLd() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Jason Shultz — Senior Full-Stack Engineer",
-    url: "https://thehashrocket.com",
+    url: "https://www.jasonshultz.com",
   };
 
   return (

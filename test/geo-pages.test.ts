@@ -32,7 +32,7 @@ describe("geo page data integration", () => {
         "@type": "ProfessionalService",
         name: "Jason Shultz — Software Engineering",
         description: location.metaDescription,
-        url: `https://thehashrocket.com/locations/${slug}`,
+        url: `https://www.jasonshultz.com/locations/${slug}`,
         areaServed: {
           "@type": "City",
           name: location.name,
@@ -78,7 +78,7 @@ describe("geo page data integration", () => {
   });
 
   it("sitemap entries would be generated for all locations", () => {
-    const baseUrl = "https://thehashrocket.com";
+    const baseUrl = "https://www.jasonshultz.com";
     const urls = [
       `${baseUrl}/locations`,
       ...locationSlugs.map((slug) => `${baseUrl}/locations/${slug}`),
@@ -86,7 +86,7 @@ describe("geo page data integration", () => {
 
     expect(urls).toHaveLength(locationSlugs.length + 1);
     for (const url of urls) {
-      expect(url).toMatch(/^https:\/\/thehashrocket\.com\/locations/);
+      expect(url).toMatch(/^https:\/\/www\.jasonshultz\.com\/locations/);
     }
   });
 });

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
-  metadataBase: new URL("https://thehashrocket.com"),
+  metadataBase: new URL("https://www.jasonshultz.com"),
   openGraph: {
     type: "website",
     locale: "en_US",

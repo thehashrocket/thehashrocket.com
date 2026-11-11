@@ -23,7 +23,7 @@ describe("PersonJsonLd rendering", () => {
     expect(data["@context"]).toBe("https://schema.org");
     expect(data["@type"]).toBe("Person");
     expect(data.name).toBe("Jason Shultz");
-    expect(data.url).toBe("https://thehashrocket.com");
+    expect(data.url).toBe("https://www.jasonshultz.com");
     expect(data.jobTitle).toBe("Senior Full-Stack Engineer");
     expect(data.sameAs).toContain("https://www.linkedin.com/in/jasonshultz/");
     expect(data.sameAs).toContain("https://github.com/thehashrocket");
@@ -37,7 +37,7 @@ describe("WebSiteJsonLd rendering", () => {
     expect(data["@context"]).toBe("https://schema.org");
     expect(data["@type"]).toBe("WebSite");
     expect(data.name).toBeTruthy();
-    expect(data.url).toBe("https://thehashrocket.com");
+    expect(data.url).toBe("https://www.jasonshultz.com");
   });
 });
 
@@ -51,7 +51,7 @@ describe("LocationJsonLd rendering", () => {
     const data = parseJsonLdScript(container);
     expect(data["@context"]).toBe("https://schema.org");
     expect(data["@type"]).toBe("ProfessionalService");
-    expect(data.url).toBe("https://thehashrocket.com/locations/sacramento");
+    expect(data.url).toBe("https://www.jasonshultz.com/locations/sacramento");
     expect(data.description).toBe(location.metaDescription);
   });
 
