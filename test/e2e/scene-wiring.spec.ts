@@ -23,6 +23,7 @@ test("each case study slug wires its own scene", async ({ page }) => {
     "wordpress-modernization",
     "fleet-security-audit",
     "automation-rescue",
+    "volunteerready",
   ];
   for (const slug of slugs) {
     await page.goto(`/work/${slug}`);

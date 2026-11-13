@@ -80,6 +80,7 @@
 | WordPress Modernization | #a78bfa (violet) | Layers rebuilding wireframe → solid |
 | Fleet Security Audit | #f87171 (red) | Server ring, sweeping scan beam |
 | Automation Rescue | #f472b6 (pink) | Workflow graph, edges repairing on scroll |
+| VolunteerReady | #2dd4bf (teal) | Nonprofit hubs, volunteer links crossing orgs on scroll |
 
 ## Spacing
 - **Base unit:** 4px (Tailwind default scale)

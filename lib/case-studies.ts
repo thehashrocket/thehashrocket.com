@@ -291,6 +291,42 @@ export const caseStudies: Record<string, CaseStudy> = {
       },
     ],
   },
+  volunteerready: {
+    slug: "volunteerready",
+    title: "VolunteerReady",
+    subtitle: "Volunteer recruiting, screening, and scheduling platform for nonprofits",
+    outcome:
+      "One platform that takes a volunteer from application to background check to logged hours.",
+    accent: "#2dd4bf",
+    tags: ["Next.js", "TypeScript", "tRPC", "PostgreSQL", "Stripe"],
+    group: "other",
+    status: "Shipped",
+    diagram: ["Opportunity", "Screening", "Background check", "QR check-in", "Credentials"],
+    industry: "Nonprofit (my own product)",
+    results: ["Live at volunteerready.org", "Checkr + Sterling checks built in", "6 Central Valley launch markets"],
+    cta: {
+      heading: "Building a product of your own?",
+      body: "I took this one from an empty repo to a live marketplace myself. If you have a SaaS idea or a half-built platform, tell me where it stands.",
+    },
+    beats: [
+      {
+        heading: "The Problem",
+        body: "Most small nonprofits run volunteers on a web form, a spreadsheet, and a clipboard at the door. Screening answers sit in one inbox, hours in another, and background checks get ordered by hand. When a volunteer moves to a second organization, they start over from nothing.",
+      },
+      {
+        heading: "What I Built",
+        body: "VolunteerReady is my own product. Nonprofits post opportunities and screen applicants with their own questions. Approved volunteers sign up for shifts and check in by scanning a QR code. Their hours become credentials they can carry to the next organization, and staff can order a Checkr or Sterling background check without leaving the app. Companies running employee volunteer programs get hours reports they can use for ESG reporting.",
+      },
+      {
+        heading: "Under the Hood",
+        body: "Next.js and TypeScript with tRPC and Prisma over PostgreSQL. Every query is scoped to one organization, and plan limits are enforced on the server, never in the browser. Stripe handles billing tiers. Integration secrets are encrypted at rest. Scheduled jobs send shift reminders, close out finished shifts, expire credentials, and email a weekly opportunity digest with one-click unsubscribe.",
+      },
+      {
+        heading: "Getting to Market",
+        body: "A marketplace starts empty on both sides: volunteers won't come without opportunities, and nonprofits won't post where there are no volunteers. So I'm signing up nonprofits first, starting at home. Landing pages for Stockton, Modesto, Sacramento, Fresno, and San Joaquin and Stanislaus counties speak to organizations in the Central Valley. The platform is live; the first nonprofits are the next milestone.",
+      },
+    ],
+  },
   "grant-discovery": {
     slug: "grant-discovery",
     title: "Grant Discovery",
