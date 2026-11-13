@@ -6,8 +6,8 @@ import {
 } from "../lib/case-studies";
 
 describe("case-studies", () => {
-  it("exports 4 case studies", () => {
-    expect(caseStudySlugs).toHaveLength(8);
+  it("exports 9 case studies", () => {
+    expect(caseStudySlugs).toHaveLength(9);
   });
 
   it("has all expected slugs", () => {
@@ -19,6 +19,7 @@ describe("case-studies", () => {
     expect(caseStudySlugs).toContain("wordpress-modernization");
     expect(caseStudySlugs).toContain("fleet-security-audit");
     expect(caseStudySlugs).toContain("automation-rescue");
+    expect(caseStudySlugs).toContain("volunteerready");
   });
 
   it("each case study has required fields", () => {
@@ -44,7 +45,7 @@ describe("case-studies", () => {
 
   it("getCaseStudySummaries returns summaries without beats", () => {
     const summaries = getCaseStudySummaries();
-    expect(summaries).toHaveLength(8);
+    expect(summaries).toHaveLength(9);
     for (const summary of summaries) {
       expect(summary.slug).toBeTruthy();
       expect(summary.title).toBeTruthy();

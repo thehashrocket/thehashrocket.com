@@ -11,6 +11,7 @@ import { ConsolidationScene } from "./ConsolidationScene";
 import { ModernizeScene } from "./ModernizeScene";
 import { AuditScene } from "./AuditScene";
 import { AutomationScene } from "./AutomationScene";
+import { VolunteerScene } from "./VolunteerScene";
 
 export function SceneRouter() {
   const currentScene = useSceneStore((s) => s.currentScene);
@@ -74,6 +75,12 @@ export function SceneRouter() {
         progress={scrollProgress}
         active={currentScene === "automation-rescue"}
         accent={caseStudies["automation-rescue"].accent}
+        onMorphComplete={morphCallback}
+      />
+      <VolunteerScene
+        progress={scrollProgress}
+        active={currentScene === "volunteerready"}
+        accent={caseStudies.volunteerready.accent}
         onMorphComplete={morphCallback}
       />
     </>
