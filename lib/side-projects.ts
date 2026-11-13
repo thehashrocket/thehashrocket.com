@@ -21,11 +21,11 @@ export const sideProjects: SideProject[] = [
   {
     slug: "skywave",
     name: "Skywave",
-    status: "In progress",
+    status: "Live",
     description:
-      "Shortwave and ham radio without owning a radio or an antenna. A Next.js app and a Python DSP service tune into public KiwiSDR receivers around the world, stream the audio, and map where stations are transmitting from.",
+      "Shortwave and ham radio in the browser, no radio or antenna required. It picks a public KiwiSDR receiver for the frequency you want, streams the audio, and shows a live waterfall you can click to tune. A map shows where the receivers are and which parts of the world are dark, which is when distant stations come in.",
     tags: ["Next.js", "Python", "DSP", "KiwiSDR"],
-    url: "https://skywave-woad.vercel.app/",
+    url: "https://skywavehf.com/",
   },
   {
     slug: "volunteerready",
