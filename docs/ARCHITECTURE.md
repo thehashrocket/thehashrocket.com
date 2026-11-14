@@ -100,6 +100,7 @@ lib/
   ├── contact-options.ts  Contact form project types, timelines, and project type preselected by ?source=
   ├── constants.ts      Shared constants (MORPH_DURATION_MS, CONTACT_FORM_TIMEOUT_MS)
   ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery, useDimCanvasBelow)
+  ├── nav-input.ts      Keyboard vs pointer nav-link activation, set as `data-nav-input` on `<html>` (sessionStorage carries it across a full page load)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
   ├── experience.ts     Career data (entries, core stack, domains — used by about, timeline)
   ├── offers.ts         Every offer number, the formatters (formatUsd, formatUsdRange, formatUsdCompact) and the pricing ladder (offerLadderParts/Text); type-only imports so client code may use it
