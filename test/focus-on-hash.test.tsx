@@ -40,4 +40,24 @@ describe("FocusOnHash", () => {
     });
     expect(document.activeElement).toBe(getByRole("heading"));
   });
+
+  // Value: protects=only the section's own hash moves focus, and an unmounted page stops listening;
+  //   fails_when=the hash check loosens (any hash, or a prefix match) or the listener is never removed;
+  //   why_new=the cases above cover the matching hash and no hash only; seam=none; no_claim=none beyond protects
+  it("ignores other hashes and stops listening after unmount", () => {
+    const { getByRole, unmount } = render(<Section />);
+    act(() => {
+      window.history.replaceState(null, "", "/#services-extra");
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(document.activeElement).not.toBe(getByRole("heading"));
+
+    const heading = getByRole("heading");
+    unmount();
+    document.body.appendChild(heading);
+    window.history.replaceState(null, "", "/#services");
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(document.activeElement).not.toBe(heading);
+    heading.remove();
+  });
 });

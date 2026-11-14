@@ -79,3 +79,26 @@ test("a sprint inquiry submits and resets to the sprint type", async ({ page }) 
   await expect(page.getByText(/message sent/i)).toBeVisible({ timeout: 10000 });
   await expect(projectType).toHaveValue("Automation sprint");
 });
+
+// Value: protects=a submit before hydration still POSTs to the server action, so the visitor's message never lands
+//   in the URL (history, logs, referrers); fails_when=the form's `action` prop is dropped now that onSubmit handles
+//   hydrated submits, and the browser falls back to a GET; why_new=every other submit test runs with JS on; seam=none;
+//   no_claim=what the no-JS response renders after the POST, or email delivery (TEST_EMAIL_ENABLED skips Resend)
+test.describe("without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("the contact form posts and keeps the message out of the URL", async ({ page }) => {
+    await page.goto("/contact");
+    await page.locator("#name").fill("No Script");
+    await page.locator("#email").fill("noscript@example.com");
+    await page.locator("#message").fill("Private details about our broken workflow");
+    const [request] = await Promise.all([
+      page.waitForRequest((r) => r.isNavigationRequest() && new URL(r.url()).pathname === "/contact"),
+      page.locator("form button[type=submit]").click(),
+    ]);
+    expect(request.method()).toBe("POST");
+    await page.waitForLoadState();
+    expect(page.url()).not.toContain("Private");
+    expect(page.url()).not.toContain("message=");
+  });
+});
