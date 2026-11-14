@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0.0] - 2026-11-13
+
+### Added
+- `/ai-app-review`: a fixed-fee review for an app built with AI or inherited from someone else. It shows the price, turnaround, monthly capacity and scope limits, says what is checked and what it isn't, and credits the fee toward a fix that starts within 30 days.
+- `/print-shops`: a page for print shop owners built from the Print Portal case study, with its results, the quote-to-invoice workflow, and an honest comparison of configuring a packaged system, connecting existing tools, or building custom.
+- Visitors who arrive at `/contact` from either page find the matching project type already chosen, and can still change it. "AI-built app review" is a new choice in the form.
+- Search engines get Service structured data for the review and FAQ structured data on both pages, and both pages have their own share images.
+
+### Changed
+- The homepage "Rescue it" service now names apps built with AI and links to the review. "How it works" offers a fixed-fee review as an alternative to paid discovery, and the pricing line shows the review fee beside the $10,000 project floor.
+- The Print Portal case study and the footer link to `/print-shops`.
+
 ## [0.4.1.0] - 2026-11-05
 
 ### Fixed
