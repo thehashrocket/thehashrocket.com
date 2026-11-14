@@ -208,7 +208,8 @@ describe("submitContact", () => {
       makeFormData(validFields),
     );
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Something went wrong");
+    expect(result.error).toContain("wasn't sent");
+    expect(result.code).toBe("send_failed");
   });
 
   it("returns failure when Resend throws an exception", async () => {
@@ -218,7 +219,8 @@ describe("submitContact", () => {
       makeFormData(validFields),
     );
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Something went wrong");
+    expect(result.error).toContain("wasn't sent");
+    expect(result.code).toBe("send_failed");
   });
 
   it("returns failure when RESEND_API_KEY is missing", async () => {
@@ -232,51 +234,83 @@ describe("submitContact", () => {
       makeFormData(validFields),
     );
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Something went wrong");
+    expect(result.error).toContain("wasn't sent");
+    expect(result.code).toBe("send_failed");
     vi.stubEnv("RESEND_API_KEY", "re_test_key");
   });
 });
 
 describe("submitContact rate limiting", () => {
-  // A stand-in for @upstash/ratelimit that follows its counting rules: fixed windows aligned to
-  // the epoch, the previous window weighted by how much of it still overlaps and floored, and a
-  // denied call is not counted. no_claim=Upstash's Lua script and Redis timing (mocked).
+  // A stand-in for @upstash/ratelimit 2.2 that follows its sliding-window rules: fixed windows
+  // aligned to the epoch, the previous window weighted by how much of it still overlaps and
+  // floored. getRemaining reads without spending; limit spends one slot unless the window is full.
+  // no_claim=Upstash's Lua scripts and Redis timing (mocked to the same formula).
   type Window = { tokens: number; window: string };
   type Options = { limiter: Window; prefix: string; timeout: number };
-  type Fault = "throw" | "timeout";
+  type Fault = "throw" | "hang";
   const WINDOW_MS: Record<string, number> = { "1 h": 3_600_000, "1 d": 86_400_000 };
   const instances: Options[] = [];
-  const calls: { prefix: string; key: string }[] = [];
+  const calls: { op: "check" | "record"; prefix: string; key: string }[] = [];
   const buckets = new Map<string, number>();
-  let faults: Record<string, Fault> = {};
+  let checkFaults: Record<string, Fault> = {};
+  let recordFaults: Record<string, Fault> = {};
   let setupThrows = false;
   let requestHeaders: Record<string, string> = {};
 
-  function limitFor(options: Options) {
-    return async (key: string) => {
-      calls.push({ prefix: options.prefix, key });
-      const fault = faults[options.prefix];
-      if (fault === "throw") throw new Error("upstash down at https://secret.upstash.example");
-      if (fault === "timeout") return { success: true, reason: "timeout" };
-      const size = WINDOW_MS[options.limiter.window];
-      const now = Date.now();
-      const current = Math.floor(now / size);
-      const id = (w: number) => `${options.prefix}:${key}:${w}`;
-      const used = buckets.get(id(current)) ?? 0;
-      const previous = buckets.get(id(current - 1)) ?? 0;
-      const weighted = Math.floor((1 - (now % size) / size) * previous);
-      if (weighted + used >= options.limiter.tokens) return { success: false };
-      buckets.set(id(current), used + 1);
-      return { success: true };
+  function used(options: Options, key: string) {
+    const size = WINDOW_MS[options.limiter.window];
+    const now = Date.now();
+    const current = Math.floor(now / size);
+    const id = (w: number) => `${options.prefix}:${key}:${w}`;
+    const inCurrent = buckets.get(id(current)) ?? 0;
+    const weighted = Math.floor((1 - (now % size) / size) * (buckets.get(id(current - 1)) ?? 0));
+    return { total: weighted + inCurrent, currentId: id(current), inCurrent };
+  }
+
+  function fault(kind: Fault | undefined) {
+    if (kind === "throw") throw new Error("upstash down at https://secret.upstash.example");
+    if (kind === "hang") return new Promise<never>(() => {});
+    return null;
+  }
+
+  function limiterFor(options: Options) {
+    return {
+      getRemaining: async (key: string) => {
+        calls.push({ op: "check", prefix: options.prefix, key });
+        const failed = fault(checkFaults[options.prefix]);
+        if (failed) return failed;
+        return { remaining: Math.max(0, options.limiter.tokens - used(options, key).total) };
+      },
+      limit: async (key: string) => {
+        calls.push({ op: "record", prefix: options.prefix, key });
+        const failed = fault(recordFaults[options.prefix]);
+        if (failed) return failed;
+        const { total, currentId, inCurrent } = used(options, key);
+        if (total >= options.limiter.tokens) return { success: false };
+        buckets.set(currentId, inCurrent + 1);
+        return { success: true };
+      },
     };
   }
+
+  /** Slots spent by one key under one prefix, across all windows. */
+  function spent(prefix: string, key: string) {
+    let sum = 0;
+    for (const [id, n] of buckets) if (id.startsWith(`${prefix}:${key}:`)) sum += n;
+    return sum;
+  }
+  const emailKeyOf = (email: string) => {
+    const call = calls.find((c) => c.prefix === "contact:email" && c.op === "check");
+    expect(call, `no email check for ${email}`).toBeDefined();
+    return call!.key;
+  };
 
   async function loadWithLimiter() {
     vi.doMock("@upstash/ratelimit", () => ({
       Ratelimit: Object.assign(
         vi.fn().mockImplementation(function (options: Options) {
           instances.push(options);
-          return { limit: limitFor(options) };
+          return limiterFor(options);
         }),
         { slidingWindow: (tokens: number, window: string) => ({ tokens, window }) },
       ),
@@ -301,6 +335,7 @@ describe("submitContact rate limiting", () => {
     return submit(idle, makeFormData({ ...validFields, email }));
   };
   const DENIED = { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
+  const SENT = { success: true, error: null, code: null };
   const warnSpy = () => vi.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
@@ -309,10 +344,11 @@ describe("submitContact rate limiting", () => {
     instances.length = 0;
     calls.length = 0;
     buckets.clear();
-    faults = {};
+    checkFaults = {};
+    recordFaults = {};
     setupThrows = false;
     requestHeaders = {};
-    mockSend.mockClear();
+    mockSend.mockReset().mockResolvedValue({ data: { id: "test-id" }, error: null });
     vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://upstash.example");
     vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
     vi.stubEnv("TEST_EMAIL_ENABLED", "");
@@ -348,14 +384,13 @@ describe("submitContact rate limiting", () => {
   //   no_claim=real venue NAT behaviour
   it("lets 8 different people on one IP write in within an hour", async () => {
     const submit = await loadWithLimiter();
-    for (let i = 0; i < 8; i++) {
-      expect(await send(submit, `u${i}@x.com`)).toEqual({ success: true, error: null, code: null });
-    }
+    for (let i = 0; i < 8; i++) expect(await send(submit, `u${i}@x.com`)).toEqual(SENT);
   });
 
-  // Value: protects=the hourly per-IP cap and its denial copy and log; fails_when=the hourly limit or order changes;
-  //   why_new=new limiter; seam=none; no_claim=Upstash's window edges (mocked to its rules)
-  it("rejects the 11th message from one IP within an hour", async () => {
+  // Value: protects=the hourly per-IP cap, its denial copy and log, and that a denial never sends;
+  //   fails_when=the hourly limit or order changes, or the check moves after the send; why_new=new limiter;
+  //   seam=none; no_claim=Upstash's window edges (mocked to its rules)
+  it("rejects the 11th message from one IP within an hour without sending it", async () => {
     const warn = warnSpy();
     const submit = await loadWithLimiter();
     for (let i = 0; i < 10; i++) expect((await send(submit, `u${i}@x.com`)).success).toBe(true);
@@ -365,7 +400,7 @@ describe("submitContact rate limiting", () => {
   });
 
   // Value: protects=the daily per-IP cap that bounds one source when the email check is dodged;
-  //   fails_when=the daily limiter is dropped or checked after the hourly one; why_new=new limiter; seam=none;
+  //   fails_when=the daily limiter is dropped; why_new=new limiter; seam=none;
   //   no_claim=behaviour across UTC midnight (pinned inside one UTC day)
   it("rejects the 31st message from one IP in a day", async () => {
     const warn = warnSpy();
@@ -390,6 +425,44 @@ describe("submitContact rate limiting", () => {
     expect(warn).toHaveBeenCalledWith("Contact rate limit denied", { limiter: "email" });
   });
 
+  // Value: protects=a Resend outage never uses up a visitor's slots: only a message that reached the inbox counts
+  //   (owner decision on #97); fails_when=slots are spent before or regardless of the send;
+  //   why_new=the limiter used to count every attempt; seam=none; no_claim=Resend's own retry behaviour
+  it("counts one slot for an email that failed 3 times and then sent", async () => {
+    const submit = await loadWithLimiter();
+    mockSend
+      .mockResolvedValueOnce({ data: null, error: { statusCode: 500, message: "down" } })
+      .mockResolvedValueOnce({ data: null, error: { statusCode: 500, message: "down" } })
+      .mockRejectedValueOnce(new Error("network"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    for (let i = 0; i < 3; i++) expect((await send(submit, "retry@x.com")).code).toBe("send_failed");
+    expect(await send(submit, "retry@x.com")).toEqual(SENT);
+    expect(spent("contact:email", emailKeyOf("retry@x.com"))).toBe(1);
+  });
+
+  // Value: protects=a failed send leaves the IP's hourly and daily counts untouched, so a room keeps its allowance;
+  //   fails_when=the record step runs before or without a successful send; why_new=check-then-record is new;
+  //   seam=none; no_claim=none beyond protects
+  it("leaves the IP's hourly and daily counts unchanged when a send fails", async () => {
+    const submit = await loadWithLimiter();
+    mockSend.mockResolvedValueOnce({ data: null, error: { statusCode: 500, message: "down" } });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect((await send(submit, "a@x.com")).code).toBe("send_failed");
+    expect(spent("contact:ip", "203.0.113.9")).toBe(0);
+    expect(spent("contact:ip-day", "203.0.113.9")).toBe(0);
+    expect(calls.filter((c) => c.op === "record")).toHaveLength(0);
+  });
+
+  // Value: protects=an exhausted limit still rejects before any send is attempted; fails_when=the check is skipped or
+  //   only the record step enforces the limit; why_new=checks no longer spend slots; seam=none; no_claim=none beyond protects
+  it("rejects an exhausted limit before attempting a send", async () => {
+    const submit = await loadWithLimiter();
+    for (let i = 0; i < 3; i++) await send(submit, "busy@x.com", `198.51.100.${i}`);
+    mockSend.mockClear();
+    expect(await send(submit, "busy@x.com", "192.0.2.1")).toEqual(DENIED);
+    expect(mockSend).not.toHaveBeenCalled();
+  });
+
   // Value: protects=the email key ignores case and surrounding spaces and never stores the raw address;
   //   fails_when=normalization moves after validation or the hash is dropped; why_new=new key; seam=none;
   //   no_claim=browser trimming of type=email inputs
@@ -404,16 +477,6 @@ describe("submitContact rate limiting", () => {
     expect(mockSend.mock.calls[1][0].text).toContain("Email: a@x.com");
   });
 
-  // Value: protects=a crowd on one IP can't burn a real person's email bucket; fails_when=the email check runs before
-  //   or regardless of the IP check; why_new=new ordering; seam=none; no_claim=none beyond protects
-  it("does not spend the email bucket on a request the IP limit denied", async () => {
-    const submit = await loadWithLimiter();
-    for (let i = 0; i < 10; i++) await send(submit, `u${i}@x.com`);
-    expect(await send(submit, "e@x.com")).toEqual(DENIED);
-    expect((await send(submit, "e@x.com", "192.0.2.1")).success).toBe(true);
-    expect(calls.filter((c) => c.prefix === "contact:email" && c.key === calls.at(-1)?.key)).toHaveLength(1);
-  });
-
   // Value: protects=both IP limiters key on Vercel's x-real-ip, falling back to the trimmed leftmost x-forwarded-for,
   //   then "anonymous"; fails_when=the key reverts to the raw spoofable header or the order flips; why_new=ported from
   //   the single-limiter test; seam=none; no_claim=Vercel actually sets x-real-ip
@@ -423,7 +486,7 @@ describe("submitContact rate limiting", () => {
       requestHeaders = h;
       calls.length = 0;
       await submit(idle, makeFormData(validFields));
-      return calls.filter((c) => c.prefix.startsWith("contact:ip")).map((c) => c.key);
+      return calls.filter((c) => c.op === "check" && c.prefix.startsWith("contact:ip")).map((c) => c.key);
     };
     expect(await keysFor({ "x-real-ip": "203.0.113.9", "x-forwarded-for": "1.2.3.4, 203.0.113.9" })).toEqual([
       "203.0.113.9",
@@ -434,26 +497,51 @@ describe("submitContact rate limiting", () => {
   });
 
   // Value: protects=an unavailable limiter never drops a lead, a later working limiter still applies, and the log
-  //   never carries the Upstash URL; fails_when=one try wraps all calls again, or a timeout result is ignored;
-  //   why_new=the SDK resolves timeouts as success with reason "timeout" and the old catch was silent; seam=none;
-  //   no_claim=real network latency (mocked)
-  it("fails open per limiter on a throw or timeout and logs no URL", async () => {
+  //   never carries the Upstash URL; fails_when=one try wraps all checks again; why_new=per-limiter fail-open is new;
+  //   seam=none; no_claim=real network latency (mocked)
+  it("fails open per limiter when a check throws and logs no URL", async () => {
     const warn = warnSpy();
     const submit = await loadWithLimiter();
-    faults = { "contact:ip-day": "throw", "contact:ip": "timeout" };
+    checkFaults = { "contact:ip-day": "throw", "contact:ip": "throw" };
     expect((await send(submit, "a@x.com")).success).toBe(true);
     expect(warn).toHaveBeenCalledWith("Contact rate limit unavailable, failing open", {
       limiter: "ip-day",
       reason: "Error: upstash down at https://secret.upstash.example",
     });
-    expect(warn).toHaveBeenCalledWith("Contact rate limit unavailable, failing open", {
-      limiter: "ip",
-      reason: "timeout",
-    });
     // The email limiter still counts and still denies.
     await send(submit, "a@x.com");
     await send(submit, "a@x.com");
     expect(await send(submit, "a@x.com")).toEqual(DENIED);
+  });
+
+  // Value: protects=a hanging check gives up after 1 s and accepts; fails_when=the getRemaining timeout is dropped
+  //   (Upstash applies its timeout option to limit only); why_new=getRemaining is new; seam=none;
+  //   no_claim=real Redis latency
+  it("fails open when a check hangs past 1 s", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
+    vi.setSystemTime(new Date("2026-11-16T00:00:00Z"));
+    const warn = warnSpy();
+    const submit = await loadWithLimiter();
+    checkFaults = { "contact:ip-day": "hang" };
+    const pending = send(submit, "a@x.com");
+    await vi.advanceTimersByTimeAsync(1000);
+    expect((await pending).success).toBe(true);
+    expect(warn).toHaveBeenCalledWith("Contact rate limit unavailable, failing open", {
+      limiter: "ip-day",
+      reason: "Error: timeout",
+    });
+  });
+
+  // Value: protects=a failed record after a successful send still reports success; fails_when=a record error
+  //   surfaces as a send failure and the visitor resends a message that already arrived; why_new=record step is new;
+  //   seam=none; no_claim=none beyond protects
+  it("still reports success when recording a slot fails", async () => {
+    const warn = warnSpy();
+    const submit = await loadWithLimiter();
+    recordFaults = { "contact:email": "throw" };
+    expect(await send(submit, "a@x.com")).toEqual(SENT);
+    expect(warn).toHaveBeenCalledWith("Contact rate limit not recorded", expect.objectContaining({ limiter: "email" }));
+    expect(spent("contact:ip", "203.0.113.9")).toBe(1);
   });
 
   // Value: protects=a broken Redis setup accepts the message instead of a 500; fails_when=setup moves outside the
@@ -462,7 +550,7 @@ describe("submitContact rate limiting", () => {
     const warn = warnSpy();
     setupThrows = true;
     const submit = await loadWithLimiter();
-    expect(await send(submit, "a@x.com")).toEqual({ success: true, error: null, code: null });
+    expect(await send(submit, "a@x.com")).toEqual(SENT);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0][1]).toMatchObject({ limiter: "setup" });
     expect(mockSend).toHaveBeenCalledTimes(1);
@@ -486,8 +574,10 @@ describe("submitContact rate limiting", () => {
     vi.stubEnv("TEST_EMAIL_ENABLED", "true");
     vi.stubEnv("VERCEL_ENV", "production");
     const submit = await loadWithLimiter();
-    expect(await send(submit, "a@x.com")).toEqual({ success: true, error: null, code: null });
-    expect(calls.map((c) => c.prefix)).toEqual(["contact:ip-day", "contact:ip", "contact:email"]);
+    expect(await send(submit, "a@x.com")).toEqual(SENT);
+    const prefixes = (op: string) => calls.filter((c) => c.op === op).map((c) => c.prefix).sort();
+    expect(prefixes("check")).toEqual(["contact:email", "contact:ip", "contact:ip-day"]);
+    expect(prefixes("record")).toEqual(["contact:email", "contact:ip", "contact:ip-day"]);
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
 });

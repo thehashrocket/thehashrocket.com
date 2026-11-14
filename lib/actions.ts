@@ -22,6 +22,8 @@ function pickAllowed(value: FormDataEntryValue | null, allowed: Iterable<string>
 }
 
 const MESSAGE_MAX = 5000;
+/** The visitor's draft stays in the form (ContactForm keeps it on errors). */
+const SEND_FAILED = "Your message wasn't sent. It's still in the form, so you can try again in a minute.";
 /** RFC 5321 maximum; checked before the regex so a long input can't make it backtrack. */
 const EMAIL_MAX = 254;
 
@@ -32,38 +34,74 @@ function text(value: FormDataEntryValue | null): string {
 export interface ContactFormState {
   success: boolean;
   error: string | null;
-  /** "rate_limited" for any limiter denial; the client never learns which bucket. */
-  code: "rate_limited" | null;
+  /**
+   * "rate_limited" for any limiter denial (the client never learns which bucket);
+   * "send_failed" when the email didn't go out. Both get an email/booking way through.
+   */
+  code: "rate_limited" | "send_failed" | null;
 }
 
 type LimiterName = "ip-day" | "ip" | "email";
+
+/** Limiter calls give up after this long and fail open. */
+const LIMIT_TIMEOUT_MS = 1000;
 
 /** Name and message only: an Upstash error can carry the REST URL. */
 function errorReason(err: unknown): string {
   return err instanceof Error ? `${err.name}: ${err.message}` : "unknown";
 }
 
-/**
- * True when a limiter denies. Fails open: a setup failure skips every limiter, and a
- * failed or timed-out call treats only that limiter as allowed, so later ones still run.
- *
- *   ip-day (30 / 1 d) ──allow──▶ ip (10 / 1 h) ──allow──▶ email (3 / 1 h) ──allow──▶ send
- *        │deny                       │deny                     │deny
- *        └───────────────────────────┴─────────────────────────┴──▶ "Too many submissions"
- *
- * Upstash counts in weighted fixed windows (the daily one aligned to UTC midnight) and
- * does not count a denied call, so a denial never spends a later bucket.
- */
-async function rateLimited(email: string): Promise<boolean> {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return false;
+/** Rejects after `ms`. getRemaining ignores the Ratelimit `timeout` option, so it needs its own. */
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("timeout")), ms);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
-  let checks: { limiter: LimiterName; check: () => Promise<{ success: boolean; reason?: string }> }[];
+interface LimitGate {
+  denied: boolean;
+  /** Spend one slot from each limiter. Call only after the message reached the inbox. */
+  record: () => Promise<void>;
+}
+
+const OPEN_GATE: LimitGate = { denied: false, record: async () => {} };
+
+/**
+ * Checks the three contact limits without spending them; `record` spends them once the
+ * email has actually sent, so a failed send never locks a visitor (or a talk room) out.
+ *
+ *   check ip-day (30 / 1 d) → ip (10 / 1 h) → email (3 / 1 h)   [getRemaining, no slot used]
+ *        │ any exhausted ─────────────────────────────────▶ "Too many submissions", no send
+ *        ▼ all open
+ *   send via Resend ──fails──▶ "wasn't sent", nothing recorded
+ *        ▼ sent
+ *   record: limit() on each limiter (one slot each)
+ *
+ * Fails open: a setup failure skips every limiter, and a failed or timed-out check skips
+ * only that limiter. Two requests can both pass the check before either records; that
+ * small overshoot is fine for a contact form. Upstash counts in weighted fixed windows
+ * (the daily one aligned to UTC midnight).
+ */
+async function checkLimits(email: string): Promise<LimitGate> {
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return OPEN_GATE;
+
+  type Limiter = {
+    getRemaining: (id: string) => Promise<{ remaining: number }>;
+    limit: (id: string) => Promise<{ success: boolean; reason?: string }>;
+  };
+  let limiters: { name: LimiterName; limiter: Limiter; key: string }[];
   try {
     const { Ratelimit } = await import("@upstash/ratelimit");
     const { Redis } = await import("@upstash/redis");
     const redis = Redis.fromEnv();
     const make = (prefix: string, limiter: ReturnType<typeof Ratelimit.slidingWindow>) =>
-      new Ratelimit({ redis, limiter, prefix, timeout: 1000 });
+      new Ratelimit({ redis, limiter, prefix, timeout: LIMIT_TIMEOUT_MS });
 
     // Prefer x-real-ip (set by Vercel). A client can spoof x-forwarded-for's leftmost entry, so it is only a fallback.
     const requestHeaders = await headers();
@@ -74,35 +112,45 @@ async function rateLimited(email: string): Promise<boolean> {
     // A hash keeps addresses out of casual view in Redis; it is not a secret.
     const emailKey = createHash("sha256").update(email.toLowerCase()).digest("hex");
 
-    const ipDay = make("contact:ip-day", Ratelimit.slidingWindow(30, "1 d"));
-    const ipHour = make("contact:ip", Ratelimit.slidingWindow(10, "1 h"));
-    const perEmail = make("contact:email", Ratelimit.slidingWindow(3, "1 h"));
-    checks = [
-      { limiter: "ip-day", check: () => ipDay.limit(ip) },
-      { limiter: "ip", check: () => ipHour.limit(ip) },
-      { limiter: "email", check: () => perEmail.limit(emailKey) },
+    limiters = [
+      { name: "ip-day", limiter: make("contact:ip-day", Ratelimit.slidingWindow(30, "1 d")), key: ip },
+      { name: "ip", limiter: make("contact:ip", Ratelimit.slidingWindow(10, "1 h")), key: ip },
+      { name: "email", limiter: make("contact:email", Ratelimit.slidingWindow(3, "1 h")), key: emailKey },
     ];
   } catch (err) {
     console.warn("Contact rate limit unavailable, failing open", { limiter: "setup", reason: errorReason(err) });
-    return false;
+    return OPEN_GATE;
   }
 
-  for (const { limiter, check } of checks) {
+  for (const { name, limiter, key } of limiters) {
     try {
-      const result = await check();
-      if (result.reason === "timeout") {
-        console.warn("Contact rate limit unavailable, failing open", { limiter, reason: "timeout" });
-        continue;
-      }
-      if (!result.success) {
-        console.warn("Contact rate limit denied", { limiter });
-        return true;
+      const { remaining } = await withTimeout(limiter.getRemaining(key), LIMIT_TIMEOUT_MS);
+      if (remaining <= 0) {
+        console.warn("Contact rate limit denied", { limiter: name });
+        return { denied: true, record: async () => {} };
       }
     } catch (err) {
-      console.warn("Contact rate limit unavailable, failing open", { limiter, reason: errorReason(err) });
+      console.warn("Contact rate limit unavailable, failing open", { limiter: name, reason: errorReason(err) });
     }
   }
-  return false;
+
+  return {
+    denied: false,
+    record: async () => {
+      await Promise.all(
+        limiters.map(async ({ name, limiter, key }) => {
+          try {
+            const result = await limiter.limit(key);
+            if (result.reason === "timeout") {
+              console.warn("Contact rate limit not recorded", { limiter: name, reason: "timeout" });
+            }
+          } catch (err) {
+            console.warn("Contact rate limit not recorded", { limiter: name, reason: errorReason(err) });
+          }
+        }),
+      );
+    },
+  };
 }
 
 export async function submitContact(
@@ -147,14 +195,12 @@ export async function submitContact(
   // the flag: a stray value there would drop every inquiry behind a success message.
   const testRun = process.env.TEST_EMAIL_ENABLED === "true" && process.env.VERCEL_ENV !== "production";
 
-  // Rate limiting (fail-open). Three limits, checked in order so a denial never spends
-  // a later bucket: one source per day, one source per hour, one person per hour.
-  // A talk room on shared venue Wi-Fi fits under the hourly IP limit (see docs/ARCHITECTURE.md).
-  if (!testRun) {
-    const denied = await rateLimited(email);
-    if (denied) {
-      return { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
-    }
+  // Rate limiting (fail-open): one source per day, one source per hour, one person per hour.
+  // Checked before sending and recorded only after a successful send, so a failed send
+  // never uses up a slot. A talk room on shared venue Wi-Fi fits under the hourly IP limit.
+  const gate = testRun ? OPEN_GATE : await checkLimits(email);
+  if (gate.denied) {
+    return { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
   }
 
   // Skip email delivery in test environments
@@ -181,12 +227,13 @@ export async function submitContact(
 
       if (sendError) {
         console.error("Resend send failed:", sendError);
-        return { success: false, error: "Something went wrong. Please try again.", code: null };
+        return { success: false, error: SEND_FAILED, code: "send_failed" };
       }
     } catch (err) {
       console.error("Contact form error:", err);
-      return { success: false, error: "Something went wrong. Please try again.", code: null };
+      return { success: false, error: SEND_FAILED, code: "send_failed" };
     }
+    await gate.record();
   }
 
   return { success: true, error: null, code: null };

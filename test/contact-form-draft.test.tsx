@@ -45,12 +45,18 @@ describe("ContactForm after a send", () => {
   //   why_new=React 19 reset uncontrolled fields after every action result, errors included;
   //   seam=submitContact mocked; no_claim=behaviour before hydration (server-action POST, e2e)
   it("keeps the draft after an error", async () => {
-    submitContact.mockResolvedValueOnce({ success: false, error: "Something went wrong. Please try again.", code: null });
+    submitContact.mockResolvedValueOnce({
+      success: false,
+      error: "Your message wasn't sent. It's still in the form, so you can try again in a minute.",
+      code: "send_failed",
+    });
     const { container } = render(<ContactForm source="talks" />);
     fill(container);
     await submit(container);
 
-    expect(container.textContent).toContain("Something went wrong");
+    expect(container.textContent).toContain("wasn't sent");
+    // A failed send offers the same way through as a denial (owner decision on #97).
+    expect(container.querySelector('[data-testid="contact-alternative"]')).not.toBeNull();
     expect(field(container, "name").value).toBe("Pat Organizer");
     expect(field(container, "email").value).toBe("pat@example.com");
     expect(field(container, "projectType").value).toBe("Rescue");
@@ -91,7 +97,7 @@ describe("ContactForm after a send", () => {
 
     const alert = container.querySelector('[role="alert"]')!;
     expect(alert.textContent).toContain("Too many submissions. Please try again later.");
-    const line = container.querySelector('[data-testid="rate-limit-alternative"]')!;
+    const line = container.querySelector('[data-testid="contact-alternative"]')!;
     const hrefs = [...line.querySelectorAll("a")].map((a) => a.getAttribute("href"));
     expect(hrefs[0]).toBe("mailto:jason@thehashrocket.com");
     expect(line.textContent).toContain(hasBooking ? "or book a call." : "jason@thehashrocket.com.");
@@ -107,6 +113,6 @@ describe("ContactForm after a send", () => {
     const { container } = render(<ContactForm />);
     fill(container);
     await submit(container);
-    expect(container.querySelector('[data-testid="rate-limit-alternative"]')).toBeNull();
+    expect(container.querySelector('[data-testid="contact-alternative"]')).toBeNull();
   });
 });

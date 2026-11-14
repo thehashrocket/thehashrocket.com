@@ -237,8 +237,9 @@ export function ContactForm({
             className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]"
           >
             {state.error}
-            {state.code === "rate_limited" && (
-              <p data-testid="rate-limit-alternative" className="mt-2">
+            {/* A denied or failed send still has a way through. */}
+            {state.code && (
+              <p data-testid="contact-alternative" className="mt-2">
                 You can email me at{" "}
                 <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
                   {CONTACT_EMAIL}
