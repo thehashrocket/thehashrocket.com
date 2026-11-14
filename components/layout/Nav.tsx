@@ -12,7 +12,9 @@ const links = [
 
 export function Nav() {
   return (
-    <header role="banner" className="fixed top-0 left-0 right-0 z-50">
+    // Same backdrop as the mobile menu overlay, so page text scrolling under the fixed
+    // header doesn't show through behind the links.
+    <header role="banner" className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg)]/95 backdrop-blur-sm">
       <nav
         className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-4"
         aria-label="Main navigation"

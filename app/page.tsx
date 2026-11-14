@@ -145,7 +145,10 @@ export default function Home() {
       <section id="services" aria-labelledby="services-heading" className="scroll-mt-24 px-6 py-24 md:py-32">
         <FocusOnHash hash="services" target="services-heading" />
         <div className="mx-auto max-w-[1280px]">
-          <h2 id="services-heading" tabIndex={-1} className={eyebrow}>
+          {/* A focus target, not a control: FocusOnHash moves focus here so the next Tab
+              continues from this section. Chrome draws the ring even after a mouse click,
+              so it is hidden; the links below keep their own focus styles. */}
+          <h2 id="services-heading" tabIndex={-1} className={`${eyebrow} focus:outline-none`}>
             Services
           </h2>
           <ul data-testid="service-choices" className="mt-6 flex flex-col gap-3">

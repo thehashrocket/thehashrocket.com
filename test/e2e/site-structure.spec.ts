@@ -58,6 +58,28 @@ test("Services in the main nav lands on a section that links every offer page", 
   await expect(section.locator('[data-testid="service-choices"] a').first()).toBeFocused();
 });
 
+// Value: protects=after a mouse click on Services the focused heading draws no outline box, and the fixed header
+//   hides the page text scrolling under it; fails_when=focus:outline-none comes off the heading or the header goes
+//   back to a transparent background; why_new=the owner saw a blue box around "Services" and stat text behind the
+//   header on the live site; seam=none; no_claim=how the blur looks (computed styles only)
+test("the Services heading shows no outline box and the header covers text under it", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  // Keyboard activation: headless Chromium only draws :focus-visible rings after keyboard input, while desktop
+  // Chrome also drew one after the owner's mouse click. The same rule hides both.
+  await page.getByRole("navigation", { name: "Main navigation" }).locator('a[href="/#services"]').focus();
+  await page.keyboard.press("Enter");
+  await expectLandedOnServices(page);
+  const outline = await page.locator("#services-heading").evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(outline).toBe("none");
+  const headerBg = await page.locator("header").first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  // Chromium reports rgba(r, g, b, a) or, for color-mix output, oklab(l a b / alpha); no alpha means opaque.
+  const alphaMatch = headerBg.match(/^rgba\(.*,\s*([\d.]+)\)$/) ?? headerBg.match(/\/\s*([\d.]+)\)$/);
+  const alpha = alphaMatch ? Number(alphaMatch[1]) : 1;
+  expect(headerBg, "header background").not.toBe("rgba(0, 0, 0, 0)");
+  expect(alpha, `header background opacity (${headerBg})`).toBeGreaterThanOrEqual(0.9);
+});
+
 // Value: protects=Back and Forward still change the page after the same-page Services jump, and a second click
 //   refocuses the section; fails_when=the jump goes back to a native fragment entry that Next ignores on popstate
 //   (Back then leaves /work on screen under the /#services URL); why_new=adversarial review reproduced that bug;
