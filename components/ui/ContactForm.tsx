@@ -12,7 +12,14 @@ const initialState = { success: false, error: null };
 const selectClass =
   "min-h-[44px] rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none";
 
-export function ContactForm({ source }: { source?: string }) {
+export function ContactForm({
+  source,
+  defaultProjectType,
+}: {
+  source?: string;
+  /** Preselected, still editable; form reset restores it. */
+  defaultProjectType?: (typeof PROJECT_TYPES)[number];
+}) {
   const [state, formAction, isPending] = useActionState(
     submitContact,
     initialState,
@@ -104,7 +111,12 @@ export function ContactForm({ source }: { source?: string }) {
           <label htmlFor="projectType" className="text-sm text-[var(--text-secondary)]">
             What do you need? (optional)
           </label>
-          <select id="projectType" name="projectType" defaultValue="" className={selectClass}>
+          <select
+            id="projectType"
+            name="projectType"
+            defaultValue={defaultProjectType ?? ""}
+            className={selectClass}
+          >
             <option value="">Choose one</option>
             {PROJECT_TYPES.map((option) => (
               <option key={option} value={option}>

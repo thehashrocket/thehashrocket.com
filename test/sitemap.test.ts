@@ -24,6 +24,8 @@ describe("sitemap", () => {
     expect(urls).toContain("https://www.jasonshultz.com/work");
     expect(urls).toContain("https://www.jasonshultz.com/about");
     expect(urls).toContain("https://www.jasonshultz.com/contact");
+    expect(urls).toContain("https://www.jasonshultz.com/ai-app-review");
+    expect(urls).toContain("https://www.jasonshultz.com/print-shops");
   });
 
   it("all lastModified are static strings, not dynamic Date instances", () => {

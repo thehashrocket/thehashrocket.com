@@ -26,6 +26,8 @@ export interface CaseStudy extends CaseStudySummary {
   results: string[];
   cta: { heading: string; body: string };
   beats: CaseStudyBeat[];
+  /** An offer page for businesses like this client, linked under the CTA. */
+  relatedLanding?: { href: string; label: string };
 }
 
 export const caseStudies: Record<string, CaseStudy> = {
@@ -83,6 +85,7 @@ export const caseStudies: Record<string, CaseStudy> = {
       heading: "Still running production on paper?",
       body: "Let's talk. Tell me how a job moves through your shop today and I'll tell you what it would take to get it off paper.",
     },
+    relatedLanding: { href: "/print-shops", label: "Run a print shop? See what this looks like for yours →" },
     beats: [
       {
         heading: "Before",

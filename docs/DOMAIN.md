@@ -12,8 +12,10 @@ A consulting site that doubles as a portfolio piece itself. It converts owner-op
 
 - Solo consulting/freelance engineering
 - Target clients: owner-operated and mid-size businesses running on paper, spreadsheets, or software nobody wants to touch. Startups can still hire Jason; they just aren't the headline.
-- Services: Build it (custom software), Rescue it (inherited or legacy systems), Keep it running (monthly retainer)
+- Services: Build it (custom software), Rescue it (inherited, legacy, or AI-built systems), Keep it running (monthly retainer)
 - Engagement: 20-minute call, then paid discovery with a written plan the client owns, then a fixed-scope build or retainer
+- Fixed-fee AI-built app review (`/ai-app-review`): one app built with AI or inherited, bounded scope, flat fee and turnaround set in `lib/offers.ts` (never hardcode the price elsewhere). It replaces paid discovery for that app, and the fee is credited toward a fix started within `REVIEW_CREDIT_DAYS`. A code and configuration review, not a penetration test. Never claim exclusivity or a count of past AI-app rescues.
+- Vertical page: `/print-shops`, built on the one Print Portal client. Say "a print shop", never imply many.
 - Positioning: premium (projects typically start at $10,000)
 - Primary conversion: booking a call on Cal.com, with the contact form second
 

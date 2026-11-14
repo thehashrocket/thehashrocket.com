@@ -6,6 +6,8 @@ const KNOWN_SOURCES = new Set<string>([
   "work",
   "about",
   "locations",
+  "ai-app-review",
+  "print-shops",
   // Tags for links shared off-site, such as /contact?source=linkedin.
   "linkedin",
   "referral",

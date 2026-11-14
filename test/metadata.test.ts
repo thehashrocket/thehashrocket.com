@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { metadata as workMetadata } from "../app/work/page";
 import { metadata as aboutMetadata } from "../app/about/page";
 import { metadata as contactMetadata } from "../app/contact/page";
+import { metadata as reviewMetadata } from "../app/ai-app-review/page";
+import { metadata as printMetadata } from "../app/print-shops/page";
 
 describe("metadata", () => {
   it("root layout openGraph values are defined (checked statically)", () => {
@@ -29,6 +31,8 @@ describe("metadata", () => {
       { name: "work", meta: workMetadata },
       { name: "about", meta: aboutMetadata },
       { name: "contact", meta: contactMetadata },
+      { name: "ai-app-review", meta: reviewMetadata },
+      { name: "print-shops", meta: printMetadata },
     ];
     for (const { name, meta } of pages) {
       expect(meta.title, `${name} title`).toBeTruthy();
@@ -40,5 +44,13 @@ describe("metadata", () => {
     expect(workMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/work");
     expect(aboutMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/about");
     expect(contactMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/contact");
+    expect(reviewMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/ai-app-review");
+    expect(printMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/print-shops");
+  });
+
+  // Value: protects=the /print-shops search snippet names the weekly job volume; fails_when=the case study results are reordered so results[0] becomes another stat;
+  //   why_new=no test reads the print-shops description text; seam=none; no_claim=the volume figure itself (the case study owns it)
+  it("print-shops description quotes the weekly job volume", () => {
+    expect(printMetadata.description).toContain("jobs a week");
   });
 });

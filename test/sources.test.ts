@@ -14,6 +14,8 @@ describe("normalizeSource", () => {
       "work",
       "about",
       "locations",
+      "ai-app-review",
+      "print-shops",
       "linkedin",
       "referral",
       ...locationSlugs,

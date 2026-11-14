@@ -184,3 +184,37 @@
 ### 3D Scenes for Non-Pharma Case Studies
 - **What:** Dedicated R3F canvas scenes for nonprofit-matching (graph nodes), grant-discovery (particle clusters), and print-portal (pipeline flow) case studies
 - **Completed:** v0.1.5.0 (2026-04-21)
+
+## Offers & Verticals (from /autoplan, 2026-11-13)
+
+### [P2] 90-day read on /ai-app-review and /print-shops
+- **What:** On or after 2027-02-11 (90 days after these pages ship), count real messages and booked calls by `source=ai-app-review`, `source=print-shops` and project type "AI-built app review"; compare to the owner-set bars (defaults: 2 qualified review inquiries; 1 qualified print conversation per 20 outreach touches). Below a bar, cut or rewrite that page.
+- **Why:** Both pages were built ahead of demand evidence; this is the kill/keep check.
+- **Context:** CTA clicks are not bookings (`BookingAnchor` records clicks). Keep a manual inquiry log with the first page that prompted contact and outreach touch counts. Verify one real Cal.com booking carries `source` first.
+- **Effort:** S (CC: ~10 min) | **Priority:** P2 | **Depends on:** pages shipped
+
+### [P3] Print Portal scene behind /print-shops
+- **What:** Run `PrintPortalScene` behind `/print-shops` with dimming below the hero and mobile suppression.
+- **Why:** Deferred in design review: `SceneSync` alone gives no dimming (that lives in `CaseStudyScroll`), so text would sit on busy imagery.
+- **Effort:** M (CC: ~20 min) | **Priority:** P3 | **Depends on:** /print-shops earning its 90-day bar
+
+### [P3] Anonymized sample review report
+- **What:** Publish a redacted sample of a real AI-built app review on `/ai-app-review`.
+- **Why:** Shows what the fixed fee buys; Codex CEO review flagged it.
+- **Context:** Claims rule: only from a real, completed review, with client consent and no identifying details.
+- **Effort:** S | **Priority:** P3 | **Depends on:** first paid review
+
+### [P3] Workshop interest capture
+- **What:** A small "Claude for your office" workshop interest form or page.
+- **Why:** Source-doc idea 5; deferred because the claims rule bars advertising what isn't offered.
+- **Effort:** S | **Priority:** P3 | **Depends on:** a first workshop being scheduled
+
+### [P3] Resale-rights clause for future custom builds (not site work)
+- **What:** Add a non-exclusive license-to-resell clause (non-competing regions, revenue share) to future build contracts; check the Print Portal contract's reuse terms before final `/print-shops` copy.
+- **Why:** Source-doc idea 4; decides whether the print vertical can sell "a faster start from a system already running".
+- **Effort:** S (legal review) | **Priority:** P3
+
+### [P3] Mockups for /ai-app-review and /print-shops
+- **What:** Run `/design-shotgun` once price, unit and turnaround are set.
+- **Why:** Skipped in /autoplan design phase (taste decision) because hero content depended on owner inputs.
+- **Effort:** S | **Priority:** P3

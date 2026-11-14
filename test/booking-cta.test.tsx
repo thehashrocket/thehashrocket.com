@@ -87,4 +87,26 @@ describe("ContactPage", () => {
       expect(page.querySelector("input[name='source']")).toBeNull();
     }
   });
+
+  // Value: protects=/contact preselects the project type per offer source and shows the review intro only for ai-app-review;
+  //   fails_when=page stops passing projectTypeForSource, the intro gate inverts, or print-shops loses its New build mapping;
+  //   why_new=contact-preselect renders ContactForm with props by hand; e2e only covers ai-app-review, never print-shops or absence;
+  //   seam=none; no_claim=real searchParams parsing or server action submission
+  it("preselects the offer's project type and gates the review intro on its source", async () => {
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "");
+    const intro = "You're asking about the AI-built app review.";
+    const cases: [string | undefined, string, boolean][] = [
+      ["ai-app-review", "AI-built app review", true],
+      ["print-shops", "New build", false],
+      ["home", "", false],
+      [undefined, "", false],
+    ];
+    for (const [source, projectType, showsIntro] of cases) {
+      const { container, unmount } = await renderContactPage(source);
+      const select = container.querySelector<HTMLSelectElement>("#projectType");
+      expect(select?.value, String(source)).toBe(projectType);
+      expect(container.textContent?.includes(intro), String(source)).toBe(showsIntro);
+      unmount();
+    }
+  });
 });
