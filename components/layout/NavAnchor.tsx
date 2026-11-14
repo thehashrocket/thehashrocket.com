@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { MouseEvent, MouseEventHandler, ReactNode } from "react";
+import { navInputFrom, rememberNavInput, setNavInput } from "@/lib/nav-input";
 
 /**
  * A nav link. In-page targets ("/#services") render as a plain <a>, so they work before
@@ -38,16 +39,19 @@ export function NavAnchor({
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
     }
+    // Only the link knows whether it was keyboard- or pointer-activated (lib/nav-input.ts).
+    const input = navInputFrom(event.detail);
     const url = new URL(href, window.location.href);
-    if (url.pathname !== window.location.pathname) return;
+    if (url.pathname !== window.location.pathname) {
+      // Another page: the browser does a full load, so carry the input across it.
+      rememberNavInput(input);
+      return;
+    }
     const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
     if (!target) return;
 
     event.preventDefault();
-    // A click from Enter has detail 0, a mouse or touch click 1+. Chrome treats the focus
-    // FocusOnHash moves as keyboard-style either way, so this is the only place that
-    // knows; the target styles its focus mark from it.
-    document.documentElement.dataset.navInput = event.detail === 0 ? "keyboard" : "pointer";
+    setNavInput(input);
     if (window.location.hash !== url.hash) {
       window.history.pushState(null, "", url.hash);
     }

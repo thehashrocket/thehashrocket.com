@@ -90,6 +90,39 @@ test("the Services heading shows no outline box and the header covers text under
   expect(alpha, `header background opacity (${headerBg})`).toBeGreaterThanOrEqual(0.9);
 });
 
+// Value: protects=arriving at Services from another page keeps the keyboard/mouse split: keyboard Enter shows the
+//   underline after the full page load, a mouse click shows nothing, and the remembered input is used once;
+//   fails_when=the cross-page path stops remembering the input, or the landing page stops restoring or clearing it;
+//   why_new=the fix-check found keyboard users arriving from other pages got no mark; seam=none;
+//   no_claim=browsers that block sessionStorage (they get no mark; covered by try/catch, not tested)
+test("arriving at Services from another page keeps the keyboard-only underline", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const services = page.getByRole("navigation", { name: "Main navigation" }).locator('a[href="/#services"]');
+  const heading = page.locator("#services-heading");
+  const line = () => heading.evaluate((el) => getComputedStyle(el).textDecorationLine);
+
+  await page.goto("/talks");
+  await services.focus();
+  await page.keyboard.press("Enter");
+  await expectLandedOnServices(page);
+  expect(await line(), "keyboard Enter from /talks").toBe("underline");
+
+  await page.goto("/talks");
+  await services.click();
+  await expectLandedOnServices(page);
+  expect(await line(), "mouse click from /talks").toBe("none");
+
+  // The remembered input is spent: a later direct visit carries no mark from an earlier click.
+  await page.goto("/about");
+  await services.focus();
+  await page.keyboard.press("Enter");
+  await expectLandedOnServices(page);
+  await page.goto("/work");
+  await page.goto("/#services");
+  await expect(heading).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.dataset.navInput ?? null), "fresh load").toBeNull();
+});
+
 // Value: protects=a link the browser scrolls into view on focus lands below the opaque header, not under it;
 //   fails_when=html loses its scroll-padding-top (Shift+Tab then parks focused links under the header);
 //   why_new=the header became opaque; adversarial review found focus could be hidden; seam=none;
