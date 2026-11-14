@@ -58,6 +58,34 @@ test("Services in the main nav lands on a section that links every offer page", 
   await expect(section.locator('[data-testid="service-choices"] a').first()).toBeFocused();
 });
 
+// Value: protects=Back and Forward still change the page after the same-page Services jump, and a second click
+//   refocuses the section; fails_when=the jump goes back to a native fragment entry that Next ignores on popstate
+//   (Back then leaves /work on screen under the /#services URL); why_new=adversarial review reproduced that bug;
+//   seam=none; no_claim=browsers other than Chromium
+test("Back and Forward work after jumping to Services on the homepage", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  const nav = page.getByRole("navigation", { name: "Main navigation" });
+  await nav.locator('a[href="/#services"]').click();
+  await expectLandedOnServices(page);
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await nav.locator('a[href="/#services"]').click();
+  await expectLandedOnServices(page);
+
+  await nav.getByRole("link", { name: "Work" }).click();
+  await expect(page).toHaveURL(/\/work$/);
+  await expect(page.locator("#services")).toHaveCount(0);
+
+  await page.goBack();
+  await expect(page).toHaveURL(/\/#services$/);
+  await expect(page.locator("#services")).toHaveCount(1);
+
+  await page.goForward();
+  await expect(page).toHaveURL(/\/work$/);
+  await expect(page.locator("#services")).toHaveCount(0);
+});
+
 // Value: protects=the phone menu reaches Services from any page, lands below the header, and works a second time;
 //   fails_when=body scroll stays locked during the hash jump or the menu link is missing; why_new=first same-page
 //   hash link in the mobile menu; seam=none; no_claim=iOS Safari specifics (Chromium only)
