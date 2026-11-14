@@ -9,11 +9,12 @@ import { act, fireEvent, render } from "@testing-library/react";
 
 const submitContact = vi.fn();
 vi.mock("@/lib/actions", () => ({ submitContact }));
-vi.mock("@next/third-parties/google", () => ({ sendGAEvent: vi.fn() }));
+const { sendGAEvent } = vi.hoisted(() => ({ sendGAEvent: vi.fn() }));
+vi.mock("@next/third-parties/google", () => ({ sendGAEvent }));
 
 const { ContactForm } = await import("@/components/ui/ContactForm");
 
-const DENIED = { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
+const DENIED = { success: false, error: "Too many submissions. Try again in 12 minutes.", code: "rate_limited" };
 const SENT = { success: true, error: null, code: null };
 
 function field(container: HTMLElement, id: string) {
@@ -36,6 +37,7 @@ async function submit(container: HTMLElement) {
 
 afterEach(() => {
   submitContact.mockReset();
+  sendGAEvent.mockClear();
   vi.unstubAllEnvs();
 });
 
@@ -80,6 +82,10 @@ describe("ContactForm after a send", () => {
     expect(submitContact).toHaveBeenCalledTimes(2);
     expect(field(container, "name").value).toBe("");
     expect(field(container, "message").value).toBe("");
+    // Value: protects=each of two back-to-back sends counts as a lead; fails_when=the GA effect keys on
+    //   state.success like the old reset did; why_new=conversion-events.test.tsx mocks useActionState and renders
+    //   one state; seam=none; no_claim=GA4 receiving the event (sendGAEvent mocked)
+    expect(sendGAEvent.mock.calls.filter(([, name]) => name === "generate_lead")).toHaveLength(2);
   });
 
   // Value: protects=a denied visitor can still reach the owner, by email or booking, never back to /contact;
@@ -96,7 +102,7 @@ describe("ContactForm after a send", () => {
     await submit(container);
 
     const alert = container.querySelector('[role="alert"]')!;
-    expect(alert.textContent).toContain("Too many submissions. Please try again later.");
+    expect(alert.textContent).toContain("Too many submissions. Try again in 12 minutes.");
     const line = container.querySelector('[data-testid="contact-alternative"]')!;
     const hrefs = [...line.querySelectorAll("a")].map((a) => a.getAttribute("href"));
     expect(hrefs[0]).toBe("mailto:jason@thehashrocket.com");

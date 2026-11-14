@@ -248,7 +248,7 @@ describe("submitContact rate limiting", () => {
   type Window = { tokens: number; window: string };
   type Options = { limiter: Window; prefix: string; timeout: number };
   type Fault = "throw" | "hang";
-  const WINDOW_MS: Record<string, number> = { "1 h": 3_600_000, "1 d": 86_400_000 };
+  const WINDOW_MS: Record<string, number> = { "1 m": 60_000, "1 h": 3_600_000, "1 d": 86_400_000 };
   const instances: Options[] = [];
   const calls: { op: "check" | "record"; prefix: string; key: string }[] = [];
   const buckets = new Map<string, number>();
@@ -264,7 +264,7 @@ describe("submitContact rate limiting", () => {
     const id = (w: number) => `${options.prefix}:${key}:${w}`;
     const inCurrent = buckets.get(id(current)) ?? 0;
     const weighted = Math.floor((1 - (now % size) / size) * (buckets.get(id(current - 1)) ?? 0));
-    return { total: weighted + inCurrent, currentId: id(current), inCurrent };
+    return { total: weighted + inCurrent, currentId: id(current), inCurrent, reset: (current + 1) * size };
   }
 
   function fault(kind: Fault | undefined) {
@@ -279,16 +279,17 @@ describe("submitContact rate limiting", () => {
         calls.push({ op: "check", prefix: options.prefix, key });
         const failed = fault(checkFaults[options.prefix]);
         if (failed) return failed;
-        return { remaining: Math.max(0, options.limiter.tokens - used(options, key).total) };
+        const { total, reset } = used(options, key);
+        return { remaining: Math.max(0, options.limiter.tokens - total), reset, limit: options.limiter.tokens };
       },
       limit: async (key: string) => {
         calls.push({ op: "record", prefix: options.prefix, key });
         const failed = fault(recordFaults[options.prefix]);
         if (failed) return failed;
-        const { total, currentId, inCurrent } = used(options, key);
-        if (total >= options.limiter.tokens) return { success: false };
+        const { total, currentId, inCurrent, reset } = used(options, key);
+        if (total >= options.limiter.tokens) return { success: false, reset };
         buckets.set(currentId, inCurrent + 1);
-        return { success: true };
+        return { success: true, reset };
       },
     };
   }
@@ -334,7 +335,7 @@ describe("submitContact rate limiting", () => {
     requestHeaders = { "x-real-ip": ip };
     return submit(idle, makeFormData({ ...validFields, email }));
   };
-  const DENIED = { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
+  const DENIED = { success: false, error: expect.stringMatching(/^Too many submissions\. Try again in /), code: "rate_limited" };
   const SENT = { success: true, error: null, code: null };
   const warnSpy = () => vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -366,23 +367,43 @@ describe("submitContact rate limiting", () => {
     vi.doUnmock("next/headers");
   });
 
-  // Value: protects=the three limits the owner set on #97 and their prefixes and timeouts;
-  //   fails_when=a window typo ("1 m"), a swapped prefix, or the 5 s default timeout returns;
+  // Value: protects=the three limits the owner set on #97, the burst ceiling, and their prefixes and timeouts;
+  //   fails_when=a window typo, a swapped prefix, or the 5 s default timeout returns;
   //   why_new=the old limiter had one 3/hour bucket; seam=none; no_claim=Upstash accepts these options at runtime (mocked)
-  it("builds daily IP, hourly IP and per-email limiters with a 1 s timeout", async () => {
+  it("builds daily IP, hourly IP, per-email and burst limiters with a 1 s timeout", async () => {
     const submit = await loadWithLimiter();
     await send(submit, "a@x.com");
     expect(instances.map(({ prefix, limiter, timeout }) => ({ prefix, limiter, timeout }))).toEqual([
       { prefix: "contact:ip-day", limiter: { tokens: 30, window: "1 d" }, timeout: 1000 },
       { prefix: "contact:ip", limiter: { tokens: 10, window: "1 h" }, timeout: 1000 },
       { prefix: "contact:email", limiter: { tokens: 3, window: "1 h" }, timeout: 1000 },
+      { prefix: "contact:burst", limiter: { tokens: 10, window: "1 m" }, timeout: 1000 },
     ]);
+  });
+
+  // Value: protects=parallel submissions can't all slip past the spend-free check: the burst limiter spends before
+  //   the send, so one IP's burst sends at most 10 and the hourly check refuses the rest afterwards;
+  //   fails_when=the burst limiter is dropped or moved after the send; why_new=review found check-then-record let an
+  //   unbounded parallel burst through; seam=mock limiter with a tick between check and record;
+  //   no_claim=real Redis interleaving (the mock reads every check before any record)
+  it("caps a parallel burst from one IP at the hourly allowance", async () => {
+    const submit = await loadWithLimiter();
+    requestHeaders = { "x-real-ip": "203.0.113.9" };
+    const results = await Promise.all(
+      Array.from({ length: 25 }, (_, i) => submit(idle, makeFormData({ ...validFields, email: `p${i}@x.com` }))),
+    );
+    expect(results.filter((r) => r.success)).toHaveLength(10);
+    expect(results.filter((r) => r.code === "rate_limited")).toHaveLength(15);
+    expect(mockSend).toHaveBeenCalledTimes(10);
+    expect(await send(submit, "late@x.com")).toEqual(DENIED);
   });
 
   // Value: protects=a talk room on shared venue Wi-Fi gets through (#97); fails_when=the IP limit drops below 8 or
   //   the email bucket is shared across people; why_new=the 4th person on one IP was refused before; seam=none;
   //   no_claim=real venue NAT behaviour
   it("lets 8 different people on one IP write in within an hour", async () => {
+    // Back to back at one instant, on purpose: a room hitting send in the same minute after a talk is the case
+    // this protects (owner, #97). Never space these out to get the test passing.
     const submit = await loadWithLimiter();
     for (let i = 0; i < 8; i++) expect(await send(submit, `u${i}@x.com`)).toEqual(SENT);
   });
@@ -394,7 +415,7 @@ describe("submitContact rate limiting", () => {
     const warn = warnSpy();
     const submit = await loadWithLimiter();
     for (let i = 0; i < 10; i++) expect((await send(submit, `u${i}@x.com`)).success).toBe(true);
-    expect(await send(submit, "u10@x.com")).toEqual(DENIED);
+    expect((await send(submit, "u10@x.com")).error).toBe("Too many submissions. Try again in 60 minutes.");
     expect(warn).toHaveBeenCalledWith("Contact rate limit denied", { limiter: "ip" });
     expect(mockSend).toHaveBeenCalledTimes(10);
   });
@@ -411,7 +432,7 @@ describe("submitContact rate limiting", () => {
       for (let i = 0; i < 10; i++) expect((await send(submit, `u${n++}@x.com`)).success).toBe(true);
     }
     vi.setSystemTime(new Date("2026-11-16T06:00:00Z"));
-    expect(await send(submit, `u${n}@x.com`)).toEqual(DENIED);
+    expect((await send(submit, `u${n}@x.com`)).error).toBe("Too many submissions. Try again in 18 hours.");
     expect(warn).toHaveBeenCalledWith("Contact rate limit denied", { limiter: "ip-day" });
   });
 
@@ -450,7 +471,8 @@ describe("submitContact rate limiting", () => {
     expect((await send(submit, "a@x.com")).code).toBe("send_failed");
     expect(spent("contact:ip", "203.0.113.9")).toBe(0);
     expect(spent("contact:ip-day", "203.0.113.9")).toBe(0);
-    expect(calls.filter((c) => c.op === "record")).toHaveLength(0);
+    // Only the one-minute burst ceiling spends before the send.
+    expect(calls.filter((c) => c.op === "record").map((c) => c.prefix)).toEqual(["contact:burst"]);
   });
 
   // Value: protects=an exhausted limit still rejects before any send is attempted; fails_when=the check is skipped or
@@ -544,6 +566,22 @@ describe("submitContact rate limiting", () => {
     expect(spent("contact:ip", "203.0.113.9")).toBe(1);
   });
 
+  // Value: protects=an unavailable burst limiter accepts and sends the message, warning without the Upstash URL;
+  //   fails_when=the burst limit() call loses its own try and a Redis error drops the lead; why_new=burst fail-open
+  //   had no test; seam=none; no_claim=how @upstash/ratelimit resolves its own timeout
+  it("fails open when the burst limiter throws", async () => {
+    const warn = warnSpy();
+    const submit = await loadWithLimiter();
+    recordFaults = { "contact:burst": "throw" };
+    expect(await send(submit, "a@x.com")).toEqual(SENT);
+    expect(mockSend).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith("Contact rate limit unavailable, failing open", {
+      limiter: "burst",
+      reason: "Error: upstash down at https://secret.upstash.example",
+    });
+    expect(spent("contact:ip", "203.0.113.9")).toBe(1);
+  });
+
   // Value: protects=a broken Redis setup accepts the message instead of a 500; fails_when=setup moves outside the
   //   fail-open try; why_new=per-call tries no longer cover setup; seam=none; no_claim=which Upstash errors occur in practice
   it("accepts the message and warns once when limiter setup fails", async () => {
@@ -577,7 +615,7 @@ describe("submitContact rate limiting", () => {
     expect(await send(submit, "a@x.com")).toEqual(SENT);
     const prefixes = (op: string) => calls.filter((c) => c.op === op).map((c) => c.prefix).sort();
     expect(prefixes("check")).toEqual(["contact:email", "contact:ip", "contact:ip-day"]);
-    expect(prefixes("record")).toEqual(["contact:email", "contact:ip", "contact:ip-day"]);
+    expect(prefixes("record")).toEqual(["contact:burst", "contact:email", "contact:ip", "contact:ip-day"]);
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
 });

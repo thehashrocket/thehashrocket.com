@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
-import { NAME_MAX, contactSubject } from "@/lib/contact-email";
+import { NAME_MAX, contactSubject, tooManyMessage } from "@/lib/contact-email";
 import { normalizeSource } from "@/lib/sources";
 
 let resendClient: Resend | null = null;
@@ -41,7 +41,7 @@ export interface ContactFormState {
   code: "rate_limited" | "send_failed" | null;
 }
 
-type LimiterName = "ip-day" | "ip" | "email";
+type LimiterName = "ip-day" | "ip" | "email" | "burst";
 
 /** Limiter calls give up after this long and fail open. */
 const LIMIT_TIMEOUT_MS = 1000;
@@ -66,12 +66,14 @@ async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 interface LimitGate {
   denied: boolean;
+  /** When the denying limiter's window resets (Unix ms), if it said. */
+  resetAt?: number;
   /** Spend one slot from each limiter. Call only after the message reached the inbox. */
   record: () => Promise<void>;
 }
 
 const OPEN_GATE: LimitGate = { denied: false, record: async () => {} };
-const DENIED_GATE: LimitGate = { denied: true, record: async () => {} };
+const deniedGate = (resetAt: number | undefined): LimitGate => ({ denied: true, resetAt, record: async () => {} });
 
 /**
  * Checks the three contact limits without spending them; `record` spends them once the
@@ -80,23 +82,31 @@ const DENIED_GATE: LimitGate = { denied: true, record: async () => {} };
  *   check ip-day (30 / 1 d) → ip (10 / 1 h) → email (3 / 1 h)   [getRemaining, no slot used]
  *        │ any exhausted ─────────────────────────────────▶ "Too many submissions", no send
  *        ▼ all open
- *   send via Resend ──fails──▶ "wasn't sent", nothing recorded
+ *   burst (10 / 1 min per IP)                      [limit(), spends a slot now]
+ *        │ exhausted ─────────────────────────────────────▶ "Too many submissions", no send
+ *        ▼
+ *   send via Resend ──fails──▶ "wasn't sent", nothing else recorded
  *        ▼ sent
- *   record: limit() on each limiter (one slot each)
+ *   record: limit() on ip-day, ip and email (one slot each)
  *
- * Fails open: a setup failure skips every limiter, and a failed or timed-out check skips
- * only that limiter. Two requests can both pass the check before either records; that
- * small overshoot is fine for a contact form. Upstash counts in weighted fixed windows
- * (the daily one aligned to UTC midnight).
+ * The check spends nothing, so parallel requests would all pass it before any of them
+ * records. The burst limiter is the atomic ceiling on that: it spends before the send,
+ * so a parallel burst from one IP sends at most 10, the hourly IP allowance, and the
+ * hourly check refuses everything after it once those sends record. It matches the
+ * hourly limit so a talk room on one Wi-Fi still gets through. A failed send costs a
+ * slot in this one-minute limiter only. Fails open: a setup failure skips every limiter,
+ * and a failed or timed-out check skips only that limiter. Upstash counts in weighted
+ * fixed windows (the daily one aligned to UTC midnight).
  */
 async function checkLimits(email: string): Promise<LimitGate> {
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return OPEN_GATE;
 
   type Limiter = {
-    getRemaining: (id: string) => Promise<{ remaining: number }>;
-    limit: (id: string) => Promise<{ success: boolean; reason?: string }>;
+    getRemaining: (id: string) => Promise<{ remaining: number; reset?: number }>;
+    limit: (id: string) => Promise<{ success: boolean; reset?: number; reason?: string }>;
   };
   let limiters: { name: LimiterName; limiter: Limiter; key: string }[];
+  let burst: { limiter: Limiter; key: string };
   try {
     const { Ratelimit } = await import("@upstash/ratelimit");
     const { Redis } = await import("@upstash/redis");
@@ -118,6 +128,7 @@ async function checkLimits(email: string): Promise<LimitGate> {
       { name: "ip", limiter: make("contact:ip", Ratelimit.slidingWindow(10, "1 h")), key: ip },
       { name: "email", limiter: make("contact:email", Ratelimit.slidingWindow(3, "1 h")), key: emailKey },
     ];
+    burst = { limiter: make("contact:burst", Ratelimit.slidingWindow(10, "1 m")), key: ip };
   } catch (err) {
     console.warn("Contact rate limit unavailable, failing open", { limiter: "setup", reason: errorReason(err) });
     return OPEN_GATE;
@@ -125,14 +136,25 @@ async function checkLimits(email: string): Promise<LimitGate> {
 
   for (const { name, limiter, key } of limiters) {
     try {
-      const { remaining } = await withTimeout(limiter.getRemaining(key), LIMIT_TIMEOUT_MS);
+      const { remaining, reset } = await withTimeout(limiter.getRemaining(key), LIMIT_TIMEOUT_MS);
       if (remaining <= 0) {
         console.warn("Contact rate limit denied", { limiter: name });
-        return DENIED_GATE;
+        return deniedGate(reset);
       }
     } catch (err) {
       console.warn("Contact rate limit unavailable, failing open", { limiter: name, reason: errorReason(err) });
     }
+  }
+
+  try {
+    // limit() honors the constructor timeout itself, resolving as allowed.
+    const { success, reset } = await burst.limiter.limit(burst.key);
+    if (!success) {
+      console.warn("Contact rate limit denied", { limiter: "burst" });
+      return deniedGate(reset);
+    }
+  } catch (err) {
+    console.warn("Contact rate limit unavailable, failing open", { limiter: "burst", reason: errorReason(err) });
   }
 
   return {
@@ -201,7 +223,7 @@ export async function submitContact(
   // never uses up a slot. A talk room on shared venue Wi-Fi fits under the hourly IP limit.
   const gate = testRun ? OPEN_GATE : await checkLimits(email);
   if (gate.denied) {
-    return { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
+    return { success: false, error: tooManyMessage(gate.resetAt), code: "rate_limited" };
   }
 
   if (!testRun) {
