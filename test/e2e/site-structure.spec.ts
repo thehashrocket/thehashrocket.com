@@ -58,10 +58,11 @@ test("Services in the main nav lands on a section that links every offer page", 
   await expect(section.locator('[data-testid="service-choices"] a').first()).toBeFocused();
 });
 
-// Value: protects=after a mouse click on Services the focused heading draws no outline box, and the fixed header
-//   hides the page text scrolling under it; fails_when=focus:outline-none comes off the heading or the header goes
-//   back to a transparent background; why_new=the owner saw a blue box around "Services" and stat text behind the
-//   header on the live site; seam=none; no_claim=how the blur looks (computed styles only)
+// Value: protects=the focused Services heading never draws the outline box, keyboard users get a thin underline
+//   where focus landed and mouse users get nothing, and the fixed header hides the page text under it;
+//   fails_when=focus:outline-none comes off, the keyboard/pointer split is lost, or the header goes transparent;
+//   why_new=the owner saw a blue box around "Services" and text behind the header on the live site; seam=none;
+//   no_claim=desktop Chrome's own focus-visible heuristic (headless differs; the rule is input-independent)
 test("the Services heading shows no outline box and the header covers text under it", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
@@ -70,8 +71,15 @@ test("the Services heading shows no outline box and the header covers text under
   await page.getByRole("navigation", { name: "Main navigation" }).locator('a[href="/#services"]').focus();
   await page.keyboard.press("Enter");
   await expectLandedOnServices(page);
-  const outline = await page.locator("#services-heading").evaluate((el) => getComputedStyle(el).outlineStyle);
-  expect(outline).toBe("none");
+  const heading = page.locator("#services-heading");
+  const focusStyle = () =>
+    heading.evaluate((el) => ({ outline: getComputedStyle(el).outlineStyle, line: getComputedStyle(el).textDecorationLine }));
+  expect(await focusStyle(), "after keyboard Enter").toEqual({ outline: "none", line: "underline" });
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.getByRole("navigation", { name: "Main navigation" }).locator('a[href="/#services"]').click();
+  await expect(heading).toBeFocused();
+  expect(await focusStyle(), "after a mouse click").toEqual({ outline: "none", line: "none" });
   // The backdrop is its own layer inside the header (see Nav.tsx for why it is not on the header).
   const headerBg = await page.locator("header").first().locator(":scope > [aria-hidden=\"true\"]").first()
     .evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -80,6 +88,28 @@ test("the Services heading shows no outline box and the header covers text under
   const alpha = alphaMatch ? Number(alphaMatch[1]) : 1;
   expect(headerBg, "header background").not.toBe("rgba(0, 0, 0, 0)");
   expect(alpha, `header background opacity (${headerBg})`).toBeGreaterThanOrEqual(0.9);
+});
+
+// Value: protects=a link the browser scrolls into view on focus lands below the opaque header, not under it;
+//   fails_when=html loses its scroll-padding-top (Shift+Tab then parks focused links under the header);
+//   why_new=the header became opaque; adversarial review found focus could be hidden; seam=none;
+//   no_claim=browsers that ignore scroll-padding for focus scrolling (Chromium only)
+test("focusing a link above the viewport keeps it below the header", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  // Park the second service link just below the header, focus it without scrolling, then Shift+Tab: the browser
+  // scrolls the first link (now under the header) only as far as it thinks is needed.
+  const links = page.locator('[data-testid="service-choices"] a');
+  await links.nth(1).evaluate((el) => {
+    window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100);
+    (el as HTMLElement).focus({ preventScroll: true });
+  });
+  await page.keyboard.press("Shift+Tab");
+  const link = links.first();
+  await expect(link).toBeFocused();
+  const headerBottom = await page.locator("header").first().evaluate((el) => el.getBoundingClientRect().bottom);
+  const box = await link.boundingBox();
+  expect(box!.y, "focused link below the fixed header").toBeGreaterThanOrEqual(headerBottom);
 });
 
 // Value: protects=Back and Forward still change the page after the same-page Services jump, and a second click

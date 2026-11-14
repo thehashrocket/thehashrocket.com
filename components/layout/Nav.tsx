@@ -12,12 +12,14 @@ const links = [
 
 export function Nav() {
   return (
-    <header role="banner" className="fixed top-0 left-0 right-0 z-50">
-      {/* Same backdrop as the mobile menu overlay, so page text scrolling under the fixed
-          header doesn't show through. It sits on its own layer: backdrop-filter on the
-          header itself would make the header the containing block for MobileNav's
-          fixed overlay and shrink the open menu to the header's height. */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[var(--bg)]/95 backdrop-blur-sm" />
+    <header role="banner" className="fixed top-0 left-0 right-0 z-50 isolate">
+      {/* The page colour at 95%, so text scrolling under the fixed header doesn't show
+          through. It sits on its own layer behind the nav (isolate keeps it inside the
+          header). Never put backdrop-filter, filter or transform on the header itself: that
+          makes the header the containing block for MobileNav's fixed overlay and shrinks
+          the open menu to the header's height. No blur either: at 95% it is invisible and
+          would re-render every frame over the animated 3D background. */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[var(--bg)]/95" />
       <nav
         className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-4"
         aria-label="Main navigation"

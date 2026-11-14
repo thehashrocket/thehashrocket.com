@@ -57,6 +57,12 @@ html {
    * containing block for absolute children.
    */
   position: relative;
+  /*
+   * The fixed header is opaque, so anything scrolled to the top edge would sit under it:
+   * a focused link reached by Shift+Tab, or an in-page #fragment target. Scroll padding
+   * keeps both below it (the header is about 76px tall).
+   */
+  scroll-padding-top: 6rem;
 }
 
 body {

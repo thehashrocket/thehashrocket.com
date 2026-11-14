@@ -44,6 +44,10 @@ export function NavAnchor({
     if (!target) return;
 
     event.preventDefault();
+    // A click from Enter has detail 0, a mouse or touch click 1+. Chrome treats the focus
+    // FocusOnHash moves as keyboard-style either way, so this is the only place that
+    // knows; the target styles its focus mark from it.
+    document.documentElement.dataset.navInput = event.detail === 0 ? "keyboard" : "pointer";
     if (window.location.hash !== url.hash) {
       window.history.pushState(null, "", url.hash);
     }

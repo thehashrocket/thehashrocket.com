@@ -141,14 +141,19 @@ export default function Home() {
         </dl>
       </section>
 
-      {/* Services: the nav's Services link lands here (scroll-mt clears the fixed header). */}
-      <section id="services" aria-labelledby="services-heading" className="scroll-mt-24 px-6 py-24 md:py-32">
+      {/* Services: the nav's Services link lands here (html's scroll-padding clears the fixed header). */}
+      <section id="services" aria-labelledby="services-heading" className="px-6 py-24 md:py-32">
         <FocusOnHash hash="services" target="services-heading" />
         <div className="mx-auto max-w-[1280px]">
           {/* A focus target, not a control: FocusOnHash moves focus here so the next Tab
-              continues from this section. Chrome draws the ring even after a mouse click,
-              so it is hidden; the links below keep their own focus styles. */}
-          <h2 id="services-heading" tabIndex={-1} className={`${eyebrow} focus:outline-none`}>
+              continues from this section. Chrome draws its ring even after a mouse click,
+              so the outline is always off; after keyboard activation (NavAnchor sets
+              data-nav-input on <html>) a thin accent underline shows where focus landed. */}
+          <h2
+            id="services-heading"
+            tabIndex={-1}
+            className={`${eyebrow} focus:outline-none in-data-[nav-input=keyboard]:focus:underline in-data-[nav-input=keyboard]:focus:decoration-2 in-data-[nav-input=keyboard]:focus:underline-offset-4`}
+          >
             Services
           </h2>
           <ul data-testid="service-choices" className="mt-6 flex flex-col gap-3">
