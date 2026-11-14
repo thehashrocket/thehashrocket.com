@@ -194,5 +194,6 @@
 | 2026-04-10 | Asymmetric editorial layout | Anti-template move. Reference sites (cydstumpel) prove irregular layouts feel human. |
 | 2026-04-10 | 3 motion roles only | Codex + Claude cross-model consensus: too much motion competes with message. Constrain to hero atmosphere, narrative transitions, scroll reveals. |
 | 2026-04-10 | Budget range starts at $10k | Positioning is premium. "Under $5k" attracts wrong clients for an experienced senior engineer. |
+| 2026-11-14 | Fixed-price entry offers below $10k | Small, tightly scoped doors (review, sprint) into larger builds; open-ended work still starts at $10k. |
 | 2026-11-04 | Homepage hero uses the 64px page-title size, not 96px | The longer headline and the photo column do not fit at hero display size. |
 | 2026-11-04 | Selected work replaces the Atlas sections | The homepage plan features four outcome-first studies. |

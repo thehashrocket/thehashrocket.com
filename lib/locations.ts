@@ -1,3 +1,5 @@
+import { offerLadderText } from "@/lib/offers";
+
 export interface FAQ {
   question: string;
   answer: string;
@@ -62,12 +64,12 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000. Retainers are scoped to what you run.",
+          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
       },
       {
         question: "How do you handle ongoing maintenance?",
         answer:
-          "I offer retainer-based support for production systems. This includes monitoring, bug fixes, performance optimization, and incremental feature development.",
+          "I offer monthly support for production systems: monitoring, backups, updates, bug fixes and performance work. New features are quoted separately.",
       },
     ],
     caseStudyConnectors: [
@@ -95,7 +97,7 @@ export const locations: Record<string, Location> = {
     economicContext:
       "Stockton sits at the crossroads of California logistics. An inland port drives a large logistics and distribution network, and San Joaquin County's agricultural output adds to it. The region runs on operational software that needs to be reliable, fast, and auditable.",
     whyLocal:
-      "I live in the Central Valley and work directly with local businesses. When your warehouse management system needs a fix at 6am before the morning shift, I'm not three timezones away.",
+      "I live in the Central Valley and work directly with local businesses. When your warehouse management system needs a fix, the person who built it is a short drive away, not three timezones away.",
     faqs: [
       {
         question: "Do you build software for logistics and warehouse operations?",
@@ -110,7 +112,7 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000. Retainers are scoped to what you run.",
+          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
       },
       {
         question: "How quickly can you start on a new project?",
@@ -158,12 +160,12 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000. Retainers are scoped to what you run.",
+          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
       },
       {
         question: "Do you offer ongoing support?",
         answer:
-          "Yes. I offer retainer-based support that includes monitoring, bug fixes, performance optimization, and incremental feature development for production systems.",
+          "Yes. I offer monthly support for production systems: monitoring, backups, updates, bug fixes and performance work. New features are quoted separately.",
       },
     ],
     caseStudyConnectors: [
@@ -192,7 +194,7 @@ export const locations: Record<string, Location> = {
     economicContext:
       "The I-5 and 205 corridor through Tracy, Lathrop, and Manteca is one of the Central Valley's busiest warehouse and distribution areas, with plenty of family-owned businesses alongside it. Most of them run on software that has to work every shift.",
     whyLocal:
-      "This is where I live. If you're in Manteca, Tracy, or Lathrop, I'm a short drive away, and the person you talk to is the person who built your system. When something breaks at 6am before the morning shift, you're not opening a ticket with someone three timezones away.",
+      "This is where I live. If you're in Manteca, Tracy, or Lathrop, I'm a short drive away, and the person you talk to is the person who built your system. When something breaks, you're not opening a ticket with someone three timezones away.",
     faqs: [
       {
         question: "Do you actually work on-site?",
@@ -207,7 +209,7 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          "Projects typically start at $10,000 for focused builds. Ongoing support is on a monthly retainer, scoped to what you run.",
+          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
       },
       {
         question: "Can you take over a system someone else built?",

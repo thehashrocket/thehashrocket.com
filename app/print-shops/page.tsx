@@ -15,6 +15,7 @@ import {
   printShopPathsNote,
 } from "@/lib/print-shops";
 import { getContactHref } from "@/lib/site";
+import { eyebrow, section, sectionHeading } from "@/components/ui/styles";
 
 const SOURCE = PRINT_SHOP_SOURCE;
 const study = caseStudies["print-portal"];
@@ -28,10 +29,6 @@ export const metadata: Metadata = {
   },
 };
 
-const eyebrow = "mb-2 font-mono text-sm text-[var(--accent)]";
-const sectionHeading =
-  "font-display text-4xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-5xl";
-const section = "border-t border-[var(--border)] px-6 py-16 md:py-24";
 
 export default function PrintShopsPage() {
   return (

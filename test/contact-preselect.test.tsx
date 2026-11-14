@@ -34,3 +34,16 @@ describe("ContactForm project type", () => {
     expect(select.value).toBe("AI-built app review");
   });
 });
+
+describe("ContactForm fields", () => {
+  // Value: protects=the browser caps name and message at the same lengths the server action enforces;
+  //   fails_when=NAME_MAX or the message cap changes on one side only, so a visitor types text the server then rejects;
+  //   why_new=the maxLength attributes are new and nothing compares them to lib/contact-email.ts; seam=none;
+  //   no_claim=MESSAGE_MAX's value (it is private to the "use server" module; actions.test.ts pins 5,000)
+  it("caps name and message at the server's limits", async () => {
+    const { NAME_MAX } = await import("@/lib/contact-email");
+    const { container } = render(<ContactForm source="home" />);
+    expect(container.querySelector<HTMLInputElement>("#name")!.maxLength).toBe(NAME_MAX);
+    expect(container.querySelector<HTMLTextAreaElement>("#message")!.maxLength).toBe(5000);
+  });
+});

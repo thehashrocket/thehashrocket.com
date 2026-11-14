@@ -62,3 +62,20 @@ test("contact form happy path shows success", async ({ page }) => {
   await page.getByRole("button", { name: /send/i }).click();
   await expect(page.getByText(/message sent/i)).toBeVisible({ timeout: 10000 });
 });
+
+// Value: protects=a sprint inquiry submits through the real server action and the form resets to its preselected type;
+//   fails_when=the preselect is lost on reset, the new project type is rejected server-side, or the limiter blocks test runs;
+//   why_new=contact-preselect.test.tsx calls form.reset() directly and never submits; seam=none;
+//   no_claim=email delivery (TEST_EMAIL_ENABLED skips Resend and the rate limiter)
+test("a sprint inquiry submits and resets to the sprint type", async ({ page }) => {
+  await page.goto("/contact?source=automation-sprint");
+  const projectType = page.getByLabel(/what do you need/i);
+  await expect(projectType).toHaveValue("Automation sprint");
+  await projectType.selectOption("Rescue");
+  await page.getByLabel(/name/i).fill("Test User");
+  await page.getByLabel(/email/i).fill("test@example.com");
+  await page.getByLabel(/message/i).fill("E2E sprint inquiry from Playwright");
+  await page.getByRole("button", { name: /send/i }).click();
+  await expect(page.getByText(/message sent/i)).toBeVisible({ timeout: 10000 });
+  await expect(projectType).toHaveValue("Automation sprint");
+});

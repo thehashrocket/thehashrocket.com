@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.0.0] - 2026-11-14
+
+### Added
+- `/automation-sprint`: one business process automated in 2–3 weeks for a fixed price of $3,500–$5,000, set in a one-page scope before work starts. The page shows three examples, each linked to the case study it comes from, plus the steps, what you need to provide, the terms and a FAQ. It has its own share image and Service and FAQ structured data, and it is listed in the sitemap.
+- Visitors who reach `/contact` from the sprint page find "Automation sprint" already chosen, with a short intro that matches where they came from.
+
+### Changed
+- The AI-built app review is now $1,500. Its fee is credited toward a fix or an automation sprint that starts within 30 days of the report, up to that work's price.
+- Pricing reads the same everywhere. Visitors can start with a $3,500–$5,000 automation sprint or a $1,500 review, and larger builds start at $10,000. The homepage, the contact page and the city-page FAQs all use that sentence, and ongoing support is described as a monthly plan instead of a retainer.
+- City pages show the lowest fixed price ($1.5K) in the top badge, replacing "$10K+ projects".
+- The homepage links "Build it" to the automation sprint, and "How it works" offers the sprint or the review before paid discovery.
+
+### Fixed
+- The contact form rejects email addresses over 254 characters before checking their format, so a very long value can no longer tie up the server.
+- A message that fits the 5,000-character box is no longer rejected because the browser sends each line break as two characters.
+- The contact form always sends email and applies its rate limit on the live site, even if the test-only setting is left on by mistake.
+- The rate limit now keys on the visitor address Vercel provides, which a visitor cannot fake, and name and message length limits match on the page and the server.
+
 ## [0.5.0.0] - 2026-11-13
 
 ### Added

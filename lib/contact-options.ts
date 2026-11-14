@@ -2,6 +2,7 @@
 // of imports that would pull site data into the client bundle.
 export const PROJECT_TYPES = [
   "New build",
+  "Automation sprint",
   "Rescue",
   "AI-built app review",
   "Ongoing support",
@@ -18,6 +19,8 @@ export const TIMELINES = [
 /** Preselects the form's project type for visitors arriving from an offer page. Still editable. */
 export const PROJECT_TYPE_BY_SOURCE = {
   "ai-app-review": "AI-built app review",
+  "automation-sprint": "Automation sprint",
+  "care-plan": "Ongoing support",
   "print-shops": "New build",
 } satisfies Partial<Record<string, (typeof PROJECT_TYPES)[number]>>;
 

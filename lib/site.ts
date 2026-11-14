@@ -20,3 +20,6 @@ export function getBookingUrl(source?: string): string | null {
 export function getContactHref(source?: string): string {
   return source ? `/contact?source=${encodeURIComponent(source)}` : "/contact";
 }
+
+/** Offer pages: sitemap, metadata and OG tests iterate this list. */
+export const OFFER_ROUTES = ["/automation-sprint", "/ai-app-review", "/print-shops"] as const;
