@@ -6,6 +6,7 @@ import { submitContact, type ContactFormState } from "@/lib/actions";
 import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
 import { PROJECT_TYPES, TIMELINES, contactFlowFor } from "@/lib/contact-options";
 import { CONTACT_EMAIL, getBookingUrl } from "@/lib/site";
+import { BookingAnchor } from "./BookingAnchor";
 import { Button } from "./Button";
 
 const initialState: ContactFormState = { success: false, error: null, code: null };
@@ -26,7 +27,8 @@ const selectClass =
  * Submission goes through onSubmit + startTransition once hydrated, so React does
  * not auto-reset the form and a visitor keeps their draft on any error. `action`
  * stays set so a submit before hydration still posts to the server action instead
- * of a GET that would put the message in the URL.
+ * of a GET that would put the message in the URL. That plain POST re-renders the form,
+ * so every error echoes the draft back and the fields take it as their default values.
  */
 export function ContactForm({
   source,
@@ -60,7 +62,9 @@ export function ContactForm({
     startTransition(() => formAction(formData));
   }
 
-  const bookingUrl = getBookingUrl("contact");
+  const bookingSource = source ?? "contact";
+  const bookingUrl = getBookingUrl(bookingSource);
+  const draft = state.draft;
 
   // The browser can restore or autofill the select (reload, back navigation) or the
   // visitor can change it before hydration, none of which fires onChange. Read the
@@ -143,6 +147,7 @@ export function ContactForm({
             required
             minLength={2}
             maxLength={100}
+            defaultValue={draft?.name}
             className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             placeholder="Your name"
           />
@@ -161,6 +166,7 @@ export function ContactForm({
             type="email"
             required
             maxLength={254}
+            defaultValue={draft?.email}
             className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             placeholder="you@company.com"
           />
@@ -174,7 +180,7 @@ export function ContactForm({
             <select
               id="projectType"
               name="projectType"
-              defaultValue={seed}
+              defaultValue={draft?.projectType ?? seed}
               onChange={(event) => setProjectType(event.target.value)}
               className={selectClass}
             >
@@ -191,7 +197,7 @@ export function ContactForm({
               <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
                 Rough timeline (optional)
               </label>
-              <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
+              <select id="timeline" name="timeline" defaultValue={draft?.timeline ?? ""} className={selectClass}>
                 <option value="">Choose one</option>
                 {TIMELINES.map((option) => (
                   <option key={option} value={option}>
@@ -217,6 +223,7 @@ export function ContactForm({
             minLength={10}
             maxLength={5000}
             rows={5}
+            defaultValue={draft?.message}
             className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             placeholder="Tell me about your project…"
           />
@@ -247,9 +254,9 @@ export function ContactForm({
                 {bookingUrl && (
                   <>
                     , or{" "}
-                    <a href={bookingUrl} className="underline underline-offset-2">
+                    <BookingAnchor href={bookingUrl} source={bookingSource} className="underline underline-offset-2">
                       book a call
-                    </a>
+                    </BookingAnchor>
                   </>
                 )}
                 .

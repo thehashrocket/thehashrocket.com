@@ -335,7 +335,12 @@ describe("submitContact rate limiting", () => {
     requestHeaders = { "x-real-ip": ip };
     return submit(idle, makeFormData({ ...validFields, email }));
   };
-  const DENIED = { success: false, error: expect.stringMatching(/^Too many submissions\. Try again in /), code: "rate_limited" };
+  const DENIED = {
+    success: false,
+    error: expect.stringMatching(/^Too many submissions\. Try again in /),
+    code: "rate_limited",
+    draft: expect.objectContaining({ message: validFields.message }),
+  };
   const SENT = { success: true, error: null, code: null };
   const warnSpy = () => vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -536,15 +541,16 @@ describe("submitContact rate limiting", () => {
     expect(await send(submit, "a@x.com")).toEqual(DENIED);
   });
 
-  // Value: protects=a hanging check gives up after 1 s and accepts; fails_when=the getRemaining timeout is dropped
-  //   (Upstash applies its timeout option to limit only); why_new=getRemaining is new; seam=none;
+  // Value: protects=hanging checks give up after 1 s in total and accept, because the three run together;
+  //   fails_when=the getRemaining timeout is dropped (Upstash applies its timeout option to limit only) or the checks
+  //   go back to running one after another (two hangs then take 2 s); why_new=getRemaining is new; seam=none;
   //   no_claim=real Redis latency
-  it("fails open when a check hangs past 1 s", async () => {
+  it("fails open when checks hang, within one 1 s timeout", async () => {
     vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
     vi.setSystemTime(new Date("2026-11-16T00:00:00Z"));
     const warn = warnSpy();
     const submit = await loadWithLimiter();
-    checkFaults = { "contact:ip-day": "hang" };
+    checkFaults = { "contact:ip-day": "hang", "contact:ip": "hang" };
     const pending = send(submit, "a@x.com");
     await vi.advanceTimersByTimeAsync(1000);
     expect((await pending).success).toBe(true);
@@ -592,6 +598,45 @@ describe("submitContact rate limiting", () => {
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0][1]).toMatchObject({ limiter: "setup" });
     expect(mockSend).toHaveBeenCalledTimes(1);
+  });
+
+  // Value: protects=a hung Resend call gives up after 10 s as "wasn't sent" with the draft, and records nothing;
+  //   fails_when=the send timeout is dropped and the visitor waits until the platform kills the function, or a
+  //   timed-out send is recorded; why_new=Codex adversarial review: no send timeout; seam=none;
+  //   no_claim=a late send that still lands at Resend (can arrive twice if the visitor retries)
+  it("treats a send that hangs past 10 s as failed and records nothing", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"] });
+    vi.setSystemTime(new Date("2026-11-16T00:00:00Z"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const submit = await loadWithLimiter();
+    mockSend.mockReturnValueOnce(new Promise(() => {}));
+    const pending = send(submit, "slow@x.com");
+    await vi.advanceTimersByTimeAsync(9_999);
+    let settled = false;
+    void pending.then(() => (settled = true));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(settled).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    const result = await pending;
+    expect(result.code).toBe("send_failed");
+    expect(result.draft).toEqual({ name: validFields.name, email: "slow@x.com", message: validFields.message, projectType: "", timeline: "" });
+    expect(spent("contact:ip", "203.0.113.9")).toBe(0);
+    expect(spent("contact:email", emailKeyOf("slow@x.com"))).toBe(0);
+  });
+
+  // Value: protects=production logs when missing Upstash secrets leave the form unprotected, and stays quiet
+  //   elsewhere; fails_when=the warning is dropped or fires in local dev; why_new=Codex adversarial review: silent
+  //   fail-open on a misspelled secret; seam=none; no_claim=that anyone watches the log (no alert is wired)
+  it("warns in production when the Upstash env vars are missing", async () => {
+    const warn = warnSpy();
+    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+    const submit = await loadWithLimiter();
+    expect(await send(submit, "a@x.com")).toEqual(SENT);
+    expect(warn).not.toHaveBeenCalled();
+    vi.stubEnv("VERCEL_ENV", "production");
+    expect(await send(submit, "b@x.com")).toEqual(SENT);
+    expect(warn).toHaveBeenCalledWith("Contact rate limit disabled: Upstash env vars are not set", { limiter: "setup" });
+    expect(instances).toHaveLength(0);
   });
 
   // Value: protects=TEST_EMAIL_ENABLED=true skips every limiter and the email outside production;

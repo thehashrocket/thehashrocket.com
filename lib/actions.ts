@@ -39,12 +39,32 @@ export interface ContactFormState {
    * "send_failed" when the email didn't go out. Both get an email/booking way through.
    */
   code: "rate_limited" | "send_failed" | null;
+  /**
+   * What the visitor typed, returned on every error. A submit before hydration (or with
+   * JavaScript off) is a plain POST whose response re-renders the form, so ContactForm
+   * uses these as default values to keep the draft there too.
+   */
+  draft?: ContactDraft;
+}
+
+export interface ContactDraft {
+  name: string;
+  email: string;
+  message: string;
+  projectType: string;
+  timeline: string;
 }
 
 type LimiterName = "ip-day" | "ip" | "email" | "burst";
 
 /** Limiter calls give up after this long and fail open. */
 const LIMIT_TIMEOUT_MS = 1000;
+/**
+ * A send that hasn't answered by now counts as failed: the visitor gets the way through
+ * instead of waiting on a hung provider, and no IP can hold sends in flight across burst
+ * windows. A late send that does land can arrive twice if the visitor retries.
+ */
+const SEND_TIMEOUT_MS = 10_000;
 
 /** Name and message only: an Upstash error can carry the REST URL. */
 function errorReason(err: unknown): string {
@@ -79,13 +99,13 @@ const deniedGate = (resetAt: number | undefined): LimitGate => ({ denied: true, 
  * Checks the three contact limits without spending them; `record` spends them once the
  * email has actually sent, so a failed send never locks a visitor (or a talk room) out.
  *
- *   check ip-day (30 / 1 d) → ip (10 / 1 h) → email (3 / 1 h)   [getRemaining, no slot used]
+ *   check ip-day (30 / 1 d), ip (10 / 1 h), email (3 / 1 h)     [getRemaining, together, no slot used]
  *        │ any exhausted ─────────────────────────────────▶ "Too many submissions", no send
  *        ▼ all open
  *   burst (10 / 1 min per IP)                      [limit(), spends a slot now]
  *        │ exhausted ─────────────────────────────────────▶ "Too many submissions", no send
  *        ▼
- *   send via Resend ──fails──▶ "wasn't sent", nothing else recorded
+ *   send via Resend ──fails or 10 s──▶ "wasn't sent", nothing else recorded
  *        ▼ sent
  *   record: limit() on ip-day, ip and email (one slot each)
  *
@@ -99,7 +119,13 @@ const deniedGate = (resetAt: number | undefined): LimitGate => ({ denied: true, 
  * fixed windows (the daily one aligned to UTC midnight).
  */
 async function checkLimits(email: string): Promise<LimitGate> {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) return OPEN_GATE;
+  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    // Expected locally; in production it means a missing or misspelled secret left the form unprotected.
+    if (process.env.VERCEL_ENV === "production") {
+      console.warn("Contact rate limit disabled: Upstash env vars are not set", { limiter: "setup" });
+    }
+    return OPEN_GATE;
+  }
 
   type Limiter = {
     getRemaining: (id: string) => Promise<{ remaining: number; reset?: number }>;
@@ -134,16 +160,23 @@ async function checkLimits(email: string): Promise<LimitGate> {
     return OPEN_GATE;
   }
 
-  for (const { name, limiter, key } of limiters) {
-    try {
-      const { remaining, reset } = await withTimeout(limiter.getRemaining(key), LIMIT_TIMEOUT_MS);
-      if (remaining <= 0) {
-        console.warn("Contact rate limit denied", { limiter: name });
-        return deniedGate(reset);
+  // Checked together so a hung Upstash costs one timeout, not three; the first denial in
+  // ip-day → ip → email order is the one reported.
+  const checks = await Promise.all(
+    limiters.map(async ({ name, limiter, key }) => {
+      try {
+        const { remaining, reset } = await withTimeout(limiter.getRemaining(key), LIMIT_TIMEOUT_MS);
+        return { name, denied: remaining <= 0, reset };
+      } catch (err) {
+        console.warn("Contact rate limit unavailable, failing open", { limiter: name, reason: errorReason(err) });
+        return { name, denied: false, reset: undefined };
       }
-    } catch (err) {
-      console.warn("Contact rate limit unavailable, failing open", { limiter: name, reason: errorReason(err) });
-    }
+    }),
+  );
+  const denial = checks.find((check) => check.denied);
+  if (denial) {
+    console.warn("Contact rate limit denied", { limiter: denial.name });
+    return deniedGate(denial.reset);
   }
 
   try {
@@ -196,21 +229,29 @@ export async function submitContact(
     return { success: true, error: null, code: null };
   }
 
+  const draft: ContactDraft = { name, email, message, projectType: projectType ?? "", timeline: timeline ?? "" };
+  const fail = (error: string, code: ContactFormState["code"] = null): ContactFormState => ({
+    success: false,
+    error,
+    code,
+    draft,
+  });
+
   // Validation
   if (!name || name.trim().length < 2) {
-    return { success: false, error: "Name must be at least 2 characters.", code: null };
+    return fail("Name must be at least 2 characters.");
   }
   if (name.length > NAME_MAX) {
-    return { success: false, error: `Name must be ${NAME_MAX} characters or fewer.`, code: null };
+    return fail(`Name must be ${NAME_MAX} characters or fewer.`);
   }
   if (!email || email.length > EMAIL_MAX || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { success: false, error: "Please enter a valid email address.", code: null };
+    return fail("Please enter a valid email address.");
   }
   if (!message || message.trim().length < 10) {
-    return { success: false, error: "Message must be at least 10 characters.", code: null };
+    return fail("Message must be at least 10 characters.");
   }
   if (message.length > MESSAGE_MAX) {
-    return { success: false, error: `Message must be ${MESSAGE_MAX.toLocaleString("en-US")} characters or fewer.`, code: null };
+    return fail(`Message must be ${MESSAGE_MAX.toLocaleString("en-US")} characters or fewer.`);
   }
 
   // Test runs (TEST_EMAIL_ENABLED=true, set by the Playwright webServer) skip the limiter
@@ -223,13 +264,13 @@ export async function submitContact(
   // never uses up a slot. A talk room on shared venue Wi-Fi fits under the hourly IP limit.
   const gate = testRun ? OPEN_GATE : await checkLimits(email);
   if (gate.denied) {
-    return { success: false, error: tooManyMessage(gate.resetAt), code: "rate_limited" };
+    return fail(tooManyMessage(gate.resetAt), "rate_limited");
   }
 
   if (!testRun) {
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
-      const { error: sendError } = await getResend().emails.send({
+      const { error: sendError } = await withTimeout(getResend().emails.send({
         from: `Contact Form <${fromEmail}>`,
         to: "jason@thehashrocket.com",
         subject: contactSubject(name, projectType, source),
@@ -245,15 +286,15 @@ export async function submitContact(
         ]
           .filter((line) => typeof line === "string")
           .join("\n"),
-      });
+      }), SEND_TIMEOUT_MS);
 
       if (sendError) {
         console.error("Resend send failed:", sendError);
-        return { success: false, error: SEND_FAILED, code: "send_failed" };
+        return fail(SEND_FAILED, "send_failed");
       }
     } catch (err) {
       console.error("Contact form error:", err);
-      return { success: false, error: SEND_FAILED, code: "send_failed" };
+      return fail(SEND_FAILED, "send_failed");
     }
     await gate.record();
   }

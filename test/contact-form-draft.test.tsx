@@ -88,16 +88,19 @@ describe("ContactForm after a send", () => {
     expect(sendGAEvent.mock.calls.filter(([, name]) => name === "generate_lead")).toHaveLength(2);
   });
 
-  // Value: protects=a denied visitor can still reach the owner, by email or booking, never back to /contact;
-  //   fails_when=the extra line disappears, the booking link renders without a URL, or it points at /contact;
-  //   why_new=the denial was a dead end; seam=submitContact mocked; no_claim=Cal.com reachability
+  // Value: protects=a denied visitor can still reach the owner, by email or booking, never back to /contact, and a
+  //   booking keeps the page's real source and its click event; fails_when=the line disappears, the booking link
+  //   renders without a URL, points at /contact, or goes back to a hardcoded source=contact; why_new=the denial was
+  //   a dead end; seam=submitContact mocked; no_claim=Cal.com reachability
   it.each([
-    ["with a booking URL", "https://cal.example/jason", true],
-    ["without a booking URL", "", false],
-  ])("offers email%s after a rate-limit denial", async (_label, calcom, hasBooking) => {
+    ["from /talks with a booking URL", "https://cal.example/jason", "talks", "talks"],
+    ["with no source and a booking URL", "https://cal.example/jason", undefined, "contact"],
+    ["without a booking URL", "", undefined, null],
+  ])("offers email%s after a rate-limit denial", async (_label, calcom, source, bookingSource) => {
+    const hasBooking = bookingSource !== null;
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", calcom);
     submitContact.mockResolvedValueOnce(DENIED);
-    const { container } = render(<ContactForm />);
+    const { container } = render(<ContactForm source={source} />);
     fill(container);
     await submit(container);
 
@@ -108,8 +111,12 @@ describe("ContactForm after a send", () => {
     expect(hrefs[0]).toBe("mailto:jason@thehashrocket.com");
     expect(line.textContent).toContain(hasBooking ? "or book a call." : "jason@thehashrocket.com.");
     expect(hrefs).toHaveLength(hasBooking ? 2 : 1);
-    if (hasBooking) expect(hrefs[1]).toMatch(/^https:\/\/cal\.example\/jason\?source=contact$/);
     expect(hrefs.some((href) => href?.startsWith("/contact"))).toBe(false);
+    if (hasBooking) {
+      expect(hrefs[1]).toBe(`https://cal.example/jason?source=${bookingSource}`);
+      fireEvent.click(line.querySelectorAll("a")[1]);
+      expect(sendGAEvent).toHaveBeenCalledWith("event", "book_call_click", { source: bookingSource });
+    }
   });
 
   // Value: protects=other errors keep their plain message; fails_when=the line shows for every error;

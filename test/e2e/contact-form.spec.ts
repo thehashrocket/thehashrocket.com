@@ -101,4 +101,22 @@ test.describe("without JavaScript", () => {
     expect(page.url()).not.toContain("Private");
     expect(page.url()).not.toContain("message=");
   });
+
+  // Value: protects=a plain-POST submit that the server rejects comes back with the visitor's draft in the form, so
+  //   the error copy ("still in the form") holds without JavaScript; fails_when=error results stop echoing the draft
+  //   or the fields stop using it as default values; why_new=Codex structured review found the no-JS path dropped
+  //   the draft; seam=none; no_claim=the rate-limit and send-failure paths (unit tests; e2e skips Upstash and Resend)
+  test("a rejected submit keeps the draft in the form", async ({ page }) => {
+    await page.goto("/contact");
+    await page.locator("#name").fill("No Script");
+    // type=email accepts "pat@example"; the server requires a dot in the domain.
+    await page.locator("#email").fill("pat@example");
+    await page.locator("#message").fill("Private details about our broken workflow");
+    await page.locator("form button[type=submit]").click();
+    await page.waitForLoadState();
+    await expect(page.getByRole("alert")).toContainText("valid email");
+    await expect(page.locator("#name")).toHaveValue("No Script");
+    await expect(page.locator("#email")).toHaveValue("pat@example");
+    await expect(page.locator("#message")).toHaveValue("Private details about our broken workflow");
+  });
 });
