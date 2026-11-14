@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
@@ -51,18 +52,41 @@ export default function TalksPage() {
       </section>
       <DimCanvasBelow />
 
+      {/* An organizer is booking a person (#99). */}
+      <section aria-labelledby="speaker" className={section}>
+        <div className="mx-auto max-w-[720px]">
+          <h2 id="speaker" className={eyebrow}>
+            Your speaker
+          </h2>
+          <div className="mt-6 grid gap-8 md:grid-cols-[160px_1fr] md:items-start">
+            <div className="relative aspect-[4/5] w-32 overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] md:w-40">
+              <Image src="/images/jason-shultz.jpg" alt="Jason Shultz" fill sizes="160px" className="object-cover" />
+            </div>
+            <div>
+              <p className="font-display text-2xl font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+                Jason Shultz
+              </p>
+              <p className="mt-3 text-lg leading-relaxed text-[var(--text-secondary)]">
+                I&apos;ve spent 20+ years building and fixing business software, and I&apos;m based in the Central
+                Valley. These days I build and repair automations for small businesses.{" "}
+                <Link href="/work/automation-rescue" className={inlineLink}>
+                  Here&apos;s one that broke and how I fixed it →
+                </Link>
+              </p>
+              <Link href="/about" className={`mt-4 ${accentLink}`}>
+                More about me →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className={section}>
         <div className="mx-auto max-w-[720px]">
           <h2 className={sectionHeading}>What attendees leave with</h2>
           <NumberedSteps steps={TALK_TAKEAWAYS} />
           <p className="mt-12 font-mono text-sm text-[var(--text-muted)]">{talkFormat}</p>
           <p className="mt-8 text-lg leading-relaxed text-[var(--text-secondary)]">
-            I build and fix automations for small businesses.{" "}
-            <Link href="/work/automation-rescue" className={inlineLink}>
-              Here&apos;s one that broke and how I fixed it →
-            </Link>
-          </p>
-          <p className="mt-4 text-lg leading-relaxed text-[var(--text-secondary)]">
             In-house team workshops are available on request.{" "}
             <Link href={contactHref} className={inlineLink}>
               Ask about one →

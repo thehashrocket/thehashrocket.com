@@ -8,3 +8,13 @@ export function contactSubject(name: string, projectType: string | null, source:
   const safeName = name.replace(/[\r\n]+/g, " ").trim().slice(0, NAME_MAX);
   return `New contact from ${safeName}${projectType ? ` - ${projectType}` : ""}${source ? ` (via ${source})` : ""}`;
 }
+
+/** "Try again in 12 minutes", in hours past an hour, from the limiter's reset time. */
+export function tooManyMessage(resetAt: number | undefined, now = Date.now()): string {
+  const waitMs = (resetAt ?? 0) - now;
+  if (!Number.isFinite(waitMs) || waitMs <= 0) return "Too many submissions. Please try again later.";
+  const minutes = Math.ceil(waitMs / 60_000);
+  if (minutes <= 60) return `Too many submissions. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+  const hours = Math.ceil(minutes / 60);
+  return `Too many submissions. Try again in ${hours} hours.`;
+}

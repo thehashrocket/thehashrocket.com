@@ -79,3 +79,44 @@ test("a sprint inquiry submits and resets to the sprint type", async ({ page }) 
   await expect(page.getByText(/message sent/i)).toBeVisible({ timeout: 10000 });
   await expect(projectType).toHaveValue("Automation sprint");
 });
+
+// Value: protects=a submit before hydration still POSTs to the server action, so the visitor's message never lands
+//   in the URL (history, logs, referrers); fails_when=the form's `action` prop is dropped now that onSubmit handles
+//   hydrated submits, and the browser falls back to a GET; why_new=every other submit test runs with JS on; seam=none;
+//   no_claim=what the no-JS response renders after the POST, or email delivery (TEST_EMAIL_ENABLED skips Resend)
+test.describe("without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("the contact form posts and keeps the message out of the URL", async ({ page }) => {
+    await page.goto("/contact");
+    await page.locator("#name").fill("No Script");
+    await page.locator("#email").fill("noscript@example.com");
+    await page.locator("#message").fill("Private details about our broken workflow");
+    const [request] = await Promise.all([
+      page.waitForRequest((r) => r.isNavigationRequest() && new URL(r.url()).pathname === "/contact"),
+      page.locator("form button[type=submit]").click(),
+    ]);
+    expect(request.method()).toBe("POST");
+    await page.waitForLoadState();
+    expect(page.url()).not.toContain("Private");
+    expect(page.url()).not.toContain("message=");
+  });
+
+  // Value: protects=a plain-POST submit that the server rejects comes back with the visitor's draft in the form, so
+  //   the error copy ("still in the form") holds without JavaScript; fails_when=error results stop echoing the draft
+  //   or the fields stop using it as default values; why_new=Codex structured review found the no-JS path dropped
+  //   the draft; seam=none; no_claim=the rate-limit and send-failure paths (unit tests; e2e skips Upstash and Resend)
+  test("a rejected submit keeps the draft in the form", async ({ page }) => {
+    await page.goto("/contact");
+    await page.locator("#name").fill("No Script");
+    // type=email accepts "pat@example"; the server requires a dot in the domain.
+    await page.locator("#email").fill("pat@example");
+    await page.locator("#message").fill("Private details about our broken workflow");
+    await page.locator("form button[type=submit]").click();
+    await page.waitForLoadState();
+    await expect(page.getByRole("alert")).toContainText("valid email");
+    await expect(page.locator("#name")).toHaveValue("No Script");
+    await expect(page.locator("#email")).toHaveValue("pat@example");
+    await expect(page.locator("#message")).toHaveValue("Private details about our broken workflow");
+  });
+});

@@ -167,3 +167,41 @@ describe("MobileNav", () => {
     expect(getByText("Let's Talk")).toBeTruthy();
   });
 });
+
+describe("MobileNav focus and scroll for in-page links (#100)", () => {
+  // Value: protects=a keyboard user who closes the menu with Escape lands back on the toggle, not on <body>;
+  //   fails_when=the focus call is dropped; why_new=the menu used to drop focus on Escape; seam=none;
+  //   no_claim=focus trapping while open (deferred, TODOS.md)
+  it("returns focus to the menu button after Escape", () => {
+    const { getByRole } = render(<MobileNav links={links} />);
+    const btn = getByRole("button");
+    act(() => {
+      fireEvent.click(btn);
+    });
+    act(() => {
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+    expect(document.activeElement).toBe(btn);
+  });
+
+  // Value: protects=scrolling is unlocked inside the link click itself, before a same-page "/#services" link
+  //   scrolls; fails_when=unlocking moves back into the effect cleanup that runs after the next render;
+  //   why_new=the Services nav link is the first same-page hash link in the menu; seam=none;
+  //   no_claim=the browser's actual scroll (e2e covers landing on #services)
+  it("unlocks body scroll during the link click, before the menu re-renders", () => {
+    const { getByRole, getByText } = render(<MobileNav links={[{ href: "/#services", label: "Services" }]} />);
+    act(() => {
+      fireEvent.click(getByRole("button"));
+    });
+    expect(document.body.style.overflow).toBe("hidden");
+    let overflowDuringClick = "";
+    // A window listener runs after React's delegated onClick and before any re-render or effect.
+    const record = () => {
+      overflowDuringClick = document.body.style.overflow;
+    };
+    window.addEventListener("click", record);
+    fireEvent.click(getByText("Services"));
+    window.removeEventListener("click", record);
+    expect(overflowDuringClick).toBe("");
+  });
+});

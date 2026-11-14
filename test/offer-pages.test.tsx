@@ -51,7 +51,7 @@ describe("/ai-app-review", () => {
     expect(text).toContain(offers.REVIEW_TURNAROUND);
     expect(text).toContain(`within ${offers.REVIEW_CREDIT_DAYS} days`);
     if (offers.REVIEW_MONTHLY_CAP !== null) {
-      expect(text).toContain(`I take ${offers.REVIEW_MONTHLY_CAP} reviews a month`);
+      expect(text).toContain(offers.capLine(offers.REVIEW_MONTHLY_CAP, "review", "reviews")!);
       expect(text).toContain(offers.REVIEW_CREDIT_TEXT);
     }
     expect(text).toContain(`up to ${offers.REVIEW_MAX_INTEGRATIONS} third-party integrations`);
@@ -131,13 +131,28 @@ describe.each([
   });
 });
 
+// Value: protects=both offer heroes end with their own local, reachable line (#98);
+//   fails_when=a page drops the line or uses the other page's copy; why_new=#98; seam=none;
+//   no_claim=where the line falls on a phone screen (e2e)
+describe("local line in the offer heroes", () => {
+  it.each([
+    ["/automation-sprint", () => SprintPage, () => content.sprintLocalLine],
+    ["/ai-app-review", () => ReviewPage, () => content.reviewLocalLine],
+  ])("%s ends its hero with its own local line", (_path, page, line) => {
+    const { container } = renderPage(page());
+    const local = container.querySelector('[data-testid="offer-local"]')!;
+    expect(local.textContent).toBe(line());
+    expect(local.closest("section")?.querySelector("h1")).not.toBeNull();
+  });
+});
+
 describe("/automation-sprint", () => {
   it("shows the price range, weeks, systems cap and capacity from lib/offers", () => {
     const { container, text } = renderPage(SprintPage);
     expect(text).toContain(offers.formatUsdRange(offers.SPRINT_PRICE_MIN, offers.SPRINT_PRICE_MAX));
     expect(text).toContain(`${offers.SPRINT_WEEKS} weeks`);
     expect(text).toContain(`up to ${offers.SPRINT_MAX_SYSTEMS}`);
-    const cap = offers.capLine(offers.SPRINT_MONTHLY_CAP, "sprints");
+    const cap = offers.capLine(offers.SPRINT_MONTHLY_CAP, "sprint", "sprints");
     if (cap) expect(text).toContain(cap);
     for (const term of content.sprintTerms) expect(text).toContain(term);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
@@ -213,6 +228,23 @@ describe("/talks", () => {
     expect(text).not.toMatch(/\$\d/);
     expect(jsonLd(container)).toEqual([]);
     expect(container.innerHTML).not.toMatch(/undefined|NaN/);
+  });
+
+  // Value: protects=an organizer sees who is speaking: photo, name, bio, a way to the full story, and the bio
+  //   says it once; fails_when=the speaker block is dropped or the old one-liner comes back beside it;
+  //   why_new=#99; seam=none; no_claim=how the photo looks (e2e/visual)
+  it("introduces the speaker with a photo, a short bio and a link to /about", () => {
+    const { container, text } = renderPage(TalksPage);
+    const section = container.querySelector('section[aria-labelledby="speaker"]')!;
+    expect(section.querySelector("h2#speaker")?.textContent).toBe("Your speaker");
+    expect(section.querySelector('img[alt="Jason Shultz"]')).not.toBeNull();
+    expect(section.textContent).toContain("20+ years building and fixing business software");
+    const hrefs = [...section.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(hrefs).toEqual(["/work/automation-rescue", "/about"]);
+    expect(text).not.toContain("I build and fix automations for small businesses.");
+    const headings = [...container.querySelectorAll("h1, h2")].map((h) => h.tagName);
+    expect(headings[0]).toBe("H1");
+    expect(headings[1]).toBe("H2");
   });
 
   it("asks about a date first, with booking as the secondary action", () => {

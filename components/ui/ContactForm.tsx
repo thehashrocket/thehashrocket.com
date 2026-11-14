@@ -1,13 +1,15 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
-import { submitContact } from "@/lib/actions";
+import { submitContact, type ContactFormState } from "@/lib/actions";
 import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
 import { PROJECT_TYPES, TIMELINES, contactFlowFor } from "@/lib/contact-options";
+import { CONTACT_EMAIL, getBookingUrl } from "@/lib/site";
+import { BookingAnchor } from "./BookingAnchor";
 import { Button } from "./Button";
 
-const initialState = { success: false, error: null };
+const initialState: ContactFormState = { success: false, error: null, code: null };
 
 const selectClass =
   "min-h-[44px] rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none";
@@ -17,10 +19,16 @@ const selectClass =
  * field follow the visitor's current project type, not only the ?source that
  * seeded it.
  *
- * The select stays uncontrolled (defaultValue) so every form reset, ours on
- * success and React's own after an action, puts it back on the seeded type;
- * `projectType` mirrors it through onChange and onReset. A controlled select
- * would show "Choose one" after a reset while the steps still followed state.
+ * The select stays uncontrolled (defaultValue) so our reset on success puts it
+ * back on the seeded type; `projectType` mirrors it through onChange and
+ * onReset. A controlled select would show "Choose one" after a reset while the
+ * steps still followed state.
+ *
+ * Submission goes through onSubmit + startTransition once hydrated, so React does
+ * not auto-reset the form and a visitor keeps their draft on any error. `action`
+ * stays set so a submit before hydration still posts to the server action instead
+ * of a GET that would put the message in the URL. That plain POST re-renders the form,
+ * so every error echoes the draft back and the fields take it as their default values.
  */
 export function ContactForm({
   source,
@@ -41,11 +49,22 @@ export function ContactForm({
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [timedOut, setTimedOut] = useState(false);
 
+  // Keyed on state, not state.success, so a second message in a row also resets.
   useEffect(() => {
     if (state.success) {
       formRef.current?.reset();
     }
-  }, [state.success]);
+  }, [state]);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(() => formAction(formData));
+  }
+
+  const bookingSource = source ?? "contact";
+  const bookingUrl = getBookingUrl(bookingSource);
+  const draft = state.draft;
 
   // The browser can restore or autofill the select (reload, back navigation) or the
   // visitor can change it before hydration, none of which fires onChange. Read the
@@ -101,7 +120,13 @@ export function ContactForm({
       </ol>
       {flow.note && <p className="-mt-8 mb-12 text-sm text-[var(--text-muted)]">{flow.note}</p>}
 
-      <form ref={formRef} action={formAction} onReset={() => setProjectType(seed)} className="flex flex-col gap-6">
+      <form
+        ref={formRef}
+        action={formAction}
+        onSubmit={handleSubmit}
+        onReset={() => setProjectType(seed)}
+        className="flex flex-col gap-6"
+      >
         {/* Source attribution */}
         {source && <input type="hidden" name="source" value={source} />}
 
@@ -122,6 +147,7 @@ export function ContactForm({
             required
             minLength={2}
             maxLength={100}
+            defaultValue={draft?.name}
             className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             placeholder="Your name"
           />
@@ -140,6 +166,7 @@ export function ContactForm({
             type="email"
             required
             maxLength={254}
+            defaultValue={draft?.email}
             className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             placeholder="you@company.com"
           />
@@ -153,7 +180,7 @@ export function ContactForm({
             <select
               id="projectType"
               name="projectType"
-              defaultValue={seed}
+              defaultValue={draft?.projectType ?? seed}
               onChange={(event) => setProjectType(event.target.value)}
               className={selectClass}
             >
@@ -170,7 +197,7 @@ export function ContactForm({
               <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
                 Rough timeline (optional)
               </label>
-              <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
+              <select id="timeline" name="timeline" defaultValue={draft?.timeline ?? ""} className={selectClass}>
                 <option value="">Choose one</option>
                 {TIMELINES.map((option) => (
                   <option key={option} value={option}>
@@ -196,6 +223,7 @@ export function ContactForm({
             minLength={10}
             maxLength={5000}
             rows={5}
+            defaultValue={draft?.message}
             className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
             placeholder="Tell me about your project…"
           />
@@ -216,6 +244,24 @@ export function ContactForm({
             className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]"
           >
             {state.error}
+            {/* A denied or failed send still has a way through. */}
+            {state.code && (
+              <p data-testid="contact-alternative" className="mt-2">
+                You can email me at{" "}
+                <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2">
+                  {CONTACT_EMAIL}
+                </a>
+                {bookingUrl && (
+                  <>
+                    , or{" "}
+                    <BookingAnchor href={bookingUrl} source={bookingSource} className="underline underline-offset-2">
+                      book a call
+                    </BookingAnchor>
+                  </>
+                )}
+                .
+              </p>
+            )}
           </div>
         )}
 

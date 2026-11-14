@@ -14,7 +14,9 @@ import {
   REVIEW_CREDIT_TEXT,
   LOWEST_FIXED_PRICE,
   REVIEW_FRAMING,
+  REVIEW_MONTHLY_CAP,
   REVIEW_PRICE,
+  SPRINT_MONTHLY_CAP,
   SPRINT_PRICE_MAX,
   SPRINT_PRICE_MIN,
   capLine,
@@ -28,6 +30,7 @@ import {
   reviewLineText,
 } from "../lib/offers";
 import { normalizeSource } from "../lib/sources";
+import { reviewLocalLine, sprintLocalLine, talkFormat } from "../lib/offer-content";
 
 describe("price formatting", () => {
   it("formats whole US dollars the same way everywhere", () => {
@@ -91,17 +94,28 @@ describe("owner gate inputs", () => {
     if (REVIEW_FRAMING === "small-door") expect(REVIEW_PRICE).toBeLessThan(SPRINT_PRICE_MAX);
   });
 
-  it("hides a capacity line that is unset or not positive", () => {
-    expect(capLine(null, "sprints")).toBeNull();
-    expect(capLine(0, "sprints")).toBeNull();
-    expect(capLine(2, "sprints")).toBe("I take 2 sprints a month. Ask about the next available start.");
+  // Value: protects=a cap of 1 reads "1 sprint", not "1 sprints", and unset or zero caps hide the line;
+  //   fails_when=capLine goes back to one unit form; why_new=#101 lowers the sprint cap to 1; seam=none;
+  //   no_claim=none beyond protects
+  it("words the capacity line for one and many, and hides it when unset or not positive", () => {
+    expect(capLine(null, "sprint", "sprints")).toBeNull();
+    expect(capLine(0, "sprint", "sprints")).toBeNull();
+    expect(capLine(1, "sprint", "sprints")).toBe("I take 1 sprint a month. Ask about the next available start.");
+    expect(capLine(2, "review", "reviews")).toBe("I take 2 reviews a month. Ask about the next available start.");
+  });
+
+  // Value: protects=the published caps match #101 (1 sprint, 2 reviews); fails_when=a cap is raised without
+  //   the hours data; why_new=#101; seam=none; no_claim=actual delivery hours
+  it("publishes the #101 caps", () => {
+    expect(SPRINT_MONTHLY_CAP).toBe(1);
+    expect(REVIEW_MONTHLY_CAP).toBe(2);
   });
 
   // Value: protects=the published credit matches the term the owner approved; fails_when=the wording drops the sprint, cap or no-cash clause;
   //   why_new=terms changed at the gate; seam=none; no_claim=how credits are applied on invoices
   it("states the approved review credit", () => {
     expect(REVIEW_CREDIT_TEXT).toBe(
-      `If you hire me for a fix or an automation sprint that starts within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. Unused credit isn't paid out.`,
+      `If you sign a scope for a fix or an automation sprint within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. The work can start later. Unused credit isn't paid out.`,
     );
   });
 });
@@ -169,5 +183,23 @@ describe("project type by source", () => {
 
   it("lists the sprint right after new builds", () => {
     expect(PROJECT_TYPES.indexOf("Automation sprint")).toBe(PROJECT_TYPES.indexOf("New build") + 1);
+  });
+});
+
+// Value: protects=the offer pages' in-person area matches the talk's, so neither claims a city the other doesn't;
+//   fails_when=a city is added to or dropped from one line only; why_new=#98 adds two local lines; seam=none;
+//   no_claim=whether the owner actually travels there (owner-confirmed copy)
+describe("local and reachable lines", () => {
+  const cities = /In person in the (.+) areas/.exec(talkFormat)![1].split(/, | and /);
+
+  it("names the same three cities as the talk format", () => {
+    expect(cities).toEqual(["Sacramento", "Stockton", "Modesto"]);
+    for (const line of [sprintLocalLine, reviewLocalLine]) {
+      for (const city of cities) expect(line).toContain(city);
+    }
+  });
+
+  it("never claims nobody else offers this", () => {
+    for (const line of [sprintLocalLine, reviewLocalLine]) expect(line).not.toMatch(/nobody else|only one|no one else/i);
   });
 });

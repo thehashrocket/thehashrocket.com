@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { NavAnchor } from "./NavAnchor";
 
 interface MobileNavProps {
   links: { href: string; label: string }[];
@@ -9,24 +10,37 @@ interface MobileNavProps {
 
 export function MobileNav({ links }: MobileNavProps) {
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const prevOverflowRef = useRef("");
 
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
-    const prevOverflow = document.body.style.overflow;
+    prevOverflowRef.current = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prevOverflowRef.current;
     };
   }, [open]);
+
+  // Unlock scrolling before navigation starts, not in the effect cleanup after the next
+  // render: a same-page hash link ("/#services") scrolls in the same tick as the click.
+  const closeForNavigation = () => {
+    document.body.style.overflow = prevOverflowRef.current;
+    setOpen(false);
+  };
 
   return (
     <div className="md:hidden">
       <button
+        ref={toggleRef}
         onClick={() => setOpen(!open)}
         className="relative z-50 flex h-11 w-11 items-center justify-center"
         aria-label={open ? "Close menu" : "Open menu"}
@@ -57,25 +71,26 @@ export function MobileNav({ links }: MobileNavProps) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[var(--bg)]/95 backdrop-blur-sm">
+        // Top-aligned and scrollable so every link stays reachable on a short screen (375×560).
+        <div className="fixed inset-0 z-40 flex flex-col items-center overflow-y-auto bg-[var(--bg)]/95 px-6 pt-24 pb-12 backdrop-blur-sm">
           <nav aria-label="Mobile navigation">
-            <ul className="flex flex-col items-center gap-8">
+            <ul className="flex flex-col items-center gap-6">
               {links.map((link) => (
                 <li key={link.href}>
-                  <Link
+                  <NavAnchor
                     href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="font-display text-2xl font-semibold text-[var(--text-primary)] transition-colors hover:text-[var(--accent)]"
+                    onClick={closeForNavigation}
+                    className="inline-flex min-h-11 items-center font-display text-2xl font-semibold text-[var(--text-primary)] transition-colors hover:text-[var(--accent)]"
                   >
                     {link.label}
-                  </Link>
+                  </NavAnchor>
                 </li>
               ))}
               <li>
                 <Link
                   href="/contact"
-                  onClick={() => setOpen(false)}
-                  className="rounded-[var(--radius-sm)] bg-[var(--accent)] px-6 py-3 font-display text-lg font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]"
+                  onClick={closeForNavigation}
+                  className="inline-flex min-h-11 items-center rounded-[var(--radius-sm)] bg-[var(--accent)] px-6 py-3 font-display text-lg font-semibold text-[var(--bg)] transition-colors hover:bg-[var(--accent-hover)]"
                 >
                   Let&apos;s Talk
                 </Link>
