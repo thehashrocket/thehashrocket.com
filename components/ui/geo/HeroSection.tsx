@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookingLink, secondaryButton } from "@/components/ui/BookingLink";
 import type { Location } from "@/lib/locations";
 import { getBookingUrl, getContactHref } from "@/lib/site";
+import { LOWEST_FIXED_PRICE, formatUsdCompact } from "@/lib/offers";
 
 export function HeroSection({ location }: { location: Location }) {
   return (
@@ -36,7 +37,7 @@ export function HeroSection({ location }: { location: Location }) {
         <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs">
           <span><span className="text-[var(--accent)]">20+</span> <span className="text-[var(--text-muted)]">YRS</span></span>
           <span className="text-[var(--text-muted)]">&middot;</span>
-          <span><span className="text-[var(--accent)]">$10K+</span> <span className="text-[var(--text-muted)]">PROJECTS</span></span>
+          <span><span className="text-[var(--accent)]">{formatUsdCompact(LOWEST_FIXED_PRICE)}</span> <span className="text-[var(--text-muted)]">FIXED-PRICE START</span></span>
           <span className="text-[var(--text-muted)]">&middot;</span>
           <span><span className="text-[var(--accent)]">1:1</span> <span className="text-[var(--text-muted)]">DIRECT</span></span>
         </div>

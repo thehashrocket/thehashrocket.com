@@ -13,6 +13,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 const pages = [
+  { path: "/automation-sprint", source: "automation-sprint", h1: /One process, automated\./, fact: /\$[\d,]+–\$[\d,]+ · fixed before work starts/ },
   { path: "/ai-app-review", source: "ai-app-review", h1: /what's risky in the app/i, fact: /\$[\d,]+ · 3 weeks · fixed scope/ },
   { path: "/print-shops", source: "print-shops", h1: /without the paper/i, fact: /200 jobs a week/ },
 ];
@@ -34,7 +35,54 @@ for (const { path, source, h1, fact } of pages) {
     await page.keyboard.press("Tab");
     const focused = page.locator(":focus");
     await expect(focused).toHaveAttribute("href", new RegExp(`source=${source}`));
-    await expect(focused).toHaveText(/Book a 20-minute call|Start a conversation/);
+    await expect(focused).toHaveText(/Book a 20-minute call|Send a message|Start a conversation/);
+    // A visible focus ring, not just tab order
+    const outline = await focused.evaluate((el) => getComputedStyle(el).outlineStyle);
+    expect(outline).not.toBe("none");
+  });
+}
+
+// Value: protects=on a small phone the price, what the offer is, and the booking action are in the first screen, below the fixed nav;
+//   fails_when=the hero grows, the nav overlaps it, or the page scrolls sideways at 320px;
+//   why_new=Playwright ran Desktop Chrome only; seam=none; no_claim=real devices or larger text sizes
+for (const path of ["/automation-sprint", "/ai-app-review"]) {
+  test(`${path} first screen on a phone`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto(path);
+    await page.evaluate(() => document.fonts.ready);
+    const navBottom = await page.locator("header, nav").first().evaluate((el) => el.getBoundingClientRect().bottom);
+    for (const testId of ["offer-summary", "offer-scope", "booking-cta"]) {
+      const box = await page.getByTestId(testId).boundingBox();
+      expect(box, testId).not.toBeNull();
+      expect(box!.y, `${testId} below the nav`).toBeGreaterThanOrEqual(navBottom);
+      expect(box!.y + box!.height, `${testId} in the first screen`).toBeLessThanOrEqual(667);
+    }
+    // Every hero action, not just the primary one, fits the first screen
+    const heroActions = page.getByTestId("booking-cta").locator("xpath=..").locator("a");
+    for (const action of await heroActions.all()) {
+      const box = await action.boundingBox();
+      expect(box!.y + box!.height, `${await action.textContent()} in the first screen`).toBeLessThanOrEqual(667);
+    }
+
+    // Shorter viewport: an iPhone SE under Safari's chrome. The shipped /ai-app-review hero
+    // (four-line headline plus subline) doesn't fit yet; see TODOS.md.
+    if (path === "/automation-sprint") {
+      await page.setViewportSize({ width: 375, height: 560 });
+      for (const testId of ["offer-summary", "booking-cta"]) {
+        const box = await page.getByTestId(testId).boundingBox();
+        expect(box!.y + box!.height, `${testId} at 560`).toBeLessThanOrEqual(560);
+      }
+    }
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    const fits = () => page.evaluate(() => document.documentElement.scrollWidth <= 320);
+    expect(await fits()).toBe(true);
+    const menu = page.getByRole("button", { name: /menu/i });
+    if (await menu.isVisible()) {
+      await menu.click();
+      await menu.click();
+      expect(await fits()).toBe(true);
+    }
   });
 }
 
@@ -63,14 +111,37 @@ test("the print case study links to /print-shops, and the footer does too", asyn
   await expect(footer.getByRole("link", { name: "Print shops" })).toBeVisible();
 });
 
-// Value: protects=homepage Rescue service links to /ai-app-review and the pricing line keeps $10,000 beside the review price;
-//   fails_when=services[].link stops rendering, its href drifts, or the How-it-works price line loses either figure;
-//   why_new=no unit or e2e test renders app/page.tsx; claims.test checks $10,000 on /contact and locations only;
-//   seam=none; no_claim=the exact review price value (lib/offers.ts owns it)
-test("the homepage Rescue service links to the review and keeps both prices", async ({ page }) => {
+// Value: protects=the homepage price line leads with the sprint and links the sprint and the review;
+//   fails_when=the ladder order changes or its links drop; why_new=pricing moved to offerLadderParts;
+//   seam=none; no_claim=the exact prices (lib/offers.ts owns them)
+test("the homepage leads with the sprint and links both entry offers", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText(/Projects typically start at \$10,000\. An AI-built app review is a flat \$[\d,]+\./)).toBeVisible();
+  const ladder = page.getByTestId("offer-ladder");
+  await expect(ladder).toHaveText(/^Start with a \$[\d,]+–\$[\d,]+ automation sprint or a \$[\d,]+ AI-built app review\. Larger builds start at \$10,000\.$/);
+  await expect(ladder.getByRole("link", { name: /automation sprint/ })).toHaveAttribute("href", "/automation-sprint");
   await page.getByRole("link", { name: "Get an AI-built app reviewed →" }).click();
   await expect(page).toHaveURL(/\/ai-app-review$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/what's risky in the app/i);
+});
+
+// Value: protects=the contact form's preselected project type follows client-side navigation between offers;
+//   fails_when=the ContactForm key stops tracking ?source, so a second offer keeps the first offer's type;
+//   why_new=every other contact test loads /contact directly; seam=none; no_claim=Cal.com booking links
+test("the preselected project type follows client navigation between offers", async ({ page }) => {
+  await page.goto("/");
+  const ladder = page.getByTestId("offer-ladder");
+  await ladder.getByRole("link", { name: /automation sprint/ }).click();
+  await expect(page).toHaveURL(/\/automation-sprint$/);
+  await page.locator("main").getByRole("link", { name: "Send a message" }).first().click();
+  await expect(page).toHaveURL(/source=automation-sprint/);
+  await expect(page.getByLabel(/what do you need/i)).toHaveValue("Automation sprint");
+
+  await page.goBack();
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await page.getByTestId("offer-ladder").getByRole("link", { name: /AI-built app review/ }).click();
+  await expect(page).toHaveURL(/\/ai-app-review$/);
+  await page.locator("main").getByRole("link", { name: "Send a message" }).first().click();
+  await expect(page).toHaveURL(/source=ai-app-review/);
+  await expect(page.getByLabel(/what do you need/i)).toHaveValue("AI-built app review");
 });

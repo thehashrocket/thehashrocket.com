@@ -42,15 +42,41 @@ export function WebSiteJsonLd() {
   );
 }
 
+/** How a service is priced. */
+export type ServiceOffer =
+  | { kind: "fixed"; price: number }
+  | { kind: "range"; low: number; high: number }
+  | { kind: "monthly"; low: number; high: number };
+
 interface ServiceJsonLdProps {
   name: string;
   description: string;
   url: string;
-  price: number;
+  offer: ServiceOffer;
+}
+
+function offerJsonLd(offer: ServiceOffer) {
+  switch (offer.kind) {
+    case "fixed":
+      return { "@type": "Offer", price: offer.price, priceCurrency: "USD" };
+    case "range":
+      return { "@type": "AggregateOffer", lowPrice: offer.low, highPrice: offer.high, priceCurrency: "USD" };
+    case "monthly":
+      return {
+        "@type": "Offer",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          minPrice: offer.low,
+          maxPrice: offer.high,
+          priceCurrency: "USD",
+          unitCode: "MON",
+        },
+      };
+  }
 }
 
 /** A priced service, attributed to the site-wide Person by @id. */
-export function ServiceJsonLd({ name, description, url, price }: ServiceJsonLdProps) {
+export function ServiceJsonLd({ name, description, url, offer }: ServiceJsonLdProps) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -59,11 +85,7 @@ export function ServiceJsonLd({ name, description, url, price }: ServiceJsonLdPr
     url,
     provider: { "@id": PERSON_ID },
     areaServed: "US",
-    offers: {
-      "@type": "Offer",
-      price,
-      priceCurrency: "USD",
-    },
+    offers: offerJsonLd(offer),
   };
 
   return (

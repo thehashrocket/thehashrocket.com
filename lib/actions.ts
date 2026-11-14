@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
+import { NAME_MAX, contactSubject } from "@/lib/contact-email";
 import { normalizeSource } from "@/lib/sources";
 
 let resendClient: Resend | null = null;
@@ -19,6 +20,14 @@ function pickAllowed(value: FormDataEntryValue | null, allowed: Iterable<string>
   return typeof value === "string" && new Set(allowed).has(value) ? value : null;
 }
 
+const MESSAGE_MAX = 5000;
+/** RFC 5321 maximum; checked before the regex so a long input can't make it backtrack. */
+const EMAIL_MAX = 254;
+
+function text(value: FormDataEntryValue | null): string {
+  return typeof value === "string" ? value : "";
+}
+
 interface ContactFormState {
   success: boolean;
   error: string | null;
@@ -28,10 +37,12 @@ export async function submitContact(
   _prevState: ContactFormState,
   formData: FormData,
 ): Promise<ContactFormState> {
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const message = formData.get("message") as string;
-  const honeypot = formData.get("website") as string;
+  const name = text(formData.get("name"));
+  const email = text(formData.get("email"));
+  // Browsers submit textarea line breaks as CRLF but count them as one character in
+  // maxLength; normalize so the server counts what the visitor saw.
+  const message = text(formData.get("message")).replace(/\r\n/g, "\n");
+  const honeypot = text(formData.get("website"));
   const source = normalizeSource(formData.get("source"));
   const projectType = pickAllowed(formData.get("projectType"), PROJECT_TYPES);
   const timeline = pickAllowed(formData.get("timeline"), TIMELINES);
@@ -45,42 +56,60 @@ export async function submitContact(
   if (!name || name.trim().length < 2) {
     return { success: false, error: "Name must be at least 2 characters." };
   }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (name.length > NAME_MAX) {
+    return { success: false, error: `Name must be ${NAME_MAX} characters or fewer.` };
+  }
+  if (!email || email.length > EMAIL_MAX || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { success: false, error: "Please enter a valid email address." };
   }
   if (!message || message.trim().length < 10) {
     return { success: false, error: "Message must be at least 10 characters." };
   }
+  if (message.length > MESSAGE_MAX) {
+    return { success: false, error: `Message must be ${MESSAGE_MAX.toLocaleString("en-US")} characters or fewer.` };
+  }
 
-  // Rate limiting (fail-open)
-  try {
-    const { Ratelimit } = await import("@upstash/ratelimit");
-    const { Redis } = await import("@upstash/redis");
+  // Test runs (TEST_EMAIL_ENABLED=true, set by the Playwright webServer) skip the limiter
+  // and email so local e2e never spends Upstash quota or sends mail. Production ignores
+  // the flag: a stray value there would drop every inquiry behind a success message.
+  const testRun = process.env.TEST_EMAIL_ENABLED === "true" && process.env.VERCEL_ENV !== "production";
 
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      const ratelimit = new Ratelimit({
-        redis: Redis.fromEnv(),
-        limiter: Ratelimit.slidingWindow(3, "1 h"),
-      });
+  // Rate limiting (fail-open).
+  if (!testRun) {
+    try {
+      const { Ratelimit } = await import("@upstash/ratelimit");
+      const { Redis } = await import("@upstash/redis");
 
-      const ip = (await headers()).get("x-forwarded-for") ?? "anonymous";
-      const { success } = await ratelimit.limit(ip);
-      if (!success) {
-        return { success: false, error: "Too many submissions. Please try again later." };
+      if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+        const ratelimit = new Ratelimit({
+          redis: Redis.fromEnv(),
+          limiter: Ratelimit.slidingWindow(3, "1 h"),
+        });
+
+        // Prefer x-real-ip (set by Vercel). A client can spoof x-forwarded-for's leftmost entry, so it is only a fallback.
+        const requestHeaders = await headers();
+        const ip =
+          requestHeaders.get("x-real-ip") ??
+          requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+          "anonymous";
+        const { success } = await ratelimit.limit(ip);
+        if (!success) {
+          return { success: false, error: "Too many submissions. Please try again later." };
+        }
       }
+    } catch {
+      // Fail open — if rate limiting is unavailable, accept the submission
     }
-  } catch {
-    // Fail open — if rate limiting is unavailable, accept the submission
   }
 
   // Skip email delivery in test environments
-  if (process.env.TEST_EMAIL_ENABLED !== "true") {
+  if (!testRun) {
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
       const { error: sendError } = await getResend().emails.send({
         from: `Contact Form <${fromEmail}>`,
         to: "jason@thehashrocket.com",
-        subject: `New contact from ${name}${source ? ` (via ${source})` : ""}`,
+        subject: contactSubject(name, projectType, source),
         text: [
           `Name: ${name}`,
           `Email: ${email}`,

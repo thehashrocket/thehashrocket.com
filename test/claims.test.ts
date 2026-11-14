@@ -6,7 +6,8 @@ import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { caseStudies, caseStudySlugs } from "../lib/case-studies";
 import { locations, locationSlugs } from "../lib/locations";
-import { REVIEW_PRICE, formatUsd } from "../lib/offers";
+import { BUILD_PRICE_FLOOR, formatUsd, offerLadderText } from "../lib/offers";
+import { contactIntro } from "../lib/contact-intro";
 import { normalizeSource } from "../lib/sources";
 
 const SOURCE_DIRS = ["app", "components", "lib"];
@@ -51,19 +52,30 @@ describe("claims", () => {
     expect(hits).toEqual([]);
   });
 
-  it("the review price is only ever rendered from lib/offers.ts", () => {
-    const literal = new RegExp(
-      `\\$${REVIEW_PRICE.toLocaleString("en-US").replace(",", ",?")}(?![\\d,])`,
-    );
-    const hits = sources.filter(({ path, text }) => path !== join("lib", "offers.ts") && literal.test(text));
-    expect(formatUsd(REVIEW_PRICE)).toMatch(literal);
-    expect(hits.map((h) => h.path)).toEqual([]);
+  // A price typed outside lib/offers.ts drifts the day the offer changes. The pattern is
+  // independent of today's values; the lookahead lets magnitude proof metrics ("$200M+") through.
+  const PRICE_LITERAL = /\$\d[\d,.]*(?![\d,.]|\s*[MBmb]\b)\s*[kK]?\+?/;
+
+  // Value: protects=every offer price renders from lib/offers.ts, whatever its value; fails_when=a page, location FAQ or badge types a price;
+  //   why_new=the old test matched only the current REVIEW_PRICE and missed HeroSection's "$10K+"; seam=none; no_claim=the prices are right
+  it("no price literal appears outside lib/offers.ts", () => {
+    const hits = sources.flatMap(({ path, text }) => {
+      if (path === join("lib", "offers.ts") || path === join("lib", "case-studies.ts")) return [];
+      return text.split("\n").flatMap((line, i) => (PRICE_LITERAL.test(line) ? [`${path}:${i + 1}: ${line.trim()}`] : []));
+    });
+    expect(hits).toEqual([]);
   });
 
-  it("projects still typically start at $10,000 where they did before", () => {
-    expect(readFileSync("app/contact/page.tsx", "utf8")).toContain("$10,000");
+  it("the price-literal pattern bans prices but allows magnitude metrics", () => {
+    for (const price of ["$10K+", "$1,500", "$3,500–$5,000", "$3.5K", "$10,000.", "$1,500 budget", "$5,000 minimum", "$300 monthly"]) expect(price, price).toMatch(PRICE_LITERAL);
+    for (const metric of ["$200M+", "$2B", "$40 M"]) expect(metric, metric).not.toMatch(PRICE_LITERAL);
+  });
+
+  it("the build floor still shows on /contact and in every location's pricing answer", () => {
+    expect(contactIntro(undefined).text).toContain(formatUsd(BUILD_PRICE_FLOOR));
+    expect(contactIntro(undefined).text).toContain(offerLadderText());
     for (const slug of locationSlugs) {
-      expect(locations[slug].faqs.some((faq) => /\$10,000/.test(faq.answer)), slug).toBe(true);
+      expect(locations[slug].faqs.some((faq) => faq.answer.includes(offerLadderText())), slug).toBe(true);
     }
   });
 
@@ -74,7 +86,7 @@ describe("claims", () => {
 
   it("every source the site hardcodes survives the allow-list", () => {
     const literals = sources.flatMap(({ text }) =>
-      [...text.matchAll(/source="([^"]+)"/g)].map((match) => match[1]),
+      [...text.matchAll(/source="([^"]+)"|getContactHref\("([^"]+)"\)/g)].map((match) => match[1] ?? match[2]),
     );
     expect(literals.length).toBeGreaterThan(0);
     for (const source of literals) expect(normalizeSource(source), source).toBe(source);

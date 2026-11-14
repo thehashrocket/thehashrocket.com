@@ -1,16 +1,42 @@
-// The fixed-fee AI-built app review. Every price on the site renders from
-// REVIEW_PRICE through formatReviewPrice(), so changing the offer is one edit
-// here. Keep this file free of value imports: client components may use it.
-import type { FAQ } from "@/lib/locations";
+// Every offer number on the site lives here and renders through these
+// formatters, so changing an offer is one edit. Page copy lives in
+// lib/offer-content.ts. Keep this file free of value imports: client
+// components may use it (test/offers.test.ts enforces type-only imports).
 
-/** Flat fee in US dollars. */
-export const REVIEW_PRICE = 5000;
+/** AI-built app review: flat fee in US dollars. */
+export const REVIEW_PRICE = 1500;
 export const REVIEW_TURNAROUND = "3 weeks";
 /** Reviews taken per month; null hides the line. */
 export const REVIEW_MONTHLY_CAP: number | null = 3;
 export const REVIEW_MAX_INTEGRATIONS = 3;
-/** The fee is credited toward a fix that starts within this many days of the report. */
+/** The fee is credited toward a fix or sprint that starts within this many days of the report. */
 export const REVIEW_CREDIT_DAYS = 30;
+/**
+ * "small-door": the review sits in the starter ladder beside the sprint.
+ * "premium": it leaves the ladder and gets its own line (reviewLineText).
+ */
+export type ReviewFraming = "small-door" | "premium";
+export const REVIEW_FRAMING: ReviewFraming = "small-door";
+
+/** Automation sprint: one process, fixed before work starts. */
+export const SPRINT_PRICE_MIN = 3500;
+export const SPRINT_PRICE_MAX = 5000;
+export const SPRINT_WEEKS = "2–3";
+/** Sprints taken per month; null hides the line. */
+export const SPRINT_MONTHLY_CAP: number | null = 2;
+export const SPRINT_MAX_SYSTEMS = 3;
+
+/** The cheapest fixed-price way to start: the city-page badge shows it. */
+export const LOWEST_FIXED_PRICE = Math.min(REVIEW_PRICE, SPRINT_PRICE_MIN);
+
+/** Care plan (launches in release 2; the values are set now). */
+export const CARE_PLAN_MIN = 300;
+export const CARE_PLAN_MAX = 600;
+export const CARE_PLAN_HOURS = 2;
+export const CARE_PLAN_MAX_CLIENTS: number | null = 10;
+
+/** Larger builds. */
+export const BUILD_PRICE_FLOOR = 10000;
 
 // Fixed locale and currency so server and client render the same string.
 const priceFormat = new Intl.NumberFormat("en-US", {
@@ -19,76 +45,94 @@ const priceFormat = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const compactFormat = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 export function formatUsd(amount: number): string {
   return priceFormat.format(amount);
+}
+
+/** "$3,500–$5,000". Throws on an inverted or empty range: a bad constant must break the build, not render. */
+export function formatUsdRange(min: number, max: number): string {
+  if (!(min < max)) throw new Error(`formatUsdRange: min (${min}) must be below max (${max})`);
+  return `${formatUsd(min)}–${formatUsd(max)}`;
+}
+
+/** "$3.5K", "$10K". */
+export function formatUsdCompact(amount: number): string {
+  return compactFormat.format(amount);
 }
 
 export function formatReviewPrice(): string {
   return formatUsd(REVIEW_PRICE);
 }
 
-export const REVIEW_CREDIT_TEXT = `If you hire me to fix what the review finds and the fix starts within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it.`;
+export function formatSprintPrice(): string {
+  return formatUsdRange(SPRINT_PRICE_MIN, SPRINT_PRICE_MAX);
+}
 
-export const scannerQuestions = [
-  "Can the business depend on this app day to day?",
-  "What breaks first as more people use it?",
-  "Who owns the data, and is anything backing it up?",
-  "Could another engineer pick it up and maintain it?",
-  "Should you fix it, rebuild it, or replace it with off-the-shelf software?",
-];
+export const REVIEW_CREDIT_TEXT = `If you hire me for a fix or an automation sprint that starts within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. Unused credit isn't paid out.`;
 
-export const reviewChecks = [
-  "Secrets in the source code and the repository history",
-  "Sign-in, permissions, and who can reach what",
-  "How customer and business data is stored and handled",
-  "Dependencies and how out of date they are",
-  "Backups, deploys, and what happens when something fails",
-];
+/** A capacity line, or null when the cap is unset or not positive. */
+export function capLine(cap: number | null, unit: string): string | null {
+  return cap !== null && cap > 0 ? `I take ${cap} ${unit} a month. Ask about the next available start.` : null;
+}
 
-export const reviewDeliverables = [
-  "A written report in plain language that you keep",
-  "Fixes in priority order, with what each one protects",
-  "A call to walk through the findings together",
-  "When fixing is the right call, a fixed quote to fix the top items",
-];
+// --- The pricing ladder ------------------------------------------------------
 
-export const reviewIsNot = [
-  "It isn't a penetration test. I review the code and configuration; I don't attack the running system.",
-  "It isn't the fixes. You get the list and, if you want it, a quote. The work itself is separate.",
-];
+export type LadderOffer = "sprint" | "review" | "build";
 
-export const reviewSteps = [
-  "Book a call or send a message. We confirm the app fits the scope below.",
-  "You grant read access and we do a 30-minute walkthrough of how the app is used.",
-  `You get the report within ${REVIEW_TURNAROUND}, then we go through it on a call.`,
-];
+export interface LadderPart {
+  /** Which offer this segment names; null for joining text. */
+  offer: LadderOffer | null;
+  text: string;
+  href?: string;
+}
 
-export const reviewScope = [
-  `One codebase, one production deployment, one database, a single tenant, and up to ${REVIEW_MAX_INTEGRATIONS} third-party integrations. Anything larger gets a quote instead.`,
-  "What I need from you: read access to the repository, read access to the hosting console, and a 30-minute walkthrough.",
-  "The turnaround starts on the agreed start date, once access works and the walkthrough is done. Incomplete access delays the start.",
-  "Anything urgent, like a live exposed secret or open admin access, is reported the same day I find it.",
-  "Anything the access doesn't reach is listed in the report as not verified.",
-];
+/** "a" or "an", by how the formatted price is spoken ("an $8,000", "an $11,000"). */
+export function indefiniteArticle(price: string): "a" | "an" {
+  // The spoken number starts with its leading digit group: "8"/"80"/"800" (eight…), "11", "18".
+  const lead = price.replace(/^\$/, "").split(/[,–]/)[0];
+  return lead.startsWith("8") || lead === "11" || lead === "18" ? "an" : "a";
+}
 
-export const reviewFaqs: FAQ[] = [
-  {
-    question: "Does it matter which AI tool built the app?",
-    answer:
-      "No. Lovable, Bolt, Replit, Cursor, ChatGPT, or a contractor who leaned on one of them: the review looks at what was built, not how. Apps you inherited from someone else qualify too.",
-  },
-  {
-    question: "Is this a security audit or a penetration test?",
-    answer:
-      "It's a code and configuration review. Automated scanning is included, but the value is a senior engineer reading the code and telling you what matters. It doesn't replace a penetration test if your industry requires one.",
-  },
-  {
-    question: "What happens after the review?",
-    answer: `You keep the report whatever you decide. If fixing is the right call, I give you a fixed quote for the top items. ${REVIEW_CREDIT_TEXT}`,
-  },
-  {
-    question: "Do I still need a paid discovery?",
-    answer:
-      "Not for this app. For a single AI-built app, the review takes the place of discovery: it's the written plan you'd otherwise pay for.",
-  },
-];
+/**
+ * The ordered pricing sentence as segments, so the homepage can link each offer
+ * while metadata and FAQ answers use the plain text. Order by `offer`, never by
+ * price string: two offers can share a price.
+ */
+export function offerLadderParts(framing: ReviewFraming = REVIEW_FRAMING): LadderPart[] {
+  const sprint = formatSprintPrice();
+  const review = formatReviewPrice();
+  const parts: LadderPart[] = [
+    { offer: null, text: `Start with ${indefiniteArticle(sprint)} ` },
+    { offer: "sprint", text: `${sprint} automation sprint`, href: "/automation-sprint" },
+  ];
+  if (framing === "small-door") {
+    parts.push(
+      { offer: null, text: ` or ${indefiniteArticle(review)} ` },
+      { offer: "review", text: `${review} AI-built app review`, href: "/ai-app-review" },
+    );
+  }
+  parts.push(
+    { offer: null, text: ". " },
+    { offer: "build", text: `Larger builds start at ${formatUsd(BUILD_PRICE_FLOOR)}` },
+    { offer: null, text: "." },
+  );
+  return parts;
+}
+
+export function offerLadderText(framing: ReviewFraming = REVIEW_FRAMING): string {
+  return offerLadderParts(framing)
+    .map((part) => part.text)
+    .join("");
+}
+
+/** The review's own line under the premium framing; not rendered under small-door. */
+export function reviewLineText(): string {
+  return `Inherited an app someone built with AI? A fixed-fee review is ${formatReviewPrice()}, with the written report within ${REVIEW_TURNAROUND}.`;
+}

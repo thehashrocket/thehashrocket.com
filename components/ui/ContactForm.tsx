@@ -15,10 +15,13 @@ const selectClass =
 export function ContactForm({
   source,
   defaultProjectType,
+  hideTimeline = false,
 }: {
   source?: string;
   /** Preselected, still editable; form reset restores it. */
   defaultProjectType?: (typeof PROJECT_TYPES)[number];
+  /** The server treats timeline as optional, so omitting the field is safe. */
+  hideTimeline?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(
     submitContact,
@@ -84,6 +87,7 @@ export function ContactForm({
           type="text"
           required
           minLength={2}
+          maxLength={100}
           className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
           placeholder="Your name"
         />
@@ -101,6 +105,7 @@ export function ContactForm({
           name="email"
           type="email"
           required
+          maxLength={254}
           className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
           placeholder="you@company.com"
         />
@@ -125,19 +130,21 @@ export function ContactForm({
             ))}
           </select>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
-            Rough timeline (optional)
-          </label>
-          <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
-            <option value="">Choose one</option>
-            {TIMELINES.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
+        {!hideTimeline && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
+              Rough timeline (optional)
+            </label>
+            <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
+              <option value="">Choose one</option>
+              {TIMELINES.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -152,6 +159,7 @@ export function ContactForm({
           name="message"
           required
           minLength={10}
+          maxLength={5000}
           rows={5}
           className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
           placeholder="Tell me about your project…"

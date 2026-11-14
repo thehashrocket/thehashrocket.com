@@ -6,7 +6,7 @@ import { describe, it, expect } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render } from "@testing-library/react";
 import React from "react";
-import { PERSON_ID, PersonJsonLd, ServiceJsonLd, WebSiteJsonLd } from "../components/layout/JsonLd";
+import { PERSON_ID, PersonJsonLd, ServiceJsonLd, WebSiteJsonLd, type ServiceOffer } from "../components/layout/JsonLd";
 import { LocationJsonLd, FAQJsonLd } from "../components/layout/LocationJsonLd";
 import { getLocation } from "../lib/locations";
 
@@ -36,10 +36,44 @@ describe("PersonJsonLd rendering", () => {
   it("declares the @id that ServiceJsonLd's provider references", () => {
     const person = parseJsonLdScript(render(<PersonJsonLd />).container);
     const service = parseJsonLdScript(
-      render(<ServiceJsonLd name="x" description="y" url="https://www.jasonshultz.com/x" price={1} />).container,
+      render(<ServiceJsonLd name="x" description="y" url="https://www.jasonshultz.com/x" offer={{ kind: "fixed", price: 1 }} />).container,
     );
     expect(person["@id"]).toBe(PERSON_ID);
     expect(service.provider).toEqual({ "@id": person["@id"] });
+  });
+});
+
+describe("ServiceJsonLd offers", () => {
+  const service = (offer: ServiceOffer) =>
+    parseJsonLdScript(
+      render(<ServiceJsonLd name="x" description="y" url="https://www.jasonshultz.com/x" offer={offer} />).container,
+    );
+
+  // Value: protects=each pricing shape maps to valid schema.org markup and the fixed shape /ai-app-review ships is unchanged;
+  //   fails_when=a branch swaps fields, drops USD, or the monthly unit leaks onto AggregateOffer;
+  //   why_new=ServiceJsonLd took a single number before; seam=none; no_claim=Google rich-result eligibility
+  it("renders fixed, range and monthly offers", () => {
+    expect(service({ kind: "fixed", price: 1500 }).offers).toEqual({
+      "@type": "Offer",
+      price: 1500,
+      priceCurrency: "USD",
+    });
+    expect(service({ kind: "range", low: 3500, high: 5000 }).offers).toEqual({
+      "@type": "AggregateOffer",
+      lowPrice: 3500,
+      highPrice: 5000,
+      priceCurrency: "USD",
+    });
+    expect(service({ kind: "monthly", low: 300, high: 600 }).offers).toEqual({
+      "@type": "Offer",
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        minPrice: 300,
+        maxPrice: 600,
+        priceCurrency: "USD",
+        unitCode: "MON",
+      },
+    });
   });
 });
 

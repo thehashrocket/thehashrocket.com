@@ -5,8 +5,9 @@ import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
 import { BookingLink, secondaryButton } from "@/components/ui/BookingLink";
 import { ClosingCta } from "@/components/ui/ClosingCta";
+import { accentLink, eyebrow, inlineLink, sectionHeading } from "@/components/ui/styles";
 import { getCaseStudySummaries } from "@/lib/case-studies";
-import { formatReviewPrice } from "@/lib/offers";
+import { offerLadderParts } from "@/lib/offers";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -31,13 +32,12 @@ const proofPoints = [
   { value: "20+", label: "years shipping production software" },
 ];
 
-const accentLink =
-  "inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]";
 
 const services: { title: string; body: string; link?: { href: string; label: string } }[] = [
   {
     title: "Build it.",
     body: "Custom software that replaces the paper, the spreadsheets, and the six disconnected tools. Quotes, job tracking, inventory, production queues, invoicing, integrations with QuickBooks and whatever else you already pay for.",
+    link: { href: "/automation-sprint", label: "See the automation sprint →" },
   },
   {
     title: "Rescue it.",
@@ -46,9 +46,10 @@ const services: { title: string; body: string; link?: { href: string; label: str
   },
   {
     title: "Keep it running.",
-    body: "Servers, security, updates, backups, and the 6am call before the morning shift. Ongoing support on a monthly retainer, so you have an engineer before you need one.",
+    body: "Servers, security, updates, backups, and a fast reply when something breaks. Ongoing support on a monthly plan, so you have an engineer before you need one.",
   },
 ];
+
 
 const steps: { title: string; body: ReactNode }[] = [
   {
@@ -56,28 +57,28 @@ const steps: { title: string; body: ReactNode }[] = [
     body: "You tell me what's broken or what you need. I tell you honestly whether I'm the right fit.",
   },
   {
-    title: "A paid discovery or a fixed-fee review.",
+    title: "A fixed scope and price.",
     body: (
       <>
-        For anything bigger than a quick fix, I map what exists, find the real problems, and give you a written plan
-        with estimates. If you already have an app someone built with AI, a{" "}
-        <Link href="/ai-app-review" className="text-[var(--accent)] underline-offset-4 hover:underline">
+        One process to automate gets a one-page scope for an{" "}
+        <Link href="/automation-sprint" className={inlineLink}>
+          automation sprint
+        </Link>
+        . An app someone built with AI gets a{" "}
+        <Link href="/ai-app-review" className={inlineLink}>
           fixed-fee review
-        </Link>{" "}
-        tells you what&apos;s risky and what to fix first, and it takes the place of discovery for that app. You own
-        either report whether or not we keep working together.
+        </Link>
+        . Larger work starts with a paid discovery: I map what exists, find the real problems, and give you a written
+        plan with estimates. You own the written result either way.
       </>
     ),
   },
   {
-    title: "Build or support.",
-    body: "A fixed-scope project, or an ongoing retainer for systems that need a steady hand.",
+    title: "Build, hand off, look after.",
+    body: "The work ships, you get a handoff you can follow, and ongoing support keeps it running if you want it.",
   },
 ];
 
-const eyebrow = "mb-2 font-mono text-sm text-[var(--accent)]";
-const sectionHeading =
-  "font-display text-4xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-5xl";
 
 export default function Home() {
   return (
@@ -225,9 +226,16 @@ export default function Home() {
               </li>
             ))}
           </ol>
-          <p className="mt-12 text-lg text-[var(--text-primary)]">
-            Projects typically start at $10,000. An AI-built app review is a flat{" "}
-            {formatReviewPrice()}. Retainers are scoped to what you run.
+          <p data-testid="offer-ladder" className="mt-12 text-lg text-[var(--text-primary)]">
+            {offerLadderParts().map((part, i) =>
+              part.href ? (
+                <Link key={i} href={part.href} className={inlineLink}>
+                  {part.text}
+                </Link>
+              ) : (
+                <span key={i}>{part.text}</span>
+              ),
+            )}
           </p>
         </div>
       </section>
