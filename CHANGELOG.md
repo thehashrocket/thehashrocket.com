@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1.0] - 2026-11-14
+
+### Fixed
+- Clicking Services in the nav no longer draws a blue box around the Services heading. If you use the keyboard instead, a thin green underline shows where you landed, so you know the next Tab continues from that section.
+- Page text no longer shows through the top navigation bar while you scroll; the bar now has a solid background.
+- When you tab backwards through the page, the link you land on stays visible below the navigation bar instead of sliding under it.
+
 ## [0.8.0.0] - 2026-11-14
 
 ### Added
