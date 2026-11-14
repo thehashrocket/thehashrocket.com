@@ -145,7 +145,7 @@ export default function Home() {
       <section id="services" aria-labelledby="services-heading" className="scroll-mt-24 px-6 py-24 md:py-32">
         <FocusOnHash hash="services" target="services-heading" />
         <div className="mx-auto max-w-[1280px]">
-          <h2 id="services-heading" tabIndex={-1} className={`${eyebrow} focus:outline-none`}>
+          <h2 id="services-heading" tabIndex={-1} className={eyebrow}>
             Services
           </h2>
           <ul data-testid="service-choices" className="mt-6 flex flex-col gap-3">
