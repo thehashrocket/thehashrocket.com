@@ -8,7 +8,7 @@ Consulting site for owner-operated and mid-size businesses, built with Next.js 1
 
 ```
 app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
-  ├── <Nav />                              (client — responsive nav + mobile hamburger)
+  ├── <Nav />                              (server — desktop links + client <MobileNav />; "Services" → /#services via NavAnchor)
   ├── <SceneProvider />                    (client — persistent 3D canvas wrapper)
   │   ├── <ErrorBoundary>                  (catches WebGL failures)
   │   │   └── <SceneCanvas />              (lazy-loaded via next/dynamic, ssr: false)
@@ -90,9 +90,9 @@ app/                    Routes (App Router)
   ├── layout.tsx        Root layout (canvas + nav + footer + analytics + JSON-LD)
   └── not-found.tsx     404 with persistent canvas
 components/
-  ├── layout/           Shell components (Nav, Footer, SceneProvider, ErrorBoundary, JsonLd, LocationJsonLd)
+  ├── layout/           Shell components (Nav, MobileNav, NavAnchor, Footer, SceneProvider, ErrorBoundary, JsonLd, LocationJsonLd). NavAnchor renders in-page targets ("/#services") as plain anchors, since Next's Link uses pushState and fires no hashchange
   ├── scenes/           R3F scene components (HeroScene, PharmaScene, NonprofitScene, GrantScene, PrintPortalScene, ConsolidationScene, ModernizeScene, AuditScene, AutomationScene, SceneRouter)
-  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, BookingLink, OfferHeroActions, DimCanvasBelow, ClosingCta, NumberedSteps, ArchitectureDiagram, LabSection, Timeline, SceneSync) and `styles.ts` (shared section class strings)
+  └── ui/               UI primitives (Button, Card, Input, ContactForm, AtlasCard, BookingLink, OfferHeroActions, DimCanvasBelow, ClosingCta, NumberedSteps, ArchitectureDiagram, LabSection, Timeline, SceneSync, FocusOnHash) and `styles.ts` (shared section class strings). FocusOnHash moves keyboard focus to the homepage Services heading when the URL hash is #services
       └── geo/          Geo landing page sections (Hero, Services, CaseStudies, FAQ, CTA)
 lib/
   ├── store.ts          Zustand scene state

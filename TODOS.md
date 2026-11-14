@@ -190,6 +190,7 @@
 ### [P2] 90-day read on each offer page
 - **What:** 90 days after each page ships, count real messages and booked calls by `source` and project type, and compare to the owner-set bars. `/ai-app-review` and `/print-shops`: on or after 2027-02-11 (defaults: 2 qualified review inquiries; 1 qualified print conversation per 20 outreach touches; the review price dropped to $1,500 with release 1, so restart the review count from that date). `/automation-sprint` (`source=automation-sprint`, type "Automation sprint"): on or after 2027-02-12, 90 days after release 1 (default: 2 qualified inquiries and 1 sale). `/talks` (shipped in release 2): 90 days from the first organizer outreach touch, not from merge (bar: 2 talks given and 1 qualified opportunity, from `source=talks` and `source=talk-attendee`; also log prep and travel hours per talk). The care plan, when it ships: 1 signup from a sprint or review handoff, clock from the first delivered handoff. Below a bar, cut or rewrite that page.
 - **Ledger:** keep a manual lead log with origin, offer, qualified, proposal, sale and delivery hours; `source` records the last click, not where the lead first heard of you.
+- **Caps (#101):** log actual hours on the first sprint and the first review, then revisit `SPRINT_MONTHLY_CAP` (1) and `REVIEW_MONTHLY_CAP` (2) and their monthly revenue (1 sprint + 2 reviews ≈ $6,500–$8,000 gross at full use) with this read.
 - **Why:** Both pages were built ahead of demand evidence; this is the kill/keep check.
 - **Context:** CTA clicks are not bookings (`BookingAnchor` records clicks). Keep a manual inquiry log with the first page that prompted contact and outreach touch counts. Verify one real Cal.com booking carries `source` first.
 - **Effort:** S (CC: ~10 min) | **Priority:** P2 | **Depends on:** pages shipped
@@ -228,12 +229,6 @@
 - **Context:** CEO phase X5. `/talks` ships with no structured data. Add a small `talks` data list in `lib/offer-content.ts` when the first date is booked.
 - **Effort:** S (CC: ~10 min) | **Priority:** P3 | **Depends on:** a first scheduled public talk
 
-### [P3] Navigation entry for the offer pages
-- **What:** Decide whether the main nav gets an "Offers" or "Work with me" entry pointing at the sprint, review, care plan and talks.
-- **Why:** Offer pages are reachable from home, footer, contact and location pages only.
-- **Context:** CEO phase X6, deferred to after the 90-day read so nav space goes to the doors that earn it.
-- **Effort:** S | **Priority:** P3 | **Depends on:** 90-day read
-
 ### [P3] Talk leave-behind
 - **What:** A one-page handout or slide link for the talk (`TALK_TITLE` in `lib/talk.ts`), carrying `/contact?source=talk-attendee`.
 - **Why:** Attendees need something to take away that preserves attribution.
@@ -266,3 +261,43 @@
 - **What:** A test that renders `app/automation-sprint/opengraph-image.tsx` and checks the subtitle carries `formatSprintPrice()`.
 - **Why:** Deferred from plan: `~/.gstack/projects/thehashrocket-thehashrocket.com/plans/2026-11-14-offer-relaunch.md` (OG tests driven by `OFFER_ROUTES`). The repo has no harness for rendering `next/og` images in vitest yet; the price can't drift today because the image reads the same helper the page does.
 - **Effort:** S | **Priority:** P3
+
+## Offer relaunch follow-ups deferrals (from /autoplan, 2026-11-14, issues #97–#101)
+
+### [P2] Bounded outreach test: print-shop problem vs broad sprint pitch
+- **What:** For 30 days, send the same number of outreach touches with a print-shop-specific problem (quote to invoice, QuickBooks re-keying) and with the general automation sprint pitch; log qualified conversations, paid commitments and founder hours per arm in the lead ledger.
+- **Why:** The site changes assume discoverability is the bottleneck; Codex's CEO review argued the bigger unknown is which buyer/problem pair converts.
+- **Pros:** Evidence for where to spend limited evening hours. **Cons:** Owner time; small samples.
+- **Context:** Pairs with the 90-day read above; print-shop case study already exists (`/print-shops`, Print Portal).
+- **Effort:** S (human) | **Priority:** P2 | **Depends on:** release of #97–#101
+
+### [P2] Talk follow-up routine
+- **What:** Before the first talk, prepare the one takeaway, a specific next step tied to each attendee's chosen process, and a consent-based follow-up (who gets an email, when). Raises the "Talk leave-behind" item above.
+- **Why:** Unpaid talks must earn prep, travel and follow-up time; the site captures `source=talk-attendee` but nothing plans the bridge to a sprint conversation.
+- **Effort:** S (human) | **Priority:** P2 | **Depends on:** first talk booked
+
+### [P3] Demo review report on an app you own
+- **What:** Publish a clearly labeled sample AI-built-app review report made from an app you own, instead of waiting for the first paid review (see "Anonymized sample review report" above).
+- **Why:** Buyers are asked to pay $1,500 before seeing what they get (Codex CEO review).
+- **Effort:** S | **Priority:** P3 | **Depends on:** none
+
+### [P3] Click events for the hero sprint button and Services choices
+- **What:** GA4 events (same `sendGAEvent` pattern as `BookingAnchor`) for the homepage sprint button and each `#services` choice link, with the target route.
+- **Why:** The 90-day read can then tell which entry point produced a visit; today only booking clicks and sent messages are recorded.
+- **Effort:** S (CC: ~10 min) | **Priority:** P3 | **Depends on:** #100 shipped
+
+### [P3] "Next opening" state when a month is full
+- **What:** One constant in `lib/offers.ts` (e.g. `SPRINT_NEXT_OPENING`) that, when set, replaces the cap line with "Next opening: {month}".
+- **Why:** With caps of 1 sprint and 2 reviews, a full month needs honest copy; build when it first fills.
+- **Effort:** S | **Priority:** P3 | **Depends on:** a month filling up
+
+### [P2] Homepage booking button sits below the fold on a 375×667 phone
+- **What:** On a 375×667 phone the homepage hero's "Book a 20-minute call" button ends at about 697px, below the first screen. Desktop sizes (1440×900, 1280×720) are fine.
+- **Why:** A visitor who types the address after a talk, usually on a phone, has to scroll to the main call to action. Measured on main before #100; #100 did not move it.
+- **Options:** tighten the hero's mobile spacing (`pt-24` under the fixed nav, `mt-6`/`mt-10` gaps), shorten the mobile body paragraph, or move the buttons above it on small screens. Then add a 375×667 assertion to the homepage "first screen" test in `test/e2e/offer-pages.spec.ts`.
+- **Effort:** S | **Priority:** P2 | **Depends on:** a design choice on the mobile hero
+
+### [P3] Enlarged-text and landscape checks for the mobile menu and offer heroes
+- **What:** e2e at 200% text zoom and short landscape (e.g. 667×375) for the mobile menu and offer heroes.
+- **Why:** Design review (Codex) flagged that fixed-viewport checks don't prove readability under enlarged text.
+- **Effort:** S | **Priority:** P3 | **Depends on:** release of #97–#101
