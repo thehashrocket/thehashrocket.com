@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0.0] - 2026-11-14
+
+### Added
+- `/talks`: a free 30–45 minute talk for chambers, SBDCs and business groups, in person around Sacramento, Stockton and Modesto or online. The page leads with the talk title, lists what attendees leave with, and makes "Ask about a date" the main action, with booking a call as the second option. It has its own share image, is listed in the sitemap, and is linked from the footer and the About page.
+- Organizers who reach `/contact` from the talk page find "A talk for my group" already chosen. "A talk for my group" is a new choice in the form.
+
+### Changed
+- On the sprint, review, print shop and talk pages, the 3D background dims once you scroll past the opening section, so the text below is easier to read. Case studies dim the same way they did before.
+- The contact form's "What happens next" steps now follow the project type the visitor has chosen. A talk shows its own steps, says that sending doesn't reserve a date, and drops the timeline question. Choosing another type brings the usual steps back, and a sent message resets the form to the type it started with.
+- Links inside paragraphs are always underlined, so they no longer rely on color alone.
+
 ## [0.6.0.0] - 2026-11-14
 
 ### Added

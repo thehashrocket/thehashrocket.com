@@ -146,3 +146,11 @@ export const sprintFaqs: FAQ[] = [
       "Then the scope call says so and you get a quote for the larger build instead. The sprint is for one process with a clear finish line.",
   },
 ];
+
+// --- Talks ---------------------------------------------------------------------
+// The title and takeaways live in lib/talk.ts (a leaf module the tests import).
+
+/** The hero's one line on what attendees leave with. */
+export const talkScope = "You leave with one job picked out and a way to check it’s working.";
+
+export const talkFormat = "In person in the Sacramento, Stockton and Modesto areas, or online.";

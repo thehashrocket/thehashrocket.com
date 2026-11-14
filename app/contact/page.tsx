@@ -16,12 +16,6 @@ export const metadata: Metadata = {
   },
 };
 
-const nextSteps = [
-  "I reply within one business day.",
-  "We do a 20-minute call.",
-  "You get a written proposal or an honest “I’m not your guy.”",
-];
-
 export default async function ContactPage({
   searchParams,
 }: {
@@ -51,23 +45,10 @@ export default async function ContactPage({
           </div>
         )}
 
-        <h2 className="mb-4 font-mono text-sm text-[var(--accent)]">What happens next</h2>
-        <ol className="mb-12 space-y-2 text-[var(--text-secondary)]">
-          {nextSteps.map((step, i) => (
-            <li key={step} className="flex gap-3">
-              <span aria-hidden="true" className="font-mono text-sm text-[var(--text-muted)]">
-                {i + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-
         <ContactForm
           key={source ?? "direct"}
           source={source}
           defaultProjectType={projectTypeForSource(source)}
-          hideTimeline={intro.hideTimeline}
         />
 
         <p className="mt-8 text-sm text-[var(--text-muted)]">

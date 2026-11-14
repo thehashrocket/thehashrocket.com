@@ -90,7 +90,7 @@ describe("ContactPage", () => {
 
   // Value: protects=/contact preselects the project type per offer source and shows only that offer's context line;
   //   fails_when=page stops passing projectTypeForSource, the intro map mis-keys a source, or a talk source shows prices or timelines;
-  //   why_new=the intro became a per-source map with a hidden timeline for organizers; seam=none;
+  //   why_new=the intro became a per-source map; the timeline and next steps now follow the project type; seam=none;
   //   no_claim=real searchParams parsing or server action submission
   it("tailors the intro, preselect and fields to each source", async () => {
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "");
@@ -98,7 +98,7 @@ describe("ContactPage", () => {
       ["ai-app-review", "AI-built app review", /You're asking about the AI-built app review\./, true],
       ["automation-sprint", "Automation sprint", /You're asking about the automation sprint\./, true],
       ["care-plan", "Ongoing support", /You're asking about ongoing support\./, true],
-      ["talks", "", /Tell me about your group/, false],
+      ["talks", "A talk for my group", /Tell me about your group/, false],
       ["talk-attendee", "", /Heard me speak\?/, true],
       ["print-shops", "New build", /Start with a/, true],
       ["home", "", /Start with a/, true],
@@ -112,6 +112,8 @@ describe("ContactPage", () => {
       expect(container.querySelector<HTMLSelectElement>("#projectType")?.value, label).toBe(projectType);
       expect(container.textContent, label).toMatch(intro);
       expect(container.querySelector("#timeline") !== null, label).toBe(hasTimeline);
+      const steps = container.querySelector('[data-testid="next-steps"]')?.textContent ?? "";
+      expect(steps, label).toMatch(source === "talks" ? /We pick a date and a format\./ : /We do a 20-minute call\./);
       if (source === "talks" || source === "talk-attendee" || source === "care-plan") {
         expect(container.textContent, label).not.toMatch(/\$\d/);
       }

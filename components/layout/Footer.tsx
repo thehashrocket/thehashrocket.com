@@ -6,6 +6,7 @@ const internalLinks = [
   { href: "/about", label: "About" },
   { href: "/lab", label: "Lab" },
   { href: "/print-shops", label: "Print shops" },
+  { href: "/talks", label: "Talks" },
   { href: "/locations", label: "Locations" },
   { href: "/contact", label: "Contact" },
 ];

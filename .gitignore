@@ -20,6 +20,7 @@ yarn.lock
 
 # next.js
 /.next/
+/.next-booking/
 /out/
 
 # production

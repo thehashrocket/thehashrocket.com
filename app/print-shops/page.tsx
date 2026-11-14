@@ -4,6 +4,7 @@ import { FAQJsonLd } from "@/components/layout/LocationJsonLd";
 import { ArchitectureDiagram } from "@/components/ui/ArchitectureDiagram";
 import { BookingLink, secondaryButton } from "@/components/ui/BookingLink";
 import { ClosingCta } from "@/components/ui/ClosingCta";
+import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { FAQSection } from "@/components/ui/geo/FAQSection";
 import { caseStudies } from "@/lib/case-studies";
 import {
@@ -53,6 +54,7 @@ export default function PrintShopsPage() {
           </div>
         </div>
       </section>
+      <DimCanvasBelow />
 
       {/* Proof */}
       <section aria-labelledby="print-proof" className={section}>

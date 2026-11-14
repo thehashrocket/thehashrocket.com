@@ -1,6 +1,6 @@
 /**
  * @vitest-environment jsdom
- * /automation-sprint, /ai-app-review and /print-shops: offer facts render from
+ * /automation-sprint, /ai-app-review, /print-shops and /talks: offer facts render from
  * lib/offers.ts and the case study, never from retyped copy.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -29,6 +29,8 @@ const content = await import("@/lib/offer-content");
 const SprintPage = (await import("@/app/automation-sprint/page")).default;
 const ReviewPage = (await import("@/app/ai-app-review/page")).default;
 const PrintPage = (await import("@/app/print-shops/page")).default;
+const TalksPage = (await import("@/app/talks/page")).default;
+const talk = await import("@/lib/talk");
 
 function jsonLd(container: HTMLElement) {
   return [...container.querySelectorAll('script[type="application/ld+json"]')].map((s) =>
@@ -186,5 +188,46 @@ describe("/print-shops", () => {
     expect(text).toMatch(/packaged print MIS/i);
     expect(container.querySelector('[data-testid="current-scene"]')).toBeNull();
     expect(container.innerHTML).not.toMatch(/undefined|NaN/);
+  });
+});
+
+// Value: protects=/talks leads with the owner's title, asks for a date first, shows the takeaways and minutes
+//   from their single sources, and carries no price or Service JSON-LD;
+//   fails_when=the H1 drifts from TALK_TITLE, booking leads, the testid lands twice, or a price appears;
+//   why_new=/talks is new; seam=none; no_claim=how the title reads to an organizer (owner sign-off)
+describe("/talks", () => {
+  it("renders the title, summary, takeaways and links", () => {
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "");
+    const { container, text } = renderPage(TalksPage);
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector("h1")?.textContent).toBe(talk.TALK_TITLE);
+    expect(container.querySelector('[data-testid="offer-summary"]')?.textContent).toMatch(
+      new RegExp(`Free · ${offers.TALK_MINUTES_MIN}–${offers.TALK_MINUTES_MAX} min · for chambers, SBDCs and business groups`),
+    );
+    expect(container.querySelector('[data-testid="offer-scope"]')?.textContent).toBe(content.talkScope);
+    for (const takeaway of talk.TALK_TAKEAWAYS) expect(text).toContain(takeaway);
+    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("/work/automation-rescue");
+    expect(hrefs).toContain("/automation-sprint");
+    expect(hrefs.filter((h) => h === "/contact?source=talks").length).toBeGreaterThanOrEqual(2);
+    expect(text).not.toMatch(/\$\d/);
+    expect(jsonLd(container)).toEqual([]);
+    expect(container.innerHTML).not.toMatch(/undefined|NaN/);
+  });
+
+  it("asks about a date first, with booking as the secondary action", () => {
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "https://example.com/me");
+    const on = renderPage(TalksPage).container;
+    const ctaOn = on.querySelectorAll('[data-testid="booking-cta"]');
+    expect(ctaOn).toHaveLength(1);
+    expect(ctaOn[0].textContent).toBe("Ask about a date");
+    expect(on.textContent).toContain("Or book a call to plan it");
+
+    vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "");
+    const off = renderPage(TalksPage).container;
+    const ctaOff = off.querySelectorAll('[data-testid="booking-cta"]');
+    expect(ctaOff).toHaveLength(1);
+    expect(ctaOff[0].textContent).toBe("Ask about a date");
+    expect(off.textContent).not.toContain("Or book a call to plan it");
   });
 });

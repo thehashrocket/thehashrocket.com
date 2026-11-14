@@ -123,6 +123,9 @@ describe("submitContact", () => {
       "New contact from Jason Shultz - Automation sprint (via automation-sprint)",
     );
     expect(await subjectFor({ source: "talks" })).toBe("New contact from Jason Shultz (via talks)");
+    expect(await subjectFor({ projectType: "A talk for my group", source: "talks" })).toBe(
+      "New contact from Jason Shultz - A talk for my group (via talks)",
+    );
     expect(await subjectFor({})).toBe("New contact from Jason Shultz");
     expect(await subjectFor({ name: "Jason\r\nBcc: spam@example.com" })).toBe(
       "New contact from Jason Bcc: spam@example.com",

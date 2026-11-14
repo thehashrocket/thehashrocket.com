@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ClosingCta } from "@/components/ui/ClosingCta";
 import { Timeline } from "@/components/ui/Timeline";
 import { careerEntries, coreStack, domains } from "@/lib/experience";
+import { TALK_MINUTES_MAX, TALK_MINUTES_MIN } from "@/lib/offers";
+import { inlineLink } from "@/components/ui/styles";
 import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -55,6 +57,12 @@ export default function AboutPage() {
             When you hire me, the person who designs your system is the same
             person who knows what happens when it breaks. I help teams make
             architectural decisions they won&apos;t regret in two years.
+          </p>
+          <p>
+            I give a free {TALK_MINUTES_MIN}–{TALK_MINUTES_MAX} minute talk for chambers and business groups.{" "}
+            <Link href="/talks" className={inlineLink}>
+              Ask about a date →
+            </Link>
           </p>
         </div>
 
