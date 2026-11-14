@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
 
 export default function AutomationSprintPage() {
-  const cap = capLine(SPRINT_MONTHLY_CAP, "sprints");
+  const cap = capLine(SPRINT_MONTHLY_CAP, "sprint", "sprints");
   return (
     <div className="relative">
       <ServiceJsonLd

@@ -14,7 +14,9 @@ import {
   REVIEW_CREDIT_TEXT,
   LOWEST_FIXED_PRICE,
   REVIEW_FRAMING,
+  REVIEW_MONTHLY_CAP,
   REVIEW_PRICE,
+  SPRINT_MONTHLY_CAP,
   SPRINT_PRICE_MAX,
   SPRINT_PRICE_MIN,
   capLine,
@@ -91,17 +93,28 @@ describe("owner gate inputs", () => {
     if (REVIEW_FRAMING === "small-door") expect(REVIEW_PRICE).toBeLessThan(SPRINT_PRICE_MAX);
   });
 
-  it("hides a capacity line that is unset or not positive", () => {
-    expect(capLine(null, "sprints")).toBeNull();
-    expect(capLine(0, "sprints")).toBeNull();
-    expect(capLine(2, "sprints")).toBe("I take 2 sprints a month. Ask about the next available start.");
+  // Value: protects=a cap of 1 reads "1 sprint", not "1 sprints", and unset or zero caps hide the line;
+  //   fails_when=capLine goes back to one unit form; why_new=#101 lowers the sprint cap to 1; seam=none;
+  //   no_claim=none beyond protects
+  it("words the capacity line for one and many, and hides it when unset or not positive", () => {
+    expect(capLine(null, "sprint", "sprints")).toBeNull();
+    expect(capLine(0, "sprint", "sprints")).toBeNull();
+    expect(capLine(1, "sprint", "sprints")).toBe("I take 1 sprint a month. Ask about the next available start.");
+    expect(capLine(2, "review", "reviews")).toBe("I take 2 reviews a month. Ask about the next available start.");
+  });
+
+  // Value: protects=the published caps match #101 (1 sprint, 2 reviews); fails_when=a cap is raised without
+  //   the hours data; why_new=#101; seam=none; no_claim=actual delivery hours
+  it("publishes the #101 caps", () => {
+    expect(SPRINT_MONTHLY_CAP).toBe(1);
+    expect(REVIEW_MONTHLY_CAP).toBe(2);
   });
 
   // Value: protects=the published credit matches the term the owner approved; fails_when=the wording drops the sprint, cap or no-cash clause;
   //   why_new=terms changed at the gate; seam=none; no_claim=how credits are applied on invoices
   it("states the approved review credit", () => {
     expect(REVIEW_CREDIT_TEXT).toBe(
-      `If you hire me for a fix or an automation sprint that starts within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. Unused credit isn't paid out.`,
+      `If you sign a scope for a fix or an automation sprint within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. The work can start later. Unused credit isn't paid out.`,
     );
   });
 });

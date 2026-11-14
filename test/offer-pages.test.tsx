@@ -51,7 +51,7 @@ describe("/ai-app-review", () => {
     expect(text).toContain(offers.REVIEW_TURNAROUND);
     expect(text).toContain(`within ${offers.REVIEW_CREDIT_DAYS} days`);
     if (offers.REVIEW_MONTHLY_CAP !== null) {
-      expect(text).toContain(`I take ${offers.REVIEW_MONTHLY_CAP} reviews a month`);
+      expect(text).toContain(offers.capLine(offers.REVIEW_MONTHLY_CAP, "review", "reviews")!);
       expect(text).toContain(offers.REVIEW_CREDIT_TEXT);
     }
     expect(text).toContain(`up to ${offers.REVIEW_MAX_INTEGRATIONS} third-party integrations`);
@@ -137,7 +137,7 @@ describe("/automation-sprint", () => {
     expect(text).toContain(offers.formatUsdRange(offers.SPRINT_PRICE_MIN, offers.SPRINT_PRICE_MAX));
     expect(text).toContain(`${offers.SPRINT_WEEKS} weeks`);
     expect(text).toContain(`up to ${offers.SPRINT_MAX_SYSTEMS}`);
-    const cap = offers.capLine(offers.SPRINT_MONTHLY_CAP, "sprints");
+    const cap = offers.capLine(offers.SPRINT_MONTHLY_CAP, "sprint", "sprints");
     if (cap) expect(text).toContain(cap);
     for (const term of content.sprintTerms) expect(text).toContain(term);
     expect(container.querySelectorAll("h1")).toHaveLength(1);

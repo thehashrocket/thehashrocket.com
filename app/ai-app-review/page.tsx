@@ -44,7 +44,7 @@ const related = RELATED_SLUGS.flatMap((slug) => caseStudies[slug] ?? []);
 
 
 export default function AiAppReviewPage() {
-  const cap = capLine(REVIEW_MONTHLY_CAP, "reviews");
+  const cap = capLine(REVIEW_MONTHLY_CAP, "review", "reviews");
   return (
     <div className="relative">
       <ServiceJsonLd name="AI-built app review" description={DESCRIPTION} url={PAGE_URL} offer={{ kind: "fixed", price: REVIEW_PRICE }} />

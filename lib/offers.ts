@@ -6,10 +6,10 @@
 /** AI-built app review: flat fee in US dollars. */
 export const REVIEW_PRICE = 1500;
 export const REVIEW_TURNAROUND = "3 weeks";
-/** Reviews taken per month; null hides the line. */
-export const REVIEW_MONTHLY_CAP: number | null = 3;
+/** Reviews taken per month; null hides the line. Revisit with real hours (TODOS.md, 90-day read). */
+export const REVIEW_MONTHLY_CAP: number | null = 2;
 export const REVIEW_MAX_INTEGRATIONS = 3;
-/** The fee is credited toward a fix or sprint that starts within this many days of the report. */
+/** The fee is credited toward a fix or sprint whose scope is signed within this many days of the report. */
 export const REVIEW_CREDIT_DAYS = 30;
 /**
  * "small-door": the review sits in the starter ladder beside the sprint.
@@ -22,8 +22,8 @@ export const REVIEW_FRAMING: ReviewFraming = "small-door";
 export const SPRINT_PRICE_MIN = 3500;
 export const SPRINT_PRICE_MAX = 5000;
 export const SPRINT_WEEKS = "2–3";
-/** Sprints taken per month; null hides the line. */
-export const SPRINT_MONTHLY_CAP: number | null = 2;
+/** Sprints taken per month; null hides the line. Revisit with real hours (TODOS.md, 90-day read). */
+export const SPRINT_MONTHLY_CAP: number | null = 1;
 export const SPRINT_MAX_SYSTEMS = 3;
 
 /** The cheapest fixed-price way to start: the city-page badge shows it. */
@@ -79,11 +79,15 @@ export function formatSprintPrice(): string {
   return formatUsdRange(SPRINT_PRICE_MIN, SPRINT_PRICE_MAX);
 }
 
-export const REVIEW_CREDIT_TEXT = `If you hire me for a fix or an automation sprint that starts within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. Unused credit isn't paid out.`;
+// Counts from signing, not from the start date: with low monthly caps, a full calendar
+// must never cost a client their credit (owner decision on #101).
+export const REVIEW_CREDIT_TEXT = `If you sign a scope for a fix or an automation sprint within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. The work can start later. Unused credit isn't paid out.`;
 
-/** A capacity line, or null when the cap is unset or not positive. */
-export function capLine(cap: number | null, unit: string): string | null {
-  return cap !== null && cap > 0 ? `I take ${cap} ${unit} a month. Ask about the next available start.` : null;
+/** A capacity line ("1 sprint", "2 reviews"), or null when the cap is unset or not positive. */
+export function capLine(cap: number | null, one: string, many: string): string | null {
+  return cap !== null && cap > 0
+    ? `I take ${cap} ${cap === 1 ? one : many} a month. Ask about the next available start.`
+    : null;
 }
 
 // --- The pricing ladder ------------------------------------------------------
