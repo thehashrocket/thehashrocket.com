@@ -106,7 +106,7 @@ lib/
   ├── offer-content.ts  Review, sprint and talks page copy (server components only)
   ├── talk.ts           TALK_TITLE and the takeaways (leaf module; tests import the exact strings)
   ├── contact-intro.ts  /contact intro text per source
-  ├── contact-email.ts  Contact email subject
+  ├── contact-email.ts  Contact email subject and the rate-limit wait message (tooManyMessage)
   ├── print-shops.ts    /print-shops copy (results and workflow come from the print-portal case study)
   ├── locations.ts      City configs (Sacramento, Stockton, Modesto, Manteca/Tracy/Lathrop) with optional localExperience
   ├── side-projects.ts  Side project data (used by /lab)
