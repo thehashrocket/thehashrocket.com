@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0.0] - 2026-11-14
+
+### Added
+- The homepage has a Services section that links every offer, including the automation sprint, the AI-built app review, the talk and the print shop page. "Services" is the first link in the main nav and the phone menu, and following it puts keyboard focus on the section so the next Tab continues from there.
+- `/talks` introduces the speaker with a photo, a short bio and a link to the About page.
+- The sprint and review pages say the work happens in person around Sacramento, Stockton and Modesto or remotely, and that you work with Jason directly.
+
+### Changed
+- The homepage's second button is now the automation sprint with its price, next to booking a call, so both fixed-price ways in are on the first screen of a laptop.
+- The contact form lets a talk room on shared venue Wi-Fi write in. One connection can send up to 10 messages an hour and 30 a day (it was 3 an hour), and one email address can send 3 an hour. Only a message that actually sends counts, so a mail outage never locks a visitor out of retrying.
+- When a message is refused for sending too often, the form says how long to wait and offers your email address and a booking link.
+- The sprint and review pages say how many you take each month: 1 sprint and 2 reviews.
+- The review fee is credited toward a fix or a sprint when you sign its scope within 30 days of the report; the work itself can start later.
+
+### Fixed
+- The contact form keeps everything you typed when a message can't be sent, with or without JavaScript, and says plainly that it wasn't sent. It used to clear the form on any error.
+- A send that hangs for more than 10 seconds now ends with a clear "wasn't sent" message instead of a form that spins until the server gives up.
+- The phone menu scrolls on short screens, every item is at least 44px tall, Escape returns focus to the menu button, and the page no longer stays locked after you tap a link.
+- A booking started from the contact form keeps the page it came from, so talk and offer bookings are no longer counted as plain contact-page bookings.
+
 ## [0.7.0.0] - 2026-11-14
 
 ### Added
