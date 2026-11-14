@@ -72,7 +72,9 @@ test("the Services heading shows no outline box and the header covers text under
   await expectLandedOnServices(page);
   const outline = await page.locator("#services-heading").evaluate((el) => getComputedStyle(el).outlineStyle);
   expect(outline).toBe("none");
-  const headerBg = await page.locator("header").first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  // The backdrop is its own layer inside the header (see Nav.tsx for why it is not on the header).
+  const headerBg = await page.locator("header").first().locator(":scope > [aria-hidden=\"true\"]").first()
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
   // Chromium reports rgba(r, g, b, a) or, for color-mix output, oklab(l a b / alpha); no alpha means opaque.
   const alphaMatch = headerBg.match(/^rgba\(.*,\s*([\d.]+)\)$/) ?? headerBg.match(/\/\s*([\d.]+)\)$/);
   const alpha = alphaMatch ? Number(alphaMatch[1]) : 1;
@@ -123,12 +125,22 @@ test("Services in the mobile menu lands on the section from / and from /talks", 
 });
 
 // Value: protects=every item in the phone menu can be reached and tapped on a short screen;
-//   fails_when=the overlay goes back to centered and non-scrolling, or links lose their 44px targets;
+//   fails_when=the overlay goes back to centered and non-scrolling, stops covering the screen, or links lose their
+//   44px targets;
 //   why_new=the menu gained a fifth item; seam=none; no_claim=enlarged text (TODOS.md)
 test("every mobile menu item is reachable and at least 44px tall at 375×560", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 560 });
   await page.goto("/about");
   await page.getByRole("button", { name: "Open menu" }).click();
+  // The overlay must cover the screen. A backdrop-filter or transform on the header would make the header its
+  // containing block and shrink it to a strip, while links stayed reachable by scrolling inside that strip.
+  const overlay = await page.getByRole("navigation", { name: "Mobile navigation" }).evaluate((el) => {
+    let box: Element | null = el;
+    while (box && getComputedStyle(box).position !== "fixed") box = box.parentElement;
+    const r = box!.getBoundingClientRect();
+    return { top: r.top, height: r.height };
+  });
+  expect(overlay, "open menu overlay covers the viewport").toEqual({ top: 0, height: 560 });
   const links = page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link");
   const count = await links.count();
   expect(count).toBeGreaterThanOrEqual(5);
