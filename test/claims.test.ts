@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { caseStudies, caseStudySlugs } from "../lib/case-studies";
 import { locations, locationSlugs } from "../lib/locations";
+import { REVIEW_PRICE, formatUsd } from "../lib/offers";
 import { normalizeSource } from "../lib/sources";
 
 const SOURCE_DIRS = ["app", "components", "lib"];
@@ -36,6 +37,10 @@ const BANNED = [
   /decision fatigue/,
   /\$2M\+/,
   /50,000\+/,
+  // Fixing AI-built apps is a crowded field; never claim exclusivity or a rescue count.
+  /nobody else (offers|does)/i,
+  /only one (who|offering)/i,
+  /rescued \d+/i,
 ];
 
 describe("claims", () => {
@@ -44,6 +49,22 @@ describe("claims", () => {
       BANNED.filter((pattern) => pattern.test(text)).map((pattern) => `${path}: ${pattern}`),
     );
     expect(hits).toEqual([]);
+  });
+
+  it("the review price is only ever rendered from lib/offers.ts", () => {
+    const literal = new RegExp(
+      `\\$${REVIEW_PRICE.toLocaleString("en-US").replace(",", ",?")}(?![\\d,])`,
+    );
+    const hits = sources.filter(({ path, text }) => path !== join("lib", "offers.ts") && literal.test(text));
+    expect(formatUsd(REVIEW_PRICE)).toMatch(literal);
+    expect(hits.map((h) => h.path)).toEqual([]);
+  });
+
+  it("projects still typically start at $10,000 where they did before", () => {
+    expect(readFileSync("app/contact/page.tsx", "utf8")).toContain("$10,000");
+    for (const slug of locationSlugs) {
+      expect(locations[slug].faqs.some((faq) => /\$10,000/.test(faq.answer)), slug).toBe(true);
+    }
   });
 
   it("cal.com is never hardcoded", () => {

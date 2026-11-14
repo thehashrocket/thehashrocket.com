@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
 import { BookingLink, secondaryButton } from "@/components/ui/BookingLink";
 import { ClosingCta } from "@/components/ui/ClosingCta";
 import { getCaseStudySummaries } from "@/lib/case-studies";
+import { formatReviewPrice } from "@/lib/offers";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -29,14 +31,18 @@ const proofPoints = [
   { value: "20+", label: "years shipping production software" },
 ];
 
-const services = [
+const accentLink =
+  "inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]";
+
+const services: { title: string; body: string; link?: { href: string; label: string } }[] = [
   {
     title: "Build it.",
     body: "Custom software that replaces the paper, the spreadsheets, and the six disconnected tools. Quotes, job tracking, inventory, production queues, invoicing, integrations with QuickBooks and whatever else you already pay for.",
   },
   {
     title: "Rescue it.",
-    body: "You inherited a system and the person who built it is long gone. Maybe it's a legacy app, a pile of WordPress sites, or an automation that worked great until it didn't. I figure out what it actually does, tell you plainly what it'll take, and fix it.",
+    body: "You inherited a system and the person who built it is long gone. Maybe it's a legacy app, a pile of WordPress sites, or an automation that worked great until it didn't. Or someone on your team built it with AI, it's running the business now, and nobody knows what's risky in it. I figure out what it actually does, tell you plainly what it'll take, and fix it.",
+    link: { href: "/ai-app-review", label: "Get an AI-built app reviewed →" },
   },
   {
     title: "Keep it running.",
@@ -44,14 +50,24 @@ const services = [
   },
 ];
 
-const steps = [
+const steps: { title: string; body: ReactNode }[] = [
   {
     title: "A 20-minute call.",
     body: "You tell me what's broken or what you need. I tell you honestly whether I'm the right fit.",
   },
   {
-    title: "A paid discovery.",
-    body: "For anything bigger than a quick fix, I map what exists, find the real problems, and give you a written plan with estimates. You own it whether or not we keep working together.",
+    title: "A paid discovery or a fixed-fee review.",
+    body: (
+      <>
+        For anything bigger than a quick fix, I map what exists, find the real problems, and give you a written plan
+        with estimates. If you already have an app someone built with AI, a{" "}
+        <Link href="/ai-app-review" className="text-[var(--accent)] underline-offset-4 hover:underline">
+          fixed-fee review
+        </Link>{" "}
+        tells you what&apos;s risky and what to fix first, and it takes the place of discovery for that app. You own
+        either report whether or not we keep working together.
+      </>
+    ),
   },
   {
     title: "Build or support.",
@@ -125,9 +141,16 @@ export default function Home() {
                 className="grid gap-4 border-t border-[var(--border)] py-10 md:grid-cols-[2fr_3fr]"
               >
                 <h2 className={sectionHeading}>{service.title}</h2>
-                <p className="max-w-[720px] text-lg leading-relaxed text-[var(--text-secondary)]">
-                  {service.body}
-                </p>
+                <div>
+                  <p className="max-w-[720px] text-lg leading-relaxed text-[var(--text-secondary)]">
+                    {service.body}
+                  </p>
+                  {service.link && (
+                    <Link href={service.link.href} className={`mt-4 ${accentLink}`}>
+                      {service.link.label}
+                    </Link>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -155,10 +178,7 @@ export default function Home() {
             ))}
           </div>
 
-          <Link
-            href="/work"
-            className="mt-12 inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
-          >
+          <Link href="/work" className={`mt-12 ${accentLink}`}>
             See all case studies →
           </Link>
         </div>
@@ -206,8 +226,8 @@ export default function Home() {
             ))}
           </ol>
           <p className="mt-12 text-lg text-[var(--text-primary)]">
-            Projects typically start at $10,000. Retainers are scoped to what
-            you run.
+            Projects typically start at $10,000. An AI-built app review is a flat{" "}
+            {formatReviewPrice()}. Retainers are scoped to what you run.
           </p>
         </div>
       </section>

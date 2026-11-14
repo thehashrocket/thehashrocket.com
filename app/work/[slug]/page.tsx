@@ -136,6 +136,15 @@ export default async function CaseStudyPage({
           source={`work-${slug}`}
         />
 
+        {study.relatedLanding && (
+          <Link
+            href={study.relatedLanding.href}
+            className="mt-8 inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
+          >
+            {study.relatedLanding.label}
+          </Link>
+        )}
+
         <p className="mt-8 text-sm text-[var(--text-secondary)]">
           Serving the Central Valley:{" "}
           {getAllLocations().map((location, i) => (
