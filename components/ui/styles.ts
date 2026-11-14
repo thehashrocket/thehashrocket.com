@@ -17,5 +17,8 @@ export const listItem =
 export const accentLink =
   "inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]";
 
+/** A quiet closing line under hero actions (the offer pages' "local and reachable" line). */
+export const heroNote = "mt-6 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]";
+
 /** A link inside running text: always underlined, so it never relies on color alone (WCAG 1.4.1). */
 export const inlineLink = "text-[var(--accent)] underline underline-offset-4 transition-colors hover:text-[var(--accent-hover)]";

@@ -7,12 +7,13 @@ import { ClosingCta } from "@/components/ui/ClosingCta";
 import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
-import { accentLink, eyebrow, listItem, section, sectionHeading } from "@/components/ui/styles";
+import { accentLink, eyebrow, heroNote, listItem, section, sectionHeading } from "@/components/ui/styles";
 import { caseStudies } from "@/lib/case-studies";
 import {
   sprintExamples,
   sprintExclusion,
   sprintFaqs,
+  sprintLocalLine,
   sprintPrerequisites,
   sprintSteps,
   sprintTerms,
@@ -72,6 +73,9 @@ export default function AutomationSprintPage() {
             that means it&apos;s done.
           </p>
           <OfferHeroActions source={SOURCE} />
+          <p data-testid="offer-local" className={heroNote}>
+            {sprintLocalLine}
+          </p>
         </div>
       </section>
       <DimCanvasBelow />

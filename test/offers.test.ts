@@ -30,6 +30,7 @@ import {
   reviewLineText,
 } from "../lib/offers";
 import { normalizeSource } from "../lib/sources";
+import { reviewLocalLine, sprintLocalLine, talkFormat } from "../lib/offer-content";
 
 describe("price formatting", () => {
   it("formats whole US dollars the same way everywhere", () => {
@@ -182,5 +183,23 @@ describe("project type by source", () => {
 
   it("lists the sprint right after new builds", () => {
     expect(PROJECT_TYPES.indexOf("Automation sprint")).toBe(PROJECT_TYPES.indexOf("New build") + 1);
+  });
+});
+
+// Value: protects=the offer pages' in-person area matches the talk's, so neither claims a city the other doesn't;
+//   fails_when=a city is added to or dropped from one line only; why_new=#98 adds two local lines; seam=none;
+//   no_claim=whether the owner actually travels there (owner-confirmed copy)
+describe("local and reachable lines", () => {
+  const cities = /In person in the (.+) areas/.exec(talkFormat)![1].split(/, | and /);
+
+  it("names the same three cities as the talk format", () => {
+    expect(cities).toEqual(["Sacramento", "Stockton", "Modesto"]);
+    for (const line of [sprintLocalLine, reviewLocalLine]) {
+      for (const city of cities) expect(line).toContain(city);
+    }
+  });
+
+  it("never claims nobody else offers this", () => {
+    for (const line of [sprintLocalLine, reviewLocalLine]) expect(line).not.toMatch(/nobody else|only one|no one else/i);
   });
 });

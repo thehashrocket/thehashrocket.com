@@ -7,13 +7,14 @@ import { ClosingCta } from "@/components/ui/ClosingCta";
 import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
-import { eyebrow, listItem, section, sectionHeading } from "@/components/ui/styles";
+import { eyebrow, heroNote, listItem, section, sectionHeading } from "@/components/ui/styles";
 import { caseStudies } from "@/lib/case-studies";
 import {
   reviewChecks,
   reviewDeliverables,
   reviewFaqs,
   reviewIsNot,
+  reviewLocalLine,
   reviewScope,
   reviewSteps,
   scannerQuestions,
@@ -66,6 +67,9 @@ export default function AiAppReviewPage() {
             fixed scope
           </p>
           <OfferHeroActions source={SOURCE} />
+          <p data-testid="offer-local" className={heroNote}>
+            {reviewLocalLine}
+          </p>
         </div>
       </section>
       <DimCanvasBelow />
