@@ -17,5 +17,5 @@ export const listItem =
 export const accentLink =
   "inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]";
 
-/** A link inside running text. */
-export const inlineLink = "text-[var(--accent)] underline-offset-4 hover:underline";
+/** A link inside running text: always underlined, so it never relies on color alone (WCAG 1.4.1). */
+export const inlineLink = "text-[var(--accent)] underline underline-offset-4 transition-colors hover:text-[var(--accent-hover)]";
