@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { OFFER_ROUTES } from "../../lib/site";
+import { TALK_TITLE } from "../../lib/talk";
 
 // No WebGL: lib/webgl.ts sees a null context and the site falls back to static.
 test.beforeEach(async ({ page }) => {
@@ -12,13 +14,59 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-const pages = [
-  { path: "/automation-sprint", source: "automation-sprint", h1: /One process, automated\./, fact: /\$[\d,]+–\$[\d,]+ · fixed before work starts/ },
-  { path: "/ai-app-review", source: "ai-app-review", h1: /what's risky in the app/i, fact: /\$[\d,]+ · 3 weeks · fixed scope/ },
-  { path: "/print-shops", source: "print-shops", h1: /without the paper/i, fact: /200 jobs a week/ },
+// One row per OFFER_ROUTES entry (a test below fails until a new route has one).
+// firstScreen: the shortest phone height (375 wide) where the hero's price/summary and primary
+// action must fit; 667 also checks the scope line and every hero action. false = no hero testids.
+interface PageRow {
+  path: (typeof OFFER_ROUTES)[number];
+  source: string;
+  h1: RegExp | string;
+  fact: RegExp;
+  ctaText: RegExp;
+  firstScreen: 667 | 560 | false;
+}
+
+const pages: PageRow[] = [
+  {
+    path: "/automation-sprint",
+    source: "automation-sprint",
+    h1: /One process, automated\./,
+    fact: /\$[\d,]+–\$[\d,]+ · fixed before work starts/,
+    ctaText: /Book a 20-minute call|Send a message/,
+    firstScreen: 560,
+  },
+  {
+    path: "/ai-app-review",
+    source: "ai-app-review",
+    h1: /what's risky in the app/i,
+    fact: /\$[\d,]+ · 3 weeks · fixed scope/,
+    ctaText: /Book a 20-minute call|Send a message/,
+    // The four-line headline plus subline doesn't fit 560 yet; see TODOS.md.
+    firstScreen: 667,
+  },
+  {
+    path: "/print-shops",
+    source: "print-shops",
+    h1: /without the paper/i,
+    fact: /200 jobs a week/,
+    ctaText: /Book a 20-minute call|Start a conversation/,
+    firstScreen: false,
+  },
+  {
+    path: "/talks",
+    source: "talks",
+    h1: TALK_TITLE,
+    fact: /Free · \d+–\d+ min/,
+    ctaText: /Ask about a date/,
+    firstScreen: 560,
+  },
 ];
 
-for (const { path, source, h1, fact } of pages) {
+test("every offer route has a pages row", () => {
+  expect(pages.map((row) => row.path).sort()).toEqual([...OFFER_ROUTES].sort());
+});
+
+for (const { path, source, h1, fact, ctaText } of pages) {
   test(`${path} renders its offer and tagged CTAs without WebGL`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(h1);
@@ -35,17 +83,20 @@ for (const { path, source, h1, fact } of pages) {
     await page.keyboard.press("Tab");
     const focused = page.locator(":focus");
     await expect(focused).toHaveAttribute("href", new RegExp(`source=${source}`));
-    await expect(focused).toHaveText(/Book a 20-minute call|Send a message|Start a conversation/);
+    await expect(focused).toHaveText(ctaText);
     // A visible focus ring, not just tab order
     const outline = await focused.evaluate((el) => getComputedStyle(el).outlineStyle);
     expect(outline).not.toBe("none");
   });
 }
 
-// Value: protects=on a small phone the price, what the offer is, and the booking action are in the first screen, below the fixed nav;
-//   fails_when=the hero grows, the nav overlaps it, or the page scrolls sideways at 320px;
-//   why_new=Playwright ran Desktop Chrome only; seam=none; no_claim=real devices or larger text sizes
-for (const path of ["/automation-sprint", "/ai-app-review"]) {
+// Value: protects=on a small phone the price or summary, what the offer is, and the primary action are in the
+//   first screen, below the fixed nav, with Cal.com off (project chromium) and on (project booking-on);
+//   fails_when=the hero grows, the nav overlaps it, a booking button pushes the hero down, or the page scrolls
+//   sideways at 320px; why_new=Playwright ran Desktop Chrome only; seam=none;
+//   no_claim=real devices or larger text sizes
+for (const { path, firstScreen } of pages) {
+  if (firstScreen === false) continue;
   test(`${path} first screen on a phone`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(path);
@@ -64,9 +115,8 @@ for (const path of ["/automation-sprint", "/ai-app-review"]) {
       expect(box!.y + box!.height, `${await action.textContent()} in the first screen`).toBeLessThanOrEqual(667);
     }
 
-    // Shorter viewport: an iPhone SE under Safari's chrome. The shipped /ai-app-review hero
-    // (four-line headline plus subline) doesn't fit yet; see TODOS.md.
-    if (path === "/automation-sprint") {
+    // Shorter viewport: an iPhone SE under Safari's chrome.
+    if (firstScreen === 560) {
       await page.setViewportSize({ width: 375, height: 560 });
       for (const testId of ["offer-summary", "booking-cta"]) {
         const box = await page.getByTestId(testId).boundingBox();
@@ -102,6 +152,32 @@ test("the review page preselects its project type on /contact", async ({ page })
   await page.goto("/contact?source=ai-app-review");
   await expect(page.getByLabel(/what do you need/i)).toHaveValue("AI-built app review");
   await expect(page.getByText("You're asking about the AI-built app review.")).toBeVisible();
+});
+
+// Value: protects=an organizer from /talks reaches the form with the talk type, the talk steps and no timeline,
+//   and switching type swaps both back; fails_when=the talks source stops mapping, or the flow keys off ?source only;
+//   why_new=/talks and the type-driven contact flow are new; seam=none; no_claim=email delivery
+test("a talk organizer lands on /contact with the talk type, its steps and no timeline", async ({ page }) => {
+  await page.goto("/talks");
+  await page.getByTestId("booking-cta").click();
+  await expect(page).toHaveURL(/source=talks/);
+  const projectType = page.getByLabel(/what do you need/i);
+  await expect(projectType).toHaveValue("A talk for my group");
+  await expect(page.getByText("We pick a date and a format.")).toBeVisible();
+  await expect(page.getByLabel(/rough timeline/i)).toHaveCount(0);
+  await projectType.selectOption("Rescue");
+  await expect(page.getByText("We do a 20-minute call.")).toBeVisible();
+  await expect(page.getByLabel(/rough timeline/i)).toBeVisible();
+});
+
+// Value: protects=/talks is reachable from the footer and /about; fails_when=either link is dropped or renamed;
+//   why_new=/talks had no inbound links before release 2; seam=none; no_claim=the homepage (no talks link by design)
+test("the footer and /about link to /talks", async ({ page }) => {
+  await page.goto("/about");
+  const footer = page.getByRole("navigation", { name: "Footer navigation" });
+  await expect(footer.getByRole("link", { name: "Talks" })).toHaveAttribute("href", "/talks");
+  await page.locator("main").getByRole("link", { name: "Ask about a date →" }).click();
+  await expect(page).toHaveURL(/\/talks$/);
 });
 
 test("the print case study links to /print-shops, and the footer does too", async ({ page }) => {

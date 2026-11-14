@@ -18,17 +18,44 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number.parseInt(process.env.E2E_PORT ?? "", 10) || 3178;
 const BASE_URL = `http://localhost:${PORT}`;
 
+// A second server with Cal.com configured, so the first-screen checks also run with
+// the extra booking button in each hero. Its own build directory: Next 16 locks one
+// dev server per directory.
+const BOOKING_PORT = Number.parseInt(process.env.E2E_BOOKING_PORT ?? "", 10) || 3179;
+const BOOKING_URL = `http://localhost:${BOOKING_PORT}`;
+
 export default defineConfig({
   testDir: "./test/e2e",
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: {
-    command: `pnpm run dev --port ${PORT}`,
-    url: BASE_URL,
-    reuseExistingServer: false,
-    env: { TEST_EMAIL_ENABLED: "true" },
-  },
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"], baseURL: BASE_URL } },
+    {
+      name: "booking-on",
+      use: { ...devices["Desktop Chrome"], baseURL: BOOKING_URL },
+      testMatch: /offer-pages\.spec\.ts/,
+      grep: /first screen/,
+    },
+  ],
+  webServer: [
+    {
+      command: `pnpm run dev --port ${PORT}`,
+      url: BASE_URL,
+      reuseExistingServer: false,
+      // Booking off explicitly, so a developer's .env.local can't change what this project tests.
+      env: { TEST_EMAIL_ENABLED: "true", NEXT_PUBLIC_CALCOM_URL: "" },
+    },
+    {
+      command: `pnpm run dev --port ${BOOKING_PORT}`,
+      url: BOOKING_URL,
+      reuseExistingServer: false,
+      env: {
+        TEST_EMAIL_ENABLED: "true",
+        NEXT_PUBLIC_CALCOM_URL: "https://cal.com/test",
+        NEXT_DIST_DIR: ".next-booking",
+      },
+    },
+  ],
 });

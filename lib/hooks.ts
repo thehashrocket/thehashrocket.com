@@ -37,7 +37,7 @@ export function useMediaQuery(query: string): boolean {
  * IntersectionObserver's trigger zone without firing it. Only one dimming owner
  * may be mounted per page: each resets the shared flag on unmount.
  */
-export function useDimCanvasBelow(ref: RefObject<HTMLElement | null>, threshold = 0.75): void {
+export function useDimCanvasBelow(ref: RefObject<HTMLElement | null>, threshold: number): void {
   const setCanvasDimmed = useSceneStore((s) => s.setCanvasDimmed);
 
   useEffect(() => {

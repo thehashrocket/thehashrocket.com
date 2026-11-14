@@ -5,8 +5,18 @@ import { metadata as contactMetadata } from "../app/contact/page";
 import { metadata as reviewMetadata } from "../app/ai-app-review/page";
 import { metadata as printMetadata } from "../app/print-shops/page";
 import { metadata as sprintMetadata } from "../app/automation-sprint/page";
-import { OFFER_ROUTES } from "../lib/site";
+import { metadata as talksMetadata } from "../app/talks/page";
+import type { Metadata } from "next";
+import { OFFER_ROUTES, type OfferRoute } from "../lib/site";
 import { offerLadderText } from "../lib/offers";
+
+// One row per offer route; a new route is a compile error here until it has one.
+const offerMetadata: Record<OfferRoute, Metadata> = {
+  "/automation-sprint": sprintMetadata,
+  "/ai-app-review": reviewMetadata,
+  "/print-shops": printMetadata,
+  "/talks": talksMetadata,
+};
 
 describe("metadata", () => {
   it("root layout openGraph values are defined (checked statically)", () => {
@@ -34,13 +44,14 @@ describe("metadata", () => {
       { name: "work", meta: workMetadata },
       { name: "about", meta: aboutMetadata },
       { name: "contact", meta: contactMetadata },
-      { name: "ai-app-review", meta: reviewMetadata },
-      { name: "print-shops", meta: printMetadata },
-      { name: "automation-sprint", meta: sprintMetadata },
     ];
     for (const { name, meta } of pages) {
       expect(meta.title, `${name} title`).toBeTruthy();
       expect(meta.description, `${name} description`).toBeTruthy();
+    }
+    for (const route of OFFER_ROUTES) {
+      expect(offerMetadata[route].title, `${route} title`).toBeTruthy();
+      expect(offerMetadata[route].description, `${route} description`).toBeTruthy();
     }
   });
 
@@ -48,11 +59,6 @@ describe("metadata", () => {
     expect(workMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/work");
     expect(aboutMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/about");
     expect(contactMetadata.openGraph?.url).toBe("https://www.jasonshultz.com/contact");
-    const offerMetadata: Record<(typeof OFFER_ROUTES)[number], typeof reviewMetadata> = {
-      "/automation-sprint": sprintMetadata,
-      "/ai-app-review": reviewMetadata,
-      "/print-shops": printMetadata,
-    };
     for (const route of OFFER_ROUTES) {
       expect(offerMetadata[route].openGraph?.url, route).toBe(`https://www.jasonshultz.com${route}`);
     }

@@ -188,7 +188,7 @@
 ## Offers & Verticals (from /autoplan, 2026-11-13)
 
 ### [P2] 90-day read on each offer page
-- **What:** 90 days after each page ships, count real messages and booked calls by `source` and project type, and compare to the owner-set bars. `/ai-app-review` and `/print-shops`: on or after 2027-02-11 (defaults: 2 qualified review inquiries; 1 qualified print conversation per 20 outreach touches; the review price dropped to $1,500 with release 1, so restart the review count from that date). `/automation-sprint` (`source=automation-sprint`, type "Automation sprint"): on or after 2027-02-12, 90 days after release 1 (default: 2 qualified inquiries and 1 sale). Release 2 adds `care-plan` (1 signup from a sprint or review handoff) and talks (2 talks given and 1 qualified opportunity, from `source=talks` and `source=talk-attendee`). Below a bar, cut or rewrite that page.
+- **What:** 90 days after each page ships, count real messages and booked calls by `source` and project type, and compare to the owner-set bars. `/ai-app-review` and `/print-shops`: on or after 2027-02-11 (defaults: 2 qualified review inquiries; 1 qualified print conversation per 20 outreach touches; the review price dropped to $1,500 with release 1, so restart the review count from that date). `/automation-sprint` (`source=automation-sprint`, type "Automation sprint"): on or after 2027-02-12, 90 days after release 1 (default: 2 qualified inquiries and 1 sale). `/talks` (shipped in release 2): 90 days from the first organizer outreach touch, not from merge (bar: 2 talks given and 1 qualified opportunity, from `source=talks` and `source=talk-attendee`; also log prep and travel hours per talk). The care plan, when it ships: 1 signup from a sprint or review handoff, clock from the first delivered handoff. Below a bar, cut or rewrite that page.
 - **Ledger:** keep a manual lead log with origin, offer, qualified, proposal, sale and delivery hours; `source` records the last click, not where the lead first heard of you.
 - **Why:** Both pages were built ahead of demand evidence; this is the kill/keep check.
 - **Context:** CTA clicks are not bookings (`BookingAnchor` records clicks). Keep a manual inquiry log with the first page that prompted contact and outreach touch counts. Verify one real Cal.com booking carries `source` first.
@@ -235,9 +235,16 @@
 - **Effort:** S | **Priority:** P3 | **Depends on:** 90-day read
 
 ### [P3] Talk leave-behind
-- **What:** A one-page handout or slide link for the "Three admin jobs" talk, carrying `/contact?source=talk-attendee`.
+- **What:** A one-page handout or slide link for the talk (`TALK_TITLE` in `lib/talk.ts`), carrying `/contact?source=talk-attendee`.
 - **Why:** Attendees need something to take away that preserves attribution.
 - **Effort:** M (human) | **Priority:** P3 | **Depends on:** talk content written
+
+### [P3] "Recent talks" line on /talks
+- **What:** Add a short "Recent talks" line (group, month) to `/talks` after the first talk is given.
+- **Why:** Organizers ask "has this person spoken before?"; today only the speaker line covers credibility.
+- **Pros:** Real proof for the next organizer. **Cons:** Needs upkeep; an old date reads as stale.
+- **Context:** Deferred by the release 2 design review (2026-11-14); slot goes between the speaker line and the workshops line, no layout change. Pairs with the Event JSON-LD item above.
+- **Effort:** S (human) / S (CC) | **Priority:** P3 | **Depends on:** first talk given
 
 ### [P3] Record where a lead first heard of the site
 - **What:** Optional "How did you hear about me?" field, or keep it in the manual lead ledger.
@@ -245,9 +252,9 @@
 - **Context:** The plan's manual ledger covers this for now; add a form field only if the ledger proves unreliable.
 - **Effort:** S (CC: ~10 min) | **Priority:** P3 | **Depends on:** first month of the ledger
 
-### [P2] Release 2: care plan and talks
-- **What:** Build `/care-plan` and `/talks` per Steps 4, 7, 11 and 13 of the offer-relaunch plan (`~/.gstack/projects/thehashrocket-thehashrocket.com/plans/2026-11-14-offer-relaunch.md`): add the care clause to `offerLadderParts`, link `/care-plan` from the homepage card, How-it-works step 3, the sprint page and `/ai-app-review`, add Footer "Talks" and the `/about` line, add both routes to `OFFER_ROUTES`, and switch the `care-plan` contact intro to the care-plan line.
-- **Start when:** the first qualified sprint inquiry, a booked talk, or a qualified request for ongoing support, whichever comes first.
+### [P2] Care plan (lane B)
+- **What:** Build `/care-plan` per Steps 1 and 3 and the design and eng care decisions in the release 2 plan (`~/.gstack/projects/thehashrocket-thehashrocket.com/plans/2026-11-14-offer-relaunch-release-2.md`): the page, the care clause in every `offerLadderParts` sentence, links from the homepage card, How-it-works step 3, the sprint exclusions line and `/ai-app-review`, the care-plan contact intro line, `clientCapLine`, the route in `OFFER_ROUTES`, its e2e rows, docs and its 90-day bar. Set `CARE_PLAN_MAX_CLIENTS = 5` and record the capacity math in `docs/DOMAIN.md` (clients × included hours plus an incident buffer, against sprint and review hours per month). The owner confirms the five coverage rows before merge.
+- **Start when:** the first sprint or review is delivered (owner decision, 2026-11-14 gate). `/talks` shipped ahead of it in release 2.
 - **Effort:** M (CC: ~45 min) | **Priority:** P2
 
 ### [P3] /ai-app-review hero doesn't fit a 375×560 screen

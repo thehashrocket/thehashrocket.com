@@ -161,7 +161,7 @@ describe("project type by source", () => {
     expect(projectTypeForSource("ai-app-review")).toBe("AI-built app review");
     expect(projectTypeForSource("automation-sprint")).toBe("Automation sprint");
     expect(projectTypeForSource("care-plan")).toBe("Ongoing support");
-    expect(projectTypeForSource("talks")).toBeUndefined();
+    expect(projectTypeForSource("talks")).toBe("A talk for my group");
     expect(projectTypeForSource(undefined)).toBeUndefined();
     expect(projectTypeForSource("home")).toBeUndefined();
     expect(projectTypeForSource("constructor")).toBeUndefined();

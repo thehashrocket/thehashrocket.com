@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { sendGAEvent } from "@next/third-parties/google";
 import { submitContact } from "@/lib/actions";
 import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
-import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
+import { PROJECT_TYPES, TIMELINES, contactFlowFor } from "@/lib/contact-options";
 import { Button } from "./Button";
 
 const initialState = { success: false, error: null };
@@ -12,21 +12,31 @@ const initialState = { success: false, error: null };
 const selectClass =
   "min-h-[44px] rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none";
 
+/**
+ * The contact form and its "What happens next" list. The steps and the timeline
+ * field follow the visitor's current project type, not only the ?source that
+ * seeded it.
+ *
+ * The select stays uncontrolled (defaultValue) so every form reset, ours on
+ * success and React's own after an action, puts it back on the seeded type;
+ * `projectType` mirrors it through onChange and onReset. A controlled select
+ * would show "Choose one" after a reset while the steps still followed state.
+ */
 export function ContactForm({
   source,
   defaultProjectType,
-  hideTimeline = false,
 }: {
   source?: string;
   /** Preselected, still editable; form reset restores it. */
   defaultProjectType?: (typeof PROJECT_TYPES)[number];
-  /** The server treats timeline as optional, so omitting the field is safe. */
-  hideTimeline?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(
     submitContact,
     initialState,
   );
+  const seed = defaultProjectType ?? "";
+  const [projectType, setProjectType] = useState<string>(seed);
+  const flow = contactFlowFor(projectType);
   const formRef = useRef<HTMLFormElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [timedOut, setTimedOut] = useState(false);
@@ -36,6 +46,16 @@ export function ContactForm({
       formRef.current?.reset();
     }
   }, [state.success]);
+
+  // The browser can restore or autofill the select (reload, back navigation) or the
+  // visitor can change it before hydration, none of which fires onChange. Read the
+  // DOM once on mount so the steps and timeline match what the select shows.
+  useEffect(() => {
+    const select = formRef.current?.elements.namedItem("projectType");
+    if (select instanceof HTMLSelectElement) {
+      setProjectType(select.value);
+    }
+  }, []);
 
   // Keyed on state, not state.success, so a second message in a row still counts.
   useEffect(() => {
@@ -67,135 +87,151 @@ export function ContactForm({
   }, [isPending]);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-6">
-      {/* Source attribution */}
-      {source && <input type="hidden" name="source" value={source} />}
+    <>
+      <h2 className="mb-4 font-mono text-sm text-[var(--accent)]">What happens next</h2>
+      <ol data-testid="next-steps" className="mb-12 space-y-2 text-[var(--text-secondary)]">
+        {flow.nextSteps.map((step, i) => (
+          <li key={step} className="flex gap-3">
+            <span aria-hidden="true" className="font-mono text-sm text-[var(--text-muted)]">
+              {i + 1}
+            </span>
+            {step}
+          </li>
+        ))}
+      </ol>
+      {flow.note && <p className="-mt-8 mb-12 text-sm text-[var(--text-muted)]">{flow.note}</p>}
 
-      {/* Honeypot */}
-      <div className="sr-only" aria-hidden>
-        <label htmlFor="website">Website</label>
-        <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
-      </div>
+      <form ref={formRef} action={formAction} onReset={() => setProjectType(seed)} className="flex flex-col gap-6">
+        {/* Source attribution */}
+        {source && <input type="hidden" name="source" value={source} />}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="name" className="text-sm text-[var(--text-secondary)]">
-          Name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          minLength={2}
-          maxLength={100}
-          className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
-          placeholder="Your name"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="email"
-          className="text-sm text-[var(--text-secondary)]"
-        >
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          maxLength={254}
-          className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
-          placeholder="you@company.com"
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="projectType" className="text-sm text-[var(--text-secondary)]">
-            What do you need? (optional)
-          </label>
-          <select
-            id="projectType"
-            name="projectType"
-            defaultValue={defaultProjectType ?? ""}
-            className={selectClass}
-          >
-            <option value="">Choose one</option>
-            {PROJECT_TYPES.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+        {/* Honeypot */}
+        <div className="sr-only" aria-hidden>
+          <label htmlFor="website">Website</label>
+          <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
         </div>
-        {!hideTimeline && (
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="name" className="text-sm text-[var(--text-secondary)]">
+            Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            minLength={2}
+            maxLength={100}
+            className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
+            placeholder="Your name"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="email"
+            className="text-sm text-[var(--text-secondary)]"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            maxLength={254}
+            className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
+            placeholder="you@company.com"
+          />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
-              Rough timeline (optional)
+            <label htmlFor="projectType" className="text-sm text-[var(--text-secondary)]">
+              What do you need? (optional)
             </label>
-            <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
+            <select
+              id="projectType"
+              name="projectType"
+              defaultValue={seed}
+              onChange={(event) => setProjectType(event.target.value)}
+              className={selectClass}
+            >
               <option value="">Choose one</option>
-              {TIMELINES.map((option) => (
+              {PROJECT_TYPES.map((option) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
               ))}
             </select>
           </div>
+          {flow.showTimeline && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="timeline" className="text-sm text-[var(--text-secondary)]">
+                Rough timeline (optional)
+              </label>
+              <select id="timeline" name="timeline" defaultValue="" className={selectClass}>
+                <option value="">Choose one</option>
+                {TIMELINES.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="message"
+            className="text-sm text-[var(--text-secondary)]"
+          >
+            Message
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            required
+            minLength={10}
+            maxLength={5000}
+            rows={5}
+            className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
+            placeholder="Tell me about your project…"
+          />
+        </div>
+
+        {timedOut && isPending && (
+          <div
+            role="status"
+            className="rounded-[var(--radius-sm)] border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]"
+          >
+            Still sending… this is taking longer than expected.
+          </div>
         )}
-      </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="message"
-          className="text-sm text-[var(--text-secondary)]"
-        >
-          Message
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          minLength={10}
-          maxLength={5000}
-          rows={5}
-          className="min-h-[120px] resize-y rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
-          placeholder="Tell me about your project…"
-        />
-      </div>
+        {state.error && (
+          <div
+            role="alert"
+            className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]"
+          >
+            {state.error}
+          </div>
+        )}
 
-      {timedOut && isPending && (
-        <div
-          role="status"
-          className="rounded-[var(--radius-sm)] border border-[var(--warning)]/20 bg-[var(--warning)]/10 px-4 py-3 text-sm text-[var(--warning)]"
-        >
-          Still sending… this is taking longer than expected.
-        </div>
-      )}
+        {state.success && (
+          <div
+            role="status"
+            className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]"
+          >
+            Message sent! I&apos;ll reply within one business day.
+          </div>
+        )}
 
-      {state.error && (
-        <div
-          role="alert"
-          className="rounded-[var(--radius-sm)] border border-[var(--error)]/20 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]"
-        >
-          {state.error}
-        </div>
-      )}
-
-      {state.success && (
-        <div
-          role="status"
-          className="rounded-[var(--radius-sm)] border border-[var(--success)]/20 bg-[var(--success)]/10 px-4 py-3 text-sm text-[var(--success)]"
-        >
-          Message sent! I&apos;ll reply within one business day.
-        </div>
-      )}
-
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "Sending…" : "Send message"}
-      </Button>
-    </form>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Sending…" : "Send message"}
+        </Button>
+      </form>
+    </>
   );
 }

@@ -35,6 +35,10 @@ export const CARE_PLAN_MAX = 600;
 export const CARE_PLAN_HOURS = 2;
 export const CARE_PLAN_MAX_CLIENTS: number | null = 10;
 
+/** The free talk for chambers, SBDCs and business groups, in minutes. */
+export const TALK_MINUTES_MIN = 30;
+export const TALK_MINUTES_MAX = 45;
+
 /** Larger builds. */
 export const BUILD_PRICE_FLOOR = 10000;
 

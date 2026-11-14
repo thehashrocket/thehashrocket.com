@@ -9,8 +9,6 @@ export interface ContactIntro {
   text: string;
   /** A second, emphasized line naming what the visitor came about. */
   context?: string;
-  /** Project timelines mean nothing to someone booking a talk. */
-  hideTimeline?: boolean;
 }
 
 /** Offer sources name their offer instead of repeating the price list; talk sources show no prices. */
@@ -35,7 +33,6 @@ export function contactIntro(source: string | undefined): ContactIntro {
       return {
         text: "Tell me about your group, the likely date and roughly how many people.",
         context: "You're asking about a talk for your group.",
-        hideTimeline: true,
       };
     case "talk-attendee":
       return { text: "Heard me speak? Tell me which job you'd hand off first." };

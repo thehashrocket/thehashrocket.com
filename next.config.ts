@@ -1,7 +1,11 @@
 import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  // The booking-on Playwright server sets NEXT_DIST_DIR so it can run beside the
+  // default one: Next 16 holds a lockfile per output directory.
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
+};
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:

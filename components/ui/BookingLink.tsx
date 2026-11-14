@@ -17,24 +17,35 @@ interface BookingLinkProps {
    * nothing, for call sites that already show their own message link.
    */
   fallback?: "contact" | "hide";
+  /** "primary" (default) or "secondary" button style, for both the booking and fallback links. */
+  variant?: "primary" | "secondary";
+  /** Overrides "Book a 20-minute call". The contact fallback keeps "Start a conversation". */
+  label?: string;
 }
 
-/** Primary CTA: books a call, or links to the contact form when Cal.com is unset. */
-export function BookingLink({ source, testId, fallback = "contact" }: BookingLinkProps) {
+/** Books a call, or links to the contact form when Cal.com is unset. */
+export function BookingLink({
+  source,
+  testId,
+  fallback = "contact",
+  variant = "primary",
+  label = "Book a 20-minute call",
+}: BookingLinkProps) {
   const bookingUrl = getBookingUrl(source);
+  const className = variant === "primary" ? primaryButton : secondaryButton;
 
   if (!bookingUrl) {
     if (fallback === "hide") return null;
     return (
-      <Link href={getContactHref(source)} className={primaryButton} data-testid={testId}>
+      <Link href={getContactHref(source)} className={className} data-testid={testId}>
         Start a conversation
       </Link>
     );
   }
 
   return (
-    <BookingAnchor href={bookingUrl} source={source} className={primaryButton} testId={testId}>
-      Book a 20-minute call
+    <BookingAnchor href={bookingUrl} source={source} className={className} testId={testId}>
+      {label}
     </BookingAnchor>
   );
 }

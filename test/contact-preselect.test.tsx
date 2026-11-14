@@ -3,9 +3,10 @@
  * Offer pages hand their project type to the contact form; it stays editable.
  */
 import { describe, expect, it, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 
-vi.mock("@/lib/actions", () => ({ submitContact: vi.fn() }));
+const submitContact = vi.fn();
+vi.mock("@/lib/actions", () => ({ submitContact }));
 vi.mock("@next/third-parties/google", () => ({ sendGAEvent: vi.fn() }));
 
 const { ContactForm } = await import("@/components/ui/ContactForm");
@@ -32,6 +33,54 @@ describe("ContactForm project type", () => {
     expect(new FormData(container.querySelector("form")!).get("projectType")).toBe("Rescue");
     container.querySelector("form")!.reset();
     expect(select.value).toBe("AI-built app review");
+  });
+});
+
+// Value: protects=the next steps and the timeline field follow the visitor's current project type, and a sent
+//   message puts both back on the seeded type; fails_when=the flow keys off ?source only, the select is made
+//   controlled (React's post-action reset then shows "Choose one" under talk steps), or onReset stops syncing;
+//   why_new=the talk type has its own steps and no timeline; seam=submitContact mocked;
+//   no_claim=email delivery (test/actions.test.ts)
+describe("ContactForm follows the selected project type", () => {
+  const steps = (container: HTMLElement) => container.querySelector('[data-testid="next-steps"]')!.textContent;
+  const timeline = (container: HTMLElement) => container.querySelector("#timeline");
+
+  it("switches into and out of the talk type", () => {
+    const { container } = render(<ContactForm source="home" />);
+    expect(steps(container)).toMatch(/We do a 20-minute call\./);
+    expect(timeline(container)).not.toBeNull();
+
+    fireEvent.change(projectSelect(container), { target: { value: "A talk for my group" } });
+    expect(steps(container)).toMatch(/We pick a date and a format\./);
+    expect(container.textContent).toContain("Sending this doesn’t reserve a date.");
+    expect(timeline(container)).toBeNull();
+
+    fireEvent.change(projectSelect(container), { target: { value: "Rescue" } });
+    expect(steps(container)).toMatch(/We do a 20-minute call\./);
+    expect(timeline(container)).not.toBeNull();
+  });
+
+  it("restores the seeded type, steps and fields after a successful send", async () => {
+    submitContact.mockResolvedValueOnce({ success: true, error: null });
+    const { container } = render(<ContactForm source="talks" defaultProjectType="A talk for my group" />);
+    expect(timeline(container)).toBeNull();
+
+    fireEvent.change(projectSelect(container), { target: { value: "Rescue" } });
+    expect(timeline(container)).not.toBeNull();
+    fireEvent.change(container.querySelector("#name")!, { target: { value: "Pat Organizer" } });
+    fireEvent.change(container.querySelector("#email")!, { target: { value: "pat@example.com" } });
+    fireEvent.change(container.querySelector("#message")!, { target: { value: "A talk for our March mixer?" } });
+
+    await act(async () => {
+      container.querySelector("form")!.requestSubmit();
+    });
+
+    expect(submitContact).toHaveBeenCalledTimes(1);
+    expect((submitContact.mock.calls[0][1] as FormData).get("projectType")).toBe("Rescue");
+    expect(container.textContent).toContain("Message sent!");
+    expect(projectSelect(container).value).toBe("A talk for my group");
+    expect(steps(container)).toMatch(/We pick a date and a format\./);
+    expect(timeline(container)).toBeNull();
   });
 });
 

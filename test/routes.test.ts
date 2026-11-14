@@ -55,6 +55,8 @@ describe("internal links", () => {
   it("knows the difference between shipped and unshipped routes", () => {
     expect(routeExists("/automation-sprint")).toBe(true);
     expect(routeExists("/work/print-portal")).toBe(true);
+    expect(routeExists("/talks")).toBe(true);
+    // The care plan (lane B) waits for the first delivered sprint or review.
     expect(routeExists("/care-plan")).toBe(false);
   });
 });
