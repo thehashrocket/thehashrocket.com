@@ -18,16 +18,10 @@ export function NavAnchor({
   onClick?: MouseEventHandler<HTMLAnchorElement>;
   children: ReactNode;
 }) {
-  if (href.includes("#")) {
-    return (
-      <a href={href} className={className} onClick={onClick}>
-        {children}
-      </a>
-    );
-  }
+  const Anchor = href.includes("#") ? "a" : Link;
   return (
-    <Link href={href} className={className} onClick={onClick}>
+    <Anchor href={href} className={className} onClick={onClick}>
       {children}
-    </Link>
+    </Anchor>
   );
 }

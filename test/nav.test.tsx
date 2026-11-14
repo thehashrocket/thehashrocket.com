@@ -38,6 +38,9 @@ describe("nav links", () => {
     expect(work.hasAttribute("data-next-link")).toBe(true);
   });
 
+  // Value: protects=the main nav leads with Services at /#services and keeps Work, About and Contact in order;
+  //   fails_when=a link is dropped, reordered or re-pointed; why_new=#100 adds Services; seam=next/link mocked;
+  //   no_claim=the mobile overlay (test/mobile-nav.test.tsx)
   it("leads the main nav with Services, pointing at the homepage section", () => {
     const { getByRole } = render(<Nav />);
     const main = getByRole("navigation", { name: "Main navigation" });

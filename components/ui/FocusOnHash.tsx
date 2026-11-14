@@ -8,8 +8,7 @@ import { useEffect } from "react";
  * section the visitor landed on rather than from the nav (or a mobile menu link
  * that just unmounted). `hash` names the section, whose scroll-margin clears the
  * fixed header; `target` is usually its heading and needs `tabIndex={-1}`.
- * Links to the hash must be plain anchors (NavAnchor): Next's Link uses
- * pushState, which fires no hashchange.
+ * Links to the hash must be plain anchors; see NavAnchor.
  */
 export function FocusOnHash({ hash, target }: { hash: string; target: string }) {
   useEffect(() => {

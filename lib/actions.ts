@@ -71,6 +71,7 @@ interface LimitGate {
 }
 
 const OPEN_GATE: LimitGate = { denied: false, record: async () => {} };
+const DENIED_GATE: LimitGate = { denied: true, record: async () => {} };
 
 /**
  * Checks the three contact limits without spending them; `record` spends them once the
@@ -127,7 +128,7 @@ async function checkLimits(email: string): Promise<LimitGate> {
       const { remaining } = await withTimeout(limiter.getRemaining(key), LIMIT_TIMEOUT_MS);
       if (remaining <= 0) {
         console.warn("Contact rate limit denied", { limiter: name });
-        return { denied: true, record: async () => {} };
+        return DENIED_GATE;
       }
     } catch (err) {
       console.warn("Contact rate limit unavailable, failing open", { limiter: name, reason: errorReason(err) });
@@ -203,7 +204,6 @@ export async function submitContact(
     return { success: false, error: "Too many submissions. Please try again later.", code: "rate_limited" };
   }
 
-  // Skip email delivery in test environments
   if (!testRun) {
     try {
       const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
