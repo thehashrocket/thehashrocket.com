@@ -136,6 +136,19 @@ for (const { path, firstScreen } of pages) {
   });
 }
 
+// Value: protects=each offer route serves its share card as a PNG; fails_when=a route's opengraph-image throws
+//   (font load, template props, an import such as TALK_TITLE moving) and link previews fall back to nothing;
+//   why_new=no test requests any opengraph-image route, and /talks adds a new one; seam=none;
+//   no_claim=how the card looks or whether the title fits the 1200×630 frame
+for (const path of OFFER_ROUTES) {
+  test(`${path} serves its Open Graph image`, async ({ request }) => {
+    const response = await request.get(`${path}/opengraph-image`);
+    expect(response.status(), path).toBe(200);
+    expect(response.headers()["content-type"], path).toBe("image/png");
+    expect((await response.body()).length, path).toBeGreaterThan(1000);
+  });
+}
+
 test("related case studies on /ai-app-review navigate without WebGL", async ({ page }) => {
   await page.goto("/ai-app-review");
   await page.locator('main a[href="/work/fleet-security-audit"]').click();

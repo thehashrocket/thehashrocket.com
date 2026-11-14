@@ -60,6 +60,33 @@ describe("ContactForm follows the selected project type", () => {
     expect(timeline(container)).not.toBeNull();
   });
 
+  // Value: protects=when the browser restores or autofills the select before hydration, the steps and timeline
+  //   follow what the select shows, not the seeded type; fails_when=the mount-time DOM read is removed, so an
+  //   organizer back on /contact?source=talks with "Rescue" restored sees talk steps and no timeline;
+  //   why_new=every other case renders client-side, where the select always starts on the seed; seam=none;
+  //   no_claim=which browsers restore form state (simulated by setting the value before hydrateRoot)
+  it("follows a select value the browser restored before hydration", async () => {
+    const { renderToString } = await import("react-dom/server");
+    const { hydrateRoot } = await import("react-dom/client");
+    const element = <ContactForm source="talks" defaultProjectType="A talk for my group" />;
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(element);
+    document.body.appendChild(container);
+    expect(timeline(container)).toBeNull();
+
+    projectSelect(container).value = "Rescue";
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, element);
+    });
+
+    expect(projectSelect(container).value).toBe("Rescue");
+    expect(steps(container)).toMatch(/We do a 20-minute call\./);
+    expect(timeline(container)).not.toBeNull();
+    act(() => root!.unmount());
+    container.remove();
+  });
+
   it("restores the seeded type, steps and fields after a successful send", async () => {
     submitContact.mockResolvedValueOnce({ success: true, error: null });
     const { container } = render(<ContactForm source="talks" defaultProjectType="A talk for my group" />);

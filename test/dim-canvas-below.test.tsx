@@ -52,6 +52,26 @@ describe("DimCanvasBelow", () => {
     expect(dimmed()).toBe(false);
   });
 
+  // Value: protects=a resize (phone rotation, window drag) re-evaluates the dim against the new viewport height,
+  //   and stops after unmount; fails_when=the resize listener is dropped or leaks past unmount;
+  //   why_new=every other case here and in case-study-scroll.test.tsx fires scroll only; seam=none;
+  //   no_claim=real layout reflow on resize (getBoundingClientRect and innerHeight are stubbed)
+  it("re-checks on resize, and stops after unmount", () => {
+    const { unmount } = render(<DimCanvasBelow />);
+    scrollTo(500);
+    expect(dimmed()).toBe(false);
+    vi.stubGlobal("innerHeight", 1200);
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+    expect(dimmed()).toBe(true);
+    unmount();
+    act(() => {
+      window.dispatchEvent(new Event("resize"));
+    });
+    expect(dimmed()).toBe(false);
+  });
+
   it("clears on unmount and stops listening", () => {
     const { unmount } = render(<DimCanvasBelow />);
     scrollTo(100);
