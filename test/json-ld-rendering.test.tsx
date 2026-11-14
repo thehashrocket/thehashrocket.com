@@ -6,7 +6,7 @@ import { describe, it, expect } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render } from "@testing-library/react";
 import React from "react";
-import { PersonJsonLd, WebSiteJsonLd } from "../components/layout/JsonLd";
+import { PERSON_ID, PersonJsonLd, ServiceJsonLd, WebSiteJsonLd } from "../components/layout/JsonLd";
 import { LocationJsonLd, FAQJsonLd } from "../components/layout/LocationJsonLd";
 import { getLocation } from "../lib/locations";
 
@@ -27,6 +27,19 @@ describe("PersonJsonLd rendering", () => {
     expect(data.jobTitle).toBe("Senior Full-Stack Engineer");
     expect(data.sameAs).toContain("https://www.linkedin.com/in/jasonshultz/");
     expect(data.sameAs).toContain("https://github.com/thehashrocket");
+  });
+
+  // Value: protects=the site-wide Person carries the @id that ServiceJsonLd's provider points at, so the offer resolves to a provider;
+  //   fails_when=the Person loses its @id or the Service provider stops referencing PERSON_ID;
+  //   why_new=offer-pages checks the provider's literal @id only; nothing checks the Person node declares it;
+  //   seam=none; no_claim=Google's structured-data validator accepting the graph
+  it("declares the @id that ServiceJsonLd's provider references", () => {
+    const person = parseJsonLdScript(render(<PersonJsonLd />).container);
+    const service = parseJsonLdScript(
+      render(<ServiceJsonLd name="x" description="y" url="https://www.jasonshultz.com/x" price={1} />).container,
+    );
+    expect(person["@id"]).toBe(PERSON_ID);
+    expect(service.provider).toEqual({ "@id": person["@id"] });
   });
 });
 

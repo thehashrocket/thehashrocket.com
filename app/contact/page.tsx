@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { BookingLink } from "@/components/ui/BookingLink";
 import { ContactForm } from "@/components/ui/ContactForm";
 import { CONTACT_EMAIL, getBookingUrl } from "@/lib/site";
+import { projectTypeForSource } from "@/lib/contact-options";
+import { formatReviewPrice } from "@/lib/offers";
 import { normalizeSource } from "@/lib/sources";
 
 export const metadata: Metadata = {
@@ -35,8 +37,14 @@ export default async function ContactPage({
         </h1>
         <p className="mb-8 text-lg text-[var(--text-secondary)]">
           Tell me what&apos;s broken or what you need. Projects typically start
-          at $10,000. Retainers are scoped to what you run.
+          at $10,000. An AI-built app review is a flat {formatReviewPrice()}.
+          Retainers are scoped to what you run.
         </p>
+        {source === "ai-app-review" && (
+          <p className="-mt-4 mb-8 text-lg text-[var(--text-primary)]">
+            You&apos;re asking about the AI-built app review.
+          </p>
+        )}
 
         {/* Without Cal.com this link would point back at this page */}
         {getBookingUrl(source) && (
@@ -57,7 +65,11 @@ export default async function ContactPage({
           ))}
         </ol>
 
-        <ContactForm source={source} />
+        <ContactForm
+          key={source ?? "direct"}
+          source={source}
+          defaultProjectType={projectTypeForSource(source)}
+        />
 
         <p className="mt-8 text-sm text-[var(--text-muted)]">
           Prefer email?{" "}

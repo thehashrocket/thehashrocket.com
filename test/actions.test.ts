@@ -79,6 +79,17 @@ describe("submitContact", () => {
     expect(payload.text).toContain("Timeline: 1–3 months");
   });
 
+  it("accepts the AI-built app review project type", async () => {
+    mockSend.mockClear();
+    const result = await submitContact(
+      { success: false, error: null },
+      makeFormData({ ...validFields, projectType: "AI-built app review", source: "ai-app-review" }),
+    );
+    expect(result.success).toBe(true);
+    const payload = mockSend.mock.calls[0][0];
+    expect(payload.text).toContain("Needs: AI-built app review");
+  });
+
   it("drops unknown sources and select values without failing", async () => {
     mockSend.mockClear();
     const result = await submitContact(

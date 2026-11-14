@@ -3,6 +3,7 @@
 export const PROJECT_TYPES = [
   "New build",
   "Rescue",
+  "AI-built app review",
   "Ongoing support",
   "Not sure",
 ] as const;
@@ -13,3 +14,16 @@ export const TIMELINES = [
   "3–6 months",
   "Just exploring",
 ] as const;
+
+/** Preselects the form's project type for visitors arriving from an offer page. Still editable. */
+export const PROJECT_TYPE_BY_SOURCE = {
+  "ai-app-review": "AI-built app review",
+  "print-shops": "New build",
+} satisfies Partial<Record<string, (typeof PROJECT_TYPES)[number]>>;
+
+export function projectTypeForSource(
+  source: string | undefined,
+): (typeof PROJECT_TYPES)[number] | undefined {
+  if (!source || !Object.hasOwn(PROJECT_TYPE_BY_SOURCE, source)) return undefined;
+  return PROJECT_TYPE_BY_SOURCE[source as keyof typeof PROJECT_TYPE_BY_SOURCE];
+}
