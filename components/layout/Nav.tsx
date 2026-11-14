@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { MobileNav } from "./MobileNav";
+import { NavAnchor } from "./NavAnchor";
 
 const links = [
+  // Lands on the homepage Services section, which links every offer page (#100).
+  { href: "/#services", label: "Services" },
   { href: "/work", label: "Work" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -25,12 +28,12 @@ export function Nav() {
         <ul className="hidden items-center gap-8 md:flex">
           {links.map((link) => (
             <li key={link.href}>
-              <Link
+              <NavAnchor
                 href={link.href}
                 className="inline-flex min-h-11 items-center font-body text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
               >
                 {link.label}
-              </Link>
+              </NavAnchor>
             </li>
           ))}
           <li>

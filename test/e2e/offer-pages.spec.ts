@@ -184,7 +184,7 @@ test("a talk organizer lands on /contact with the talk type, its steps and no ti
 });
 
 // Value: protects=/talks is reachable from the footer and /about; fails_when=either link is dropped or renamed;
-//   why_new=/talks had no inbound links before release 2; seam=none; no_claim=the homepage (no talks link by design)
+//   why_new=/talks had no inbound links before release 2; seam=none; no_claim=the homepage's Services section (site-structure.spec.ts)
 test("the footer and /about link to /talks", async ({ page }) => {
   await page.goto("/about");
   const footer = page.getByRole("navigation", { name: "Footer navigation" });
@@ -198,6 +198,34 @@ test("the print case study links to /print-shops, and the footer does too", asyn
   await expect(page.locator('main a[href="/print-shops"]')).toBeVisible();
   const footer = page.getByRole("navigation", { name: "Footer navigation" });
   await expect(footer.getByRole("link", { name: "Print shops" })).toBeVisible();
+});
+
+// Value: protects=the sprint and its price are visible without scrolling on common desktop sizes, and the booking
+//   call stays above the fold on those sizes, with Cal.com on and off (#100). On a 375×667 phone the call already sat below
+//   the fold before this change (697px on main), so phones are left to a hero design decision; fails_when=the hero grows or the sprint
+//   button is removed; why_new=the price ladder sat near the bottom of the page; seam=none;
+//   no_claim=other viewport sizes. The name contains "first screen" so the booking-on project runs it.
+test("the homepage hero shows the sprint and the call in the first screen", async ({ page }) => {
+  const hero = () => page.locator("main section").first();
+  const heroCall = () => hero().getByRole("link", { name: /^(Book a 20-minute call|Start a conversation)$/ });
+  const sprint = () => hero().getByRole("link", { name: /^Automation sprint · \$[\d,]+–\$[\d,]+$/ });
+  for (const [width, height] of [
+    [1440, 900],
+    [1280, 720],
+  ] as const) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/");
+    await expect(sprint()).toHaveAttribute("href", "/automation-sprint");
+    const box = await sprint().boundingBox();
+    expect(box!.y + box!.height, `sprint button at ${width}×${height}`).toBeLessThanOrEqual(height);
+    const call = await heroCall().boundingBox();
+    expect(call!.y + call!.height, `booking call at ${width}×${height}`).toBeLessThanOrEqual(height);
+  }
+
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("/");
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow, "horizontal overflow at 320").toBeLessThanOrEqual(0);
 });
 
 // Value: protects=the homepage price line leads with the sprint and links the sprint and the review;

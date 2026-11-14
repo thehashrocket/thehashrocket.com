@@ -5,9 +5,10 @@ import Link from "next/link";
 import { AtlasCard } from "@/components/ui/AtlasCard";
 import { BookingLink, secondaryButton } from "@/components/ui/BookingLink";
 import { ClosingCta } from "@/components/ui/ClosingCta";
+import { FocusOnHash } from "@/components/ui/FocusOnHash";
 import { accentLink, eyebrow, inlineLink, sectionHeading } from "@/components/ui/styles";
 import { getCaseStudySummaries } from "@/lib/case-studies";
-import { offerLadderParts } from "@/lib/offers";
+import { formatSprintPrice, offerLadderParts } from "@/lib/offers";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -32,6 +33,14 @@ const proofPoints = [
   { value: "20+", label: "years shipping production software" },
 ];
 
+
+/** One link per offer page, worded by what the visitor wants to do (#100). The nav's Services link lands here. */
+const serviceChoices = [
+  { href: "/automation-sprint", label: "Automate one process: the automation sprint →" },
+  { href: "/ai-app-review", label: "Check an app someone built with AI: the app review →" },
+  { href: "/talks", label: "Ask about a free talk for your group →" },
+  { href: "/print-shops", label: "Run a print shop? See the print-shop page →" },
+];
 
 const services: { title: string; body: string; link?: { href: string; label: string } }[] = [
   {
@@ -101,8 +110,9 @@ export default function Home() {
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <BookingLink source="home" />
-              <Link href="/work" className={secondaryButton}>
-                See the work
+              {/* The entry offer above the fold (#100); the work stays one click away under Selected work. */}
+              <Link href="/automation-sprint" className={secondaryButton}>
+                Automation sprint &middot; {formatSprintPrice()}
               </Link>
             </div>
           </div>
@@ -131,17 +141,29 @@ export default function Home() {
         </dl>
       </section>
 
-      {/* What I do */}
-      <section className="px-6 py-24 md:py-32">
+      {/* Services: the nav's Services link lands here (scroll-mt clears the fixed header). */}
+      <section id="services" aria-labelledby="services-heading" className="scroll-mt-24 px-6 py-24 md:py-32">
+        <FocusOnHash hash="services" target="services-heading" />
         <div className="mx-auto max-w-[1280px]">
-          <p className={eyebrow}>What I do</p>
+          <h2 id="services-heading" tabIndex={-1} className={`${eyebrow} focus:outline-none`}>
+            Services
+          </h2>
+          <ul data-testid="service-choices" className="mt-6 flex flex-col gap-3">
+            {serviceChoices.map((choice) => (
+              <li key={choice.href}>
+                <Link href={choice.href} className={accentLink}>
+                  {choice.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
           <div className="mt-10 flex flex-col">
             {services.map((service) => (
               <div
                 key={service.title}
                 className="grid gap-4 border-t border-[var(--border)] py-10 md:grid-cols-[2fr_3fr]"
               >
-                <h2 className={sectionHeading}>{service.title}</h2>
+                <h3 className={sectionHeading}>{service.title}</h3>
                 <div>
                   <p className="max-w-[720px] text-lg leading-relaxed text-[var(--text-secondary)]">
                     {service.body}
