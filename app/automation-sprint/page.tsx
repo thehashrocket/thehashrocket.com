@@ -4,6 +4,7 @@ import { FAQJsonLd } from "@/components/layout/LocationJsonLd";
 import { ServiceJsonLd } from "@/components/layout/JsonLd";
 import { FAQSection } from "@/components/ui/geo/FAQSection";
 import { ClosingCta } from "@/components/ui/ClosingCta";
+import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
 import { accentLink, eyebrow, listItem, section, sectionHeading } from "@/components/ui/styles";
@@ -73,6 +74,7 @@ export default function AutomationSprintPage() {
           <OfferHeroActions source={SOURCE} />
         </div>
       </section>
+      <DimCanvasBelow />
 
       {/* Examples, each next to the work that backs it */}
       <section className={section}>

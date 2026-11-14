@@ -4,6 +4,7 @@ import { FAQJsonLd } from "@/components/layout/LocationJsonLd";
 import { ServiceJsonLd } from "@/components/layout/JsonLd";
 import { FAQSection } from "@/components/ui/geo/FAQSection";
 import { ClosingCta } from "@/components/ui/ClosingCta";
+import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
 import { eyebrow, listItem, section, sectionHeading } from "@/components/ui/styles";
@@ -67,6 +68,7 @@ export default function AiAppReviewPage() {
           <OfferHeroActions source={SOURCE} />
         </div>
       </section>
+      <DimCanvasBelow />
 
       {/* Judgment questions */}
       <section className={section}>

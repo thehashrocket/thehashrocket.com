@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useScroll, useMotionValueEvent } from "motion/react";
+import { useDimCanvasBelow } from "@/lib/hooks";
 import { useSceneStore } from "@/lib/store";
 
 interface Beat {
@@ -19,7 +20,6 @@ export function CaseStudyScroll({ beats }: CaseStudyScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef });
   const setScrollProgress = useSceneStore((s) => s.setScrollProgress);
-  const setCanvasDimmed = useSceneStore((s) => s.setCanvasDimmed);
 
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     setScrollProgress(value);
@@ -27,26 +27,7 @@ export function CaseStudyScroll({ beats }: CaseStudyScrollProps) {
 
   // Dim the scene once the narrative reaches the lower quarter of the viewport,
   // and keep it dim past the end: the closing CTA sits on the canvas too.
-  // This reads position on every scroll because a jump (Home, End) can skip over
-  // an IntersectionObserver's trigger zone without firing it.
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const update = () => {
-      setCanvasDimmed(container.getBoundingClientRect().top < window.innerHeight * DIM_START);
-    };
-
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      setCanvasDimmed(false);
-    };
-  }, [setCanvasDimmed]);
+  useDimCanvasBelow(containerRef, DIM_START);
 
   return (
     <div ref={containerRef} className="mt-16">
