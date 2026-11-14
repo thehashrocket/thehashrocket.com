@@ -12,11 +12,13 @@ A consulting site that doubles as a portfolio piece itself. It converts owner-op
 
 - Solo consulting/freelance engineering
 - Target clients: owner-operated and mid-size businesses running on paper, spreadsheets, or software nobody wants to touch. Startups can still hire Jason; they just aren't the headline.
-- Services: Build it (custom software), Rescue it (inherited, legacy, or AI-built systems), Keep it running (monthly retainer)
-- Engagement: 20-minute call, then paid discovery with a written plan the client owns, then a fixed-scope build or retainer
-- Fixed-fee AI-built app review (`/ai-app-review`): one app built with AI or inherited, bounded scope, flat fee and turnaround set in `lib/offers.ts` (never hardcode the price elsewhere). It replaces paid discovery for that app, and the fee is credited toward a fix started within `REVIEW_CREDIT_DAYS`. A code and configuration review, not a penetration test. Never claim exclusivity or a count of past AI-app rescues.
+- Services: Build it (custom software), Rescue it (inherited, legacy, or AI-built systems), Keep it running (ongoing support on a monthly plan)
+- Engagement: 20-minute call, then paid discovery with a written plan the client owns, then a fixed-scope build or monthly plan
+- Automation sprint (`/automation-sprint`): one process automated for a fixed price set at scoping (range in `lib/offers.ts`), with one success metric, a 14-day acceptance window and a monthly cap. Owner-approved terms (2026-11-14 gate): up to `SPRINT_MAX_SYSTEMS` systems, data cleanup beyond the process quoted separately, a client-side delay over 5 business days pauses the clock, and a process change mid-sprint gets its own scope. Examples on the page must each have a case study behind them. This is the lead offer; pricing copy on the homepage, contact and location pages starts with it (`offerLadderText()`).
+- Fixed-fee AI-built app review (`/ai-app-review`): one app built with AI or inherited, bounded scope, flat fee and turnaround set in `lib/offers.ts` (never hardcode a price anywhere else; `test/claims.test.ts` fails on any price literal). It replaces paid discovery for that app, and the fee is credited toward a fix or sprint started within `REVIEW_CREDIT_DAYS`, up to that work's price. A code and configuration review, not a penetration test. Never claim exclusivity or a count of past AI-app rescues.
 - Vertical page: `/print-shops`, built on the one Print Portal client. Say "a print shop", never imply many.
-- Positioning: premium (projects typically start at $10,000)
+- Coming in release 2 (values already in `lib/offers.ts`): a monthly care plan (`/care-plan`) and free talks for business groups (`/talks`). Do not link either route until it ships; `test/routes.test.ts` fails on links to pages that don't exist.
+- Positioning: premium senior engineer. Small fixed-scope entry offers (an AI-built app review, an automation sprint) lead to custom builds, which start at $10,000.
 - Primary conversion: booking a call on Cal.com, with the contact form second
 
 ## Project Domains
