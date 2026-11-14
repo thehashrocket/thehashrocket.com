@@ -33,7 +33,7 @@ app/layout.tsx (Server Component — metadata, fonts, JSON-LD)
 
 **Progressive enhancement:** `lib/webgl.ts` detects WebGL support (cached per session). `SceneCanvas` checks support via `useEffect` before mounting the R3F Canvas — unsupported devices get `StaticFallback` without ever attempting WebGL context creation. `ErrorBoundary` remains as a safety net for runtime context loss. The site is fully functional without WebGL.
 
-**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed in `lib/sources.ts`, then goes to the notification email and the Cal.com link. Nothing on the site stores it.
+**Contact form:** Server Action in `lib/actions.ts`. Honeypot spam protection + Upstash Redis rate limiting (fail-open if Redis unavailable). Email delivery via Resend. Source attribution tracks which page referred the lead; `source` is allow-listed in `lib/sources.ts`, then goes to the notification email and the Cal.com link. Nothing on the site stores it. A known offer-page source (`ai-app-review`, `print-shops`) also preselects the form's project type through `projectTypeForSource` in `lib/contact-options.ts`; the visitor can still change it.
 
 **Canvas dimming:** `CaseStudyScroll` sets `canvasDimmed` in the store once the narrative reaches the lower quarter of the viewport, and `SceneCanvas` drops the whole canvas to 20% opacity. Doing it at the canvas covers every scene. It stays dim past the narrative because the closing CTA sits on the canvas too.
 
@@ -66,10 +66,12 @@ app/                    Routes (App Router)
   ├── page.tsx          Homepage (hero, proof strip, services, selected work, why me, how it works, CTA)
   ├── opengraph-image.tsx  Homepage OG image (1200×630 via next/og)
   ├── about/            About page + opengraph-image.tsx
+  ├── ai-app-review/    Fixed-fee AI-built app review offer + opengraph-image.tsx (Service + FAQ JSON-LD)
   ├── contact/          Contact form + opengraph-image.tsx
   ├── lab/              Side projects page + opengraph-image.tsx
   ├── work/             Case studies index + opengraph-image.tsx
   │   └── [slug]/       Individual case study + opengraph-image.tsx
+  ├── print-shops/      Print shop vertical page from the Print Portal case study + opengraph-image.tsx (FAQ JSON-LD)
   ├── locations/        Geo landing pages hub + opengraph-image.tsx
   │   └── [slug]/       City page + opengraph-image.tsx (per-city dynamic OG)
   ├── layout.tsx        Root layout (canvas + nav + footer + analytics + JSON-LD)
@@ -82,11 +84,13 @@ components/
 lib/
   ├── store.ts          Zustand scene state
   ├── actions.ts        Server Actions (contact form with TEST_EMAIL_ENABLED guard)
-  ├── contact-options.ts  Contact form project types and timelines (shared by client and server)
+  ├── contact-options.ts  Contact form project types, timelines, and project type preselected by ?source=
   ├── constants.ts      Shared constants (MORPH_DURATION_MS, CONTACT_FORM_TIMEOUT_MS)
   ├── hooks.ts          Reusable hooks (usePrefersReducedMotion, useMediaQuery)
   ├── case-studies.ts   Shared case study data (used by homepage, work, geo pages)
   ├── experience.ts     Career data (entries, core stack, domains — used by about, timeline)
+  ├── offers.ts         AI-built app review price, turnaround, cap, credit, and page copy (formatReviewPrice)
+  ├── print-shops.ts    /print-shops copy (results and workflow come from the print-portal case study)
   ├── locations.ts      City configs (Sacramento, Stockton, Modesto, Manteca/Tracy/Lathrop) with optional localExperience
   ├── side-projects.ts  Side project data (used by /lab)
   ├── site.ts           Contact email, social URLs, booking and contact link helpers
@@ -115,8 +119,8 @@ public/                 Static assets
 | Runtime | Node 24 (Active LTS) | Pinned three places that must agree: `.nvmrc` (24.19.0) for local and CI, `engines.node` (`24.x`) for the Vercel build, and `@types/node` (`^24`) for the compiler. `test/typescript-toolchain.test.ts` fails if they drift — types ahead of the runtime make typecheck pass for code that throws in production |
 | Package manager | pnpm | `pnpm-lock.yaml` is the only committed lockfile. Security pins for transitive deps live in the `overrides` block of `pnpm-workspace.yaml`, which npm ignores — see CLAUDE.md. `postcss`, `sharp`, and scoped pins for `minimatch` and `glob` are the only overrides; see CLAUDE.md |
 | Language | TypeScript 6 (+ 7 alongside) | `typescript` stays on 6 because typescript-eslint cannot load TypeScript 7. TS 7 is installed as the `typescript7` alias for `pnpm run typecheck:fast` (~5x faster, local only). Never invoke a bare `tsc` — the alias owns `node_modules/.bin/tsc`. See CLAUDE.md |
-| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, booking CTAs, source allow-list, published claims, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 231 tests |
-| E2E | Playwright | 10 tests across 3 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path), scene-wiring sentinel assertions, and site structure (Lab page, nav, footer, Manteca page, qualifying fields). Runs on a dedicated port (3178, override with `E2E_PORT`) and always starts its own server — it will not adopt an unrelated process on 3000. All green as of 0.4.0.0. Not run in CI — see TODOS.md |
+| Testing | Vitest + Testing Library | Unit tests for forms, store, hooks, scene sync, AtlasCard, WebGL detection, geo pages, JSON-LD, metadata, sitemap, OG utilities, booking CTAs, source allow-list, offer pages and offer data, contact project-type preselect, published claims, and the Dependabot/CI/TypeScript-toolchain/security-override/Playwright config — 252 tests |
+| E2E | Playwright | 18 tests across 4 spec files in `test/e2e/` covering contact form (honeypot, native constraint validation, happy path), scene-wiring sentinel assertions, site structure (Lab page, nav, footer, Manteca page, qualifying fields), and the offer pages (`/ai-app-review` and `/print-shops` without WebGL, tagged CTAs, contact preselect, cross-links). Runs on a dedicated port (3178, override with `E2E_PORT`) and always starts its own server — it will not adopt an unrelated process on 3000. All green as of 0.4.0.0. Not run in CI — see TODOS.md |
 | CI | GitHub Actions | `.github/workflows/ci.yml` — frozen-lockfile install, `pnpm audit`, lint (non-blocking), `pnpm run typecheck`, unit tests, production build on every PR |
 | Supply chain | `pnpm audit` in CI | Advisory for humans, blocking for the Dependabot security PRs that auto-merge unattended. The blocking form is scoped to the exact set that merges without review and to the dependency class each can fix (`--prod` / `--dev`). `--ignore-unfixable` runs first to list advisories with no published fix, then a plain scoped audit does the blocking, so a fixable advisory the PR does not resolve holds it for a human. A held PR gets a `needs-review` label and a comment |
 | Dependency updates | Dependabot | Daily. Security patches (patch/minor) auto-approve and squash-merge once CI passes; majors get a `needs-review` label |
