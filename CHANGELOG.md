@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.10.1.0] - 2026-11-15
+
+### Changed
+- The homepage Services section shows each offer as a card with its price, one plain sentence and a link. The paid offers come first (the automation sprint, the AI-built app review and the care plan), then the free talk and the print-shop page. They now stand out more than the stats above them.
+- The site footer links all five offer pages. The sprint, the app review and the care plan were missing.
+- Screen readers announce each Services card by its name, price and call to action instead of reading the whole card as one link.
+
+### Fixed
+- The floating dots in the background no longer sit on top of headings or body text. A dot fades out while it passes behind text and fades back in once it drifts clear, on every page with the hero background.
+
 ## [0.10.0.0] - 2026-11-15
 
 ### Added
