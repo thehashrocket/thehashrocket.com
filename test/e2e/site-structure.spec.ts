@@ -131,17 +131,20 @@ test("arriving at Services from another page keeps the keyboard-only underline",
 test("focusing a link above the viewport keeps it below the header", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  // Park the second service link just below the header, focus it without scrolling, then Shift+Tab: the browser
-  // scrolls the first link (now under the header) only as far as it thinks is needed.
+  // Park the first second-row card just below the header, focus it without scrolling, then Shift+Tab to the last
+  // first-row card, which now sits above the viewport: the browser scrolls it only as far as it thinks is needed.
+  // The services grid puts several cards in one row at this width, so the pair must straddle rows (#107).
   const links = page.locator('[data-testid="service-choices"] a');
-  await links.nth(1).evaluate((el) => {
+  const headerBottom = await page.locator("header").first().evaluate((el) => el.getBoundingClientRect().bottom);
+  await links.nth(3).evaluate((el) => {
     window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100);
     (el as HTMLElement).focus({ preventScroll: true });
   });
+  const link = links.nth(2);
+  // Precondition: the target starts hidden under or above the header, so the assertion below can fail.
+  expect((await link.boundingBox())!.y, "target link starts above the header").toBeLessThan(headerBottom);
   await page.keyboard.press("Shift+Tab");
-  const link = links.first();
   await expect(link).toBeFocused();
-  const headerBottom = await page.locator("header").first().evaluate((el) => el.getBoundingClientRect().bottom);
   const box = await link.boundingBox();
   expect(box!.y, "focused link below the fixed header").toBeGreaterThanOrEqual(headerBottom);
 });

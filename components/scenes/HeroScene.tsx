@@ -45,6 +45,20 @@ export function HeroScene({ progress, active, onMorphComplete }: SceneProps) {
     [],
   );
 
+  // Text moves on scroll and resize; re-measure on the next frame instead of waiting out the interval.
+  useEffect(() => {
+    if (!active) return;
+    const stale = () => {
+      sinceRefresh.current = TEXT_REFRESH_SECONDS;
+    };
+    window.addEventListener("scroll", stale, { passive: true });
+    window.addEventListener("resize", stale);
+    return () => {
+      window.removeEventListener("scroll", stale);
+      window.removeEventListener("resize", stale);
+    };
+  }, [active]);
+
   useFrame((_, delta) => {
     if (!active || !meshRef.current) return;
 
