@@ -1,7 +1,14 @@
 // What /contact says above the form, by allow-listed source. Kept out of the
 // page module because app-router pages may only export page fields.
-import { REVIEW_PROJECT_TYPE, SPRINT_PROJECT_TYPE, type ProjectType } from "@/lib/contact-options";
-import { REVIEW_TURNAROUND, formatReviewPrice, formatSprintPrice, offerLadderText } from "@/lib/offers";
+import { CARE_PROJECT_TYPE, REVIEW_PROJECT_TYPE, SPRINT_PROJECT_TYPE, type ProjectType } from "@/lib/contact-options";
+import {
+  REVIEW_TURNAROUND,
+  formatCareHours,
+  formatCarePrice,
+  formatReviewPrice,
+  formatSprintPrice,
+  offerLadderText,
+} from "@/lib/offers";
 
 const GENERIC_OPENING = "Tell me what's broken or what you need.";
 
@@ -44,8 +51,12 @@ export function contactIntro(source: string | undefined): ContactIntro {
       };
     case "care-plan":
       return {
-        text: GENERIC_OPENING,
-        context: "You're asking about ongoing support. Tell me what you run and how it's looked after today.",
+        text: "Tell me what you run and how it's looked after today.",
+        context: "You came from the care plan page.",
+        terms: {
+          text: `It's ${formatCarePrice()} a month, with ${formatCareHours()} hours included.`,
+          termsType: CARE_PROJECT_TYPE,
+        },
       };
     case "talks":
       return {

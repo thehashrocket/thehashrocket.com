@@ -22,12 +22,13 @@ export type ProjectType = (typeof PROJECT_TYPES)[number];
 export const SPRINT_PROJECT_TYPE = "Automation sprint" satisfies ProjectType;
 export const REVIEW_PROJECT_TYPE = "AI-built app review" satisfies ProjectType;
 export const TALK_PROJECT_TYPE = "A talk for my group" satisfies ProjectType;
+export const CARE_PROJECT_TYPE = "Ongoing support" satisfies ProjectType;
 
 /** Preselects the form's project type for visitors arriving from an offer page. Still editable. */
 export const PROJECT_TYPE_BY_SOURCE = {
   "ai-app-review": REVIEW_PROJECT_TYPE,
   "automation-sprint": SPRINT_PROJECT_TYPE,
-  "care-plan": "Ongoing support",
+  "care-plan": CARE_PROJECT_TYPE,
   "print-shops": "New build",
   talks: TALK_PROJECT_TYPE,
 } satisfies Partial<Record<string, ProjectType>>;

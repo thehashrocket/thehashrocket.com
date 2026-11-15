@@ -51,8 +51,9 @@ test("Services in the main nav lands on a section that links every offer page", 
     await expectLandedOnServices(page);
   }
   const section = page.locator("#services");
+  // The choice list itself names every offer page, not just some link elsewhere in the section.
   for (const route of OFFER_ROUTES) {
-    await expect(section.locator(`a[href="${route}"]`).first()).toBeVisible();
+    await expect(section.locator(`[data-testid="service-choices"] a[href="${route}"]`)).toBeVisible();
   }
   await page.keyboard.press("Tab");
   await expect(section.locator('[data-testid="service-choices"] a').first()).toBeFocused();

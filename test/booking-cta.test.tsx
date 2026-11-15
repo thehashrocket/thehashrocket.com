@@ -97,7 +97,7 @@ describe("ContactPage", () => {
     const cases: [string | string[] | undefined, string, RegExp, boolean][] = [
       ["ai-app-review", "AI-built app review", /You came from the AI-built app review page\./, true],
       ["automation-sprint", "Automation sprint", /You came from the automation sprint page\./, true],
-      ["care-plan", "Ongoing support", /You're asking about ongoing support\./, true],
+      ["care-plan", "Ongoing support", /You came from the care plan page\./, true],
       ["talks", "A talk for my group", /Tell me about your group/, false],
       ["talk-attendee", "", /Heard me speak\?/, true],
       ["print-shops", "New build", /Start with a/, true],
@@ -122,12 +122,13 @@ describe("ContactPage", () => {
               ? /confirm the app fits the review’s scope\./
               : /We do a 20-minute call\./;
       expect(steps, label).toMatch(expectedSteps);
-      // The offer's price line sits with its steps, only for the two paid offers.
+      // The offer's price line sits with its steps, only for the priced offers.
       const terms = container.querySelector('[data-testid="offer-terms"]')?.textContent ?? null;
       if (source === "automation-sprint") expect(terms, label).toMatch(/fixed before work starts/);
       else if (source === "ai-app-review") expect(terms, label).toMatch(/It's a flat \$/);
+      else if (source === "care-plan") expect(terms, label).toMatch(/a month, with \d+–\d+ hours included\./);
       else expect(terms, label).toBeNull();
-      if (source === "talks" || source === "talk-attendee" || source === "care-plan") {
+      if (source === "talks" || source === "talk-attendee") {
         expect(container.textContent, label).not.toMatch(/\$\d/);
       }
       unmount();

@@ -5,6 +5,7 @@ import {
   getLocation,
   getAllLocations,
 } from "../lib/locations";
+import { formatCareHours, formatCarePrice } from "../lib/offers";
 
 describe("locations", () => {
   it("exports 4 locations", () => {
@@ -90,5 +91,23 @@ describe("locations", () => {
   it("modesto has localExperience defined", () => {
     const modesto = getLocation("modesto");
     expect(modesto!.localExperience).toBeTruthy();
+  });
+
+  // Value: protects=city-page support answers (also emitted as FAQ JSON-LD) state the care plan's price and included hours;
+  //   fails_when=an answer goes back to promising open-ended monthly bug fixes, or retypes a care price that can drift;
+  //   why_new=those answers contradicted /care-plan's included-hours terms (#89 ship review); seam=none;
+  //   no_claim=how Google renders the FAQ
+  it("support and maintenance answers match the care plan's terms", () => {
+    const support = Object.values(locations).flatMap((loc) =>
+      loc.faqs.filter((faq) => /ongoing (support|maintenance)/i.test(faq.question)),
+    );
+    expect(support.length).toBeGreaterThan(0);
+    for (const faq of support) {
+      expect(faq.answer, faq.question).toContain(formatCarePrice());
+      expect(faq.answer, faq.question).toContain(`${formatCareHours()} hours`);
+      expect(faq.answer, faq.question).not.toMatch(/bug fixes and performance work/);
+      // Only routine and security updates are free of hours; an update that breaks something uses them.
+      if (/updates don't use/i.test(faq.answer)) expect(faq.answer, faq.question).toMatch(/routine and security updates don't use/i);
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { offerLadderText } from "@/lib/offers";
+import { formatCareHours, formatCarePrice, offerLadderText } from "@/lib/offers";
 
 export interface FAQ {
   question: string;
@@ -64,12 +64,12 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
+          offerLadderText(),
       },
       {
         question: "How do you handle ongoing maintenance?",
         answer:
-          "I offer monthly support for production systems: monitoring, backups, updates, bug fixes and performance work. New features are quoted separately.",
+          `Through the care plan, ${formatCarePrice()} a month: monitoring, backups and updates, plus ${formatCareHours()} hours each month for fixes and small changes. Extra time, major upgrades and new features are quoted before I start.`,
       },
     ],
     caseStudyConnectors: [
@@ -112,7 +112,7 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
+          offerLadderText(),
       },
       {
         question: "How quickly can you start on a new project?",
@@ -160,12 +160,12 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
+          offerLadderText(),
       },
       {
         question: "Do you offer ongoing support?",
         answer:
-          "Yes. I offer monthly support for production systems: monitoring, backups, updates, bug fixes and performance work. New features are quoted separately.",
+          `Yes. The care plan looks after production systems for ${formatCarePrice()} a month, with ${formatCareHours()} hours included for fixes and small changes. Monitoring, backups and routine and security updates don't use those hours; anything past them is quoted first.`,
       },
     ],
     caseStudyConnectors: [
@@ -209,7 +209,7 @@ export const locations: Record<string, Location> = {
       {
         question: "What is your typical project budget?",
         answer:
-          `${offerLadderText()} Ongoing support is a monthly plan, scoped to what you run.`,
+          offerLadderText(),
       },
       {
         question: "Can you take over a system someone else built?",

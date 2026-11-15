@@ -6,6 +6,7 @@ import { metadata as reviewMetadata } from "../app/ai-app-review/page";
 import { metadata as printMetadata } from "../app/print-shops/page";
 import { metadata as sprintMetadata } from "../app/automation-sprint/page";
 import { metadata as talksMetadata } from "../app/talks/page";
+import { metadata as careMetadata } from "../app/care-plan/page";
 import type { Metadata } from "next";
 import { OFFER_ROUTES, type OfferRoute } from "../lib/site";
 import { offerLadderText } from "../lib/offers";
@@ -14,6 +15,7 @@ import { offerLadderText } from "../lib/offers";
 const offerMetadata: Record<OfferRoute, Metadata> = {
   "/automation-sprint": sprintMetadata,
   "/ai-app-review": reviewMetadata,
+  "/care-plan": careMetadata,
   "/print-shops": printMetadata,
   "/talks": talksMetadata,
 };

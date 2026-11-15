@@ -3,12 +3,19 @@
 // on lib/offers.ts so this copy stays out of client bundles.
 import type { FAQ } from "@/lib/locations";
 import {
+  CARE_PLAN_HOURS,
+  CARE_PLAN_MAX,
+  CARE_PLAN_MAX_HOURS,
+  CARE_PLAN_MAX_SYSTEMS,
+  CARE_PLAN_MIN,
+  REVIEW_CREDIT_DAYS,
   REVIEW_CREDIT_TEXT,
   REVIEW_MAX_INTEGRATIONS,
   REVIEW_TURNAROUND,
   SPRINT_MAX_SYSTEMS,
   SPRINT_PRICE_MAX,
   SPRINT_PRICE_MIN,
+  formatReviewPrice,
   formatUsd,
 } from "@/lib/offers";
 
@@ -128,7 +135,7 @@ export const sprintTerms = [
 ];
 
 export const sprintExclusion =
-  "Anything outside the one process is quoted separately as a new scope. Upkeep after handoff is available on request.";
+  "Anything outside the one process is quoted separately as a new scope. Upkeep after handoff is the care plan, below.";
 
 export const sprintFaqs: FAQ[] = [
   {
@@ -144,6 +151,120 @@ export const sprintFaqs: FAQ[] = [
     question: "What if the process is bigger than one sprint?",
     answer:
       "Then the scope call says so and you get a quote for the larger build instead. The sprint is for one process with a clear finish line.",
+  },
+];
+
+// --- Care plan -----------------------------------------------------------------
+// The five coverage rows are service promises, confirmed by the owner on 2026-11-15 (#89). Changing one is an owner decision.
+// Routine and security updates are part of the base price and never use the included hours (#89, 2026-11-15).
+
+export interface CareCoverage {
+  title: string;
+  body: string;
+  /** A smaller second line, such as the reply window. */
+  note?: string;
+}
+
+/** Office hours for the reply promise, shared by the coverage row and the FAQ. */
+export const careReplyWindow =
+  "Monday to Friday, 8am to 5pm Pacific. After hours, you hear from me the next business morning.";
+
+export const careCoverage: CareCoverage[] = [
+  {
+    title: "Monitoring",
+    body: "I check your sites and services every 5 minutes. When one goes down, the alert comes to me, not you.",
+  },
+  {
+    title: "Backups",
+    body: "Daily backups, kept for 30 days. Every quarter I restore one to prove it works.",
+  },
+  {
+    title: "Updates",
+    body: "Security updates within a week and routine updates monthly, tested first (in staging when your system has one). Updates are included and don't use your hours.",
+  },
+  {
+    title: "Included hours each month",
+    body: `${CARE_PLAN_HOURS} hours with one system, ${CARE_PLAN_MAX_HOURS} with two or three. For fixes, small changes, questions, or an update that breaks something or needs code changes to apply.`,
+  },
+  {
+    title: "Same-business-day reply when something breaks",
+    body: "You tell me what's wrong and I reply the same business day with what I'm doing about it.",
+    note: careReplyWindow,
+  },
+];
+
+/** The two tiers, stated outright so a two-system client isn't left guessing (#89). */
+export const careTiers: { systems: string; price: string; hours: string }[] = [
+  { systems: "1 system", price: `${formatUsd(CARE_PLAN_MIN)} a month`, hours: `${CARE_PLAN_HOURS} hours included` },
+  {
+    systems: `2–${CARE_PLAN_MAX_SYSTEMS} systems`,
+    price: `${formatUsd(CARE_PLAN_MAX)} a month`,
+    hours: `${CARE_PLAN_MAX_HOURS} hours included`,
+  },
+  { systems: `More than ${CARE_PLAN_MAX_SYSTEMS}`, price: "Quoted", hours: "Scoped to what you run" },
+];
+
+export const carePriceLine = "A system is one site or app with one production deployment.";
+
+/** The reply is an acknowledgment and a plan, never a promise the fix lands that day. */
+export const careHoursOut =
+  "Extra time is quoted before I start it. Routine and security updates never count toward your hours, so they can't use them up before you ask for anything. The same-day reply tells you what's happening and what it will take; it isn't a deadline for the fix.";
+
+/** What it takes before coverage starts, by where the system came from, each with its cost (#89). */
+export const careOnboarding: { from: string; detail: string; href?: string; linkLabel?: string }[] = [
+  {
+    from: "Something I built or fixed (a sprint, a larger build, or the fixes from a review)",
+    detail: "No onboarding check. Coverage can start at handoff.",
+  },
+  {
+    from: "An app built with AI",
+    detail: `The AI-built app review is the onboarding check: ${formatReviewPrice()}. The fixes it finds are quoted the usual way, and the review fee is credited toward them if you sign their scope within ${REVIEW_CREDIT_DAYS} days of the report.`,
+    href: "/ai-app-review",
+    linkLabel: "See the app review →",
+  },
+  {
+    from: "Anything else someone else built",
+    detail: "An onboarding check, quoted after a 20-minute call. The fixes it finds are quoted separately.",
+  },
+];
+
+export const careOnboardingRule = "Coverage starts once the check and any fixes it finds are done.";
+
+export const careTerms: { term: string; detail: string }[] = [
+  {
+    term: "What hours cover",
+    detail: "Fixes, small changes, work on anything that breaks, and any update that breaks something or needs code changes to apply.",
+  },
+  {
+    term: "What doesn't use hours",
+    detail: "Monitoring, backups, restore checks, and routine and security updates.",
+  },
+  {
+    term: "Quoted separately",
+    detail:
+      "Major-version upgrades (a framework, PHP or Node major, or a WordPress major that needs a theme rework) and anything bigger than the hours cover.",
+  },
+  { term: "Unused hours", detail: "Don't roll over to the next month." },
+  {
+    term: "After a sprint",
+    detail: "Fixes under a sprint's 14-day acceptance window are free and never use care hours.",
+  },
+  { term: "Commitment", detail: "Month to month. Cancel with 30 days' notice." },
+];
+
+export const careFaqs: FAQ[] = [
+  {
+    question: "What sets my monthly price?",
+    answer: `How many systems you run. One system is ${formatUsd(CARE_PLAN_MIN)} a month with ${CARE_PLAN_HOURS} hours included; two or three are ${formatUsd(CARE_PLAN_MAX)} a month with ${CARE_PLAN_MAX_HOURS} hours. A system is one site or app with one production deployment, and more than ${CARE_PLAN_MAX_SYSTEMS} is quoted. You get the number before you sign.`,
+  },
+  {
+    question: "What if I need more than my included hours in a month?",
+    answer:
+      "Extra time is quoted before I start it, so nothing shows up on an invoice you didn't agree to. Routine and security updates don't count toward your hours.",
+  },
+  {
+    question: "Can you look after something someone else built?",
+    answer: `Yes. It starts with an onboarding check. For an app built with AI, that's the ${formatReviewPrice()} AI-built app review; for anything else, the check is quoted after a 20-minute call. Fixes the check finds are quoted separately, and coverage starts once the check and those fixes are done.`,
   },
 ];
 

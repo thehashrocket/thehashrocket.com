@@ -39,6 +39,7 @@ const proofPoints = [
 const serviceChoices = [
   { href: "/automation-sprint", label: "Automate one process: the automation sprint →" },
   { href: "/ai-app-review", label: "Check an app someone built with AI: the app review →" },
+  { href: "/care-plan", label: "Keep what you run looked after: the care plan →" },
   { href: "/talks", label: "Ask about a free talk for your group →" },
   { href: "/print-shops", label: "Run a print shop? See the print-shop page →" },
 ];
@@ -56,7 +57,8 @@ const services: { title: string; body: string; link?: { href: string; label: str
   },
   {
     title: "Keep it running.",
-    body: "Servers, security, updates, backups, and a fast reply when something breaks. Ongoing support on a monthly plan, so you have an engineer before you need one.",
+    body: "Servers, security, updates, backups, and a same-business-day reply when something breaks. Ongoing support on a monthly plan, so you have an engineer before you need one.",
+    link: { href: "/care-plan", label: "See the care plan →" },
   },
 ];
 
@@ -85,7 +87,15 @@ const steps: { title: string; body: ReactNode }[] = [
   },
   {
     title: "Build, hand off, look after.",
-    body: "The work ships, you get a handoff you can follow, and ongoing support keeps it running if you want it.",
+    body: (
+      <>
+        The work ships, you get a handoff you can follow, and{" "}
+        <Link href="/care-plan" className={inlineLink}>
+          the care plan
+        </Link>{" "}
+        keeps it running if you want it.
+      </>
+    ),
   },
 ];
 
