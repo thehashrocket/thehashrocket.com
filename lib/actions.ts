@@ -52,6 +52,12 @@ export interface ContactFormState {
    * and the form keeps it selected after clearing the fields.
    */
   submittedProjectType?: string;
+  /**
+   * True only when the email really went out. A honeypot catch and a test run both
+   * report success without sending, so ContactForm counts a lead (`generate_lead`)
+   * only on this, never on `success` alone.
+   */
+  leadSent?: boolean;
 }
 
 export interface ContactDraft {
@@ -234,7 +240,8 @@ export async function submitContact(
   const timeline = pickAllowed(formData.get("timeline"), TIMELINES);
 
   // Honeypot check
-  // Answers exactly like a real send, so a bot can't tell its honeypot field was caught.
+  // Answers like a real send, so a bot can't tell its honeypot field was caught from the
+  // page. The one difference is the missing `leadSent`, which keeps it out of the lead counts.
   if (honeypot) {
     return { success: true, error: null, code: null, submittedProjectType: projectType ?? "" };
   }
@@ -312,5 +319,6 @@ export async function submitContact(
     await gate.record();
   }
 
-  return { success: true, error: null, code: null, submittedProjectType: projectType ?? "" };
+  // A test run sent nothing, so it is not a lead.
+  return { success: true, error: null, code: null, submittedProjectType: projectType ?? "", leadSent: !testRun };
 }

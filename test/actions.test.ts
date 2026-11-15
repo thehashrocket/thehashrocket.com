@@ -222,17 +222,20 @@ describe("submitContact", () => {
     expect(result.success).toBe(true);
   });
 
-  // Value: protects=a honeypot submit gets the same answer as a real send, so a bot can't learn it was caught;
-  //   fails_when=the honeypot branch returns a different shape or drops the echoed project type;
-  //   why_new=the success state now echoes the sent type (ContactForm's receipt); seam=none;
-  //   no_claim=what the browser renders (ContactForm tests)
-  it("answers a honeypot submit exactly like a real send, without sending", async () => {
+  // Value: protects=a honeypot submit gets the same answer as a real send apart from leadSent, so the page
+  //   can't show a bot it was caught, and only a real send counts as a lead (#115, D3);
+  //   fails_when=the honeypot branch returns a different shape, drops the echoed project type, or sets leadSent;
+  //   why_new=the success state now carries leadSent; seam=none;
+  //   no_claim=what the browser renders or reports (ContactForm and conversion-event tests)
+  it("answers a honeypot submit like a real send, without sending or counting a lead", async () => {
     mockSend.mockClear();
     const fields = { ...validFields, projectType: "Rescue" };
     const trapped = await submitContact(idle, makeFormData({ ...fields, website: "spam-bot-value" }));
     expect(mockSend).not.toHaveBeenCalled();
     const real = await submitContact(idle, makeFormData(fields));
-    expect(trapped).toEqual(real);
+    expect(real.leadSent).toBe(true);
+    expect(trapped.leadSent).toBeUndefined();
+    expect(trapped).toEqual({ ...real, leadSent: undefined });
     expect(trapped.submittedProjectType).toBe("Rescue");
   });
 
@@ -387,7 +390,7 @@ describe("submitContact rate limiting", () => {
     code: "rate_limited",
     draft: expect.objectContaining({ message: validFields.message }),
   };
-  const SENT = { success: true, error: null, code: null, submittedProjectType: "" };
+  const SENT = { success: true, error: null, code: null, submittedProjectType: "", leadSent: true };
   const warnSpy = () => vi.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
@@ -691,7 +694,10 @@ describe("submitContact rate limiting", () => {
   it("skips the limiters in test runs", async () => {
     vi.stubEnv("TEST_EMAIL_ENABLED", "true");
     const submit = await loadWithLimiter();
-    expect((await send(submit, "a@x.com")).success).toBe(true);
+    const result = await send(submit, "a@x.com");
+    expect(result.success).toBe(true);
+    // Nothing was sent, so it is not a lead.
+    expect(result.leadSent).toBe(false);
     expect(calls).toHaveLength(0);
     expect(mockSend).not.toHaveBeenCalled();
   });
@@ -722,12 +728,12 @@ describe("submitContact length limits", () => {
       idle,
       makeFormData({ ...validFields, name: "x".repeat(100), message: "x".repeat(5000) }),
     );
-    expect(result).toEqual({ success: true, error: null, code: null, submittedProjectType: "" });
+    expect(result).toEqual({ success: true, error: null, code: null, submittedProjectType: "", leadSent: true });
     // A textarea at its 5,000-character limit arrives with CRLF line breaks.
     const crlf = await submitContact(
       idle,
       makeFormData({ ...validFields, message: ("x".repeat(99) + "\r\n").repeat(50).slice(0, -2) }),
     );
-    expect(crlf).toEqual({ success: true, error: null, code: null, submittedProjectType: "" });
+    expect(crlf).toEqual({ success: true, error: null, code: null, submittedProjectType: "", leadSent: true });
   });
 });
