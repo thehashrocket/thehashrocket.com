@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0.0] - 2026-11-15
+
+### Added
+- A care plan page at /care-plan for keeping a site or app looked after once it's built. It lists what's covered (monitoring every 5 minutes, daily backups with a quarterly test restore, security and routine updates, and a same-business-day reply when something breaks) and spells out the price: $300 a month with 2 hours for one system, $600 a month with 3 hours for two or three, and a quote beyond that.
+- The page says what it takes before coverage starts. Something Jason built or fixed is covered from handoff, an app built with AI starts with the AI-built app review, and anything else gets an onboarding check quoted after a short call.
+- The care plan's terms are on the page. They say what the included hours cover, that routine and security updates never use them, that major upgrades and extra time are quoted first, and that it's month to month with 30 days' notice.
+
+### Changed
+- The pricing sentence on the homepage, the contact page and the city pages now ends with the care plan, linked.
+- The automation sprint page has an "After handoff" section pointing to the care plan where it used to say upkeep was available on request, and the AI-built app review page links to it after the questions.
+- The homepage's Services list, the "Keep it running" card and the "How it works" steps link to the care plan.
+- Arriving at the contact form from the care plan selects "Ongoing support" and shows the monthly price.
+- The city pages' answers about ongoing support now describe the care plan's price and included hours instead of open-ended monthly support.
+
 ## [0.9.1.0] - 2026-11-15
 
 ### Changed
