@@ -29,11 +29,18 @@ export const SPRINT_MAX_SYSTEMS = 3;
 /** The cheapest fixed-price way to start: the city-page badge shows it. */
 export const LOWEST_FIXED_PRICE = Math.min(REVIEW_PRICE, SPRINT_PRICE_MIN);
 
-/** Care plan (launches in release 2; the values are set now). */
+/**
+ * Care plan: two tiers by system count (#89). One system is CARE_PLAN_MIN a month with
+ * CARE_PLAN_HOURS; two up to CARE_PLAN_MAX_SYSTEMS is CARE_PLAN_MAX with CARE_PLAN_MAX_HOURS.
+ * More is quoted. Unused hours don't roll over; routine and security updates never use them.
+ */
 export const CARE_PLAN_MIN = 300;
 export const CARE_PLAN_MAX = 600;
 export const CARE_PLAN_HOURS = 2;
-export const CARE_PLAN_MAX_CLIENTS: number | null = 10;
+export const CARE_PLAN_MAX_HOURS = 3;
+export const CARE_PLAN_MAX_SYSTEMS = 3;
+/** Total care-plan clients, not per month; null hides the line. Capacity math: docs/DOMAIN.md. */
+export const CARE_PLAN_MAX_CLIENTS: number | null = 5;
 
 /** The free talk for chambers, SBDCs and business groups, in minutes. */
 export const TALK_MINUTES_MIN = 30;
@@ -79,20 +86,45 @@ export function formatSprintPrice(): string {
   return formatUsdRange(SPRINT_PRICE_MIN, SPRINT_PRICE_MAX);
 }
 
+/** "$300–$600", without the "a month": callers say the period in their own words. */
+export function formatCarePrice(): string {
+  return formatUsdRange(CARE_PLAN_MIN, CARE_PLAN_MAX);
+}
+
+/** "2–3": included hours across the two tiers. Throws on an inverted range, like formatUsdRange. */
+export function formatCareHours(): string {
+  if (!(CARE_PLAN_HOURS < CARE_PLAN_MAX_HOURS)) {
+    throw new Error(`formatCareHours: ${CARE_PLAN_HOURS} must be below ${CARE_PLAN_MAX_HOURS}`);
+  }
+  return `${CARE_PLAN_HOURS}–${CARE_PLAN_MAX_HOURS}`;
+}
+
 // Counts from signing, not from the start date: with low monthly caps, a full calendar
 // must never cost a client their credit (owner decision on #101).
 export const REVIEW_CREDIT_TEXT = `If you sign a scope for a fix or an automation sprint within ${REVIEW_CREDIT_DAYS} days of the report, the review fee is credited toward it, up to that work's price. The work can start later. Unused credit isn't paid out.`;
 
-/** A capacity line ("1 sprint", "2 reviews"), or null when the cap is unset or not positive. */
+/** One rule for every capacity line: an unset or non-positive cap hides it. */
+function isShownCap(cap: number | null): cap is number {
+  return cap !== null && cap > 0;
+}
+
+/** A monthly capacity line ("1 sprint", "2 reviews"), or null when the cap is hidden. */
 export function capLine(cap: number | null, one: string, many: string): string | null {
-  return cap !== null && cap > 0
+  return isShownCap(cap)
     ? `I take ${cap} ${cap === 1 ? one : many} a month. Ask about the next available start.`
+    : null;
+}
+
+/** The care plan's total client cap. Not capLine: that says "a month", which is wrong for a standing cap. */
+export function clientCapLine(cap: number | null): string | null {
+  return isShownCap(cap)
+    ? `I take on up to ${cap} care-plan ${cap === 1 ? "client" : "clients"}. Ask about the next opening.`
     : null;
 }
 
 // --- The pricing ladder ------------------------------------------------------
 
-export type LadderOffer = "sprint" | "review" | "build";
+export type LadderOffer = "sprint" | "review" | "build" | "care";
 
 export interface LadderPart {
   /** Which offer this segment names; null for joining text. */
@@ -129,6 +161,8 @@ export function offerLadderParts(framing: ReviewFraming = REVIEW_FRAMING): Ladde
   parts.push(
     { offer: null, text: ". " },
     { offer: "build", text: `Larger builds start at ${formatUsd(BUILD_PRICE_FLOOR)}` },
+    { offer: null, text: ". Keep it running for " },
+    { offer: "care", text: `${formatCarePrice()} a month`, href: "/care-plan" },
     { offer: null, text: "." },
   );
   return parts;

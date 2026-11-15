@@ -25,14 +25,15 @@ export function getContactHref(source?: string): string {
  * Offer and talk pages, not only priced offers. The sitemap, metadata,
  * first-screen and canvas-dimming checks all iterate this list.
  */
-export const OFFER_ROUTES = ["/automation-sprint", "/ai-app-review", "/print-shops", "/talks"] as const;
+export const OFFER_ROUTES = ["/automation-sprint", "/ai-app-review", "/care-plan", "/print-shops", "/talks"] as const;
 
 export type OfferRoute = (typeof OFFER_ROUTES)[number];
 
 /** Sitemap lastModified per offer route (YYYY-MM-DD). Refresh a route's date when its page changes. */
 export const OFFER_ROUTE_UPDATED: Record<OfferRoute, string> = {
-  "/automation-sprint": "2026-11-14",
-  "/ai-app-review": "2026-11-14",
+  "/automation-sprint": "2026-11-15",
+  "/ai-app-review": "2026-11-15",
+  "/care-plan": "2026-11-15",
   "/print-shops": "2026-11-14",
   "/talks": "2026-11-14",
 };

@@ -1,6 +1,6 @@
 /**
  * @vitest-environment jsdom
- * /automation-sprint, /ai-app-review, /print-shops and /talks: offer facts render from
+ * /automation-sprint, /ai-app-review, /care-plan, /print-shops and /talks: offer facts render from
  * lib/offers.ts and the case study, never from retyped copy.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -31,6 +31,7 @@ const SprintPage = (await import("@/app/automation-sprint/page")).default;
 const ReviewPage = (await import("@/app/ai-app-review/page")).default;
 const PrintPage = (await import("@/app/print-shops/page")).default;
 const TalksPage = (await import("@/app/talks/page")).default;
+const CarePage = (await import("@/app/care-plan/page")).default;
 const talk = await import("@/lib/talk");
 
 function jsonLd(container: HTMLElement) {
@@ -113,6 +114,7 @@ afterEach(() => {
 describe.each([
   ["/automation-sprint", SprintPage, "automation-sprint"],
   ["/ai-app-review", ReviewPage, "ai-app-review"],
+  ["/care-plan", CarePage, "care-plan"],
 ])("%s hero actions", (_path, Page, source) => {
   it("has one booking-cta with booking on and off", () => {
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "https://example.com/me");
@@ -207,6 +209,71 @@ describe("/automation-sprint", () => {
     const faq = blocks.find((b) => b["@type"] === "FAQPage");
     expect(faq.mainEntity).toHaveLength(content.sprintFaqs.length);
     expect(container.querySelector('[data-testid="current-scene"]')).toBeNull();
+  });
+});
+
+// Value: protects=/care-plan renders its range, hours, coverage, terms and cap from lib/offers and lib/offer-content,
+//   publishes a monthly price spec, keeps updates out of the hours with system-count pricing, and the two offer pages link to it (#89);
+//   fails_when=a number is retyped, a coverage row or term drops, the cap line uses the monthly wording, or a link is lost;
+//   why_new=/care-plan is new; seam=none; no_claim=whether the coverage promises are kept (owner sign-off)
+describe("/care-plan", () => {
+  it("renders the range, hours, coverage rows, terms and client cap", () => {
+    const { container, text } = renderPage(CarePage);
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector('[data-testid="offer-summary"]')?.textContent).toBe(
+      `${offers.formatCarePrice()}/month · ${offers.formatCareHours()} hours included`,
+    );
+    for (const row of content.careCoverage) {
+      expect(text, row.title).toContain(row.title);
+      expect(text, row.title).toContain(row.body);
+    }
+    expect(text).toContain(content.careReplyWindow);
+    // #89: updates are part of the base price, and the price is scoped by system count from lib/offers.
+    expect(text).toContain("Updates are included and don't use your hours.");
+    // The hours-out line must not promise that every update is free of hours (the terms say a breaking one isn't).
+    expect(content.careHoursOut).toContain("Routine and security updates never count toward your hours");
+    // Both tiers spelled out, so two systems is never a guess.
+    const tiers = container.querySelector('[data-testid="care-tiers"]')?.textContent ?? "";
+    expect(tiers).toContain(`1 system${offers.formatUsd(offers.CARE_PLAN_MIN)} a month${offers.CARE_PLAN_HOURS} hours included`);
+    expect(tiers).toContain(
+      `2–${offers.CARE_PLAN_MAX_SYSTEMS} systems${offers.formatUsd(offers.CARE_PLAN_MAX)} a month${offers.CARE_PLAN_MAX_HOURS} hours included`,
+    );
+    expect(tiers).toContain(`More than ${offers.CARE_PLAN_MAX_SYSTEMS}Quoted`);
+    // Every onboarding path names its cost, and the AI-built path links the review at its real price.
+    for (const row of content.careOnboarding) expect(text, row.from).toContain(row.detail);
+    expect(text).toContain(`The AI-built app review is the onboarding check: ${offers.formatReviewPrice()}.`);
+    expect(text).toContain("quoted after a 20-minute call");
+    const links = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(links).toContain("/ai-app-review");
+    const terms = [...container.querySelectorAll('[data-testid="care-terms"] dt')].map((dt) => dt.textContent);
+    expect(terms).toEqual(content.careTerms.map((t) => t.term));
+    expect(text).toContain(offers.clientCapLine(offers.CARE_PLAN_MAX_CLIENTS)!);
+    expect(text).not.toContain("a month. Ask about the next available start.");
+    const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("/automation-sprint");
+  });
+
+  it("publishes a monthly price range and the FAQ as JSON-LD", () => {
+    const blocks = jsonLd(renderPage(CarePage).container);
+    const service = blocks.find((b) => b["@type"] === "Service");
+    expect(service.offers.priceSpecification).toEqual({
+      "@type": "UnitPriceSpecification",
+      minPrice: offers.CARE_PLAN_MIN,
+      maxPrice: offers.CARE_PLAN_MAX,
+      priceCurrency: "USD",
+      unitCode: "MON",
+    });
+    expect(blocks.find((b) => b["@type"] === "FAQPage").mainEntity).toHaveLength(content.careFaqs.length);
+  });
+
+  it("is linked from both offer pages, and the sprint no longer says upkeep is on request", () => {
+    for (const Page of [SprintPage, ReviewPage]) {
+      const hrefs = [...renderPage(Page).container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+      expect(hrefs).toContain("/care-plan");
+    }
+    const sprint = renderPage(SprintPage).text;
+    expect(sprint).not.toContain("on request");
+    expect(sprint).toContain(`${offers.formatCarePrice()} a month, ${offers.formatCareHours()} hours included`);
   });
 });
 

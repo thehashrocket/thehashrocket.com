@@ -67,7 +67,7 @@ describe("claims", () => {
   });
 
   it("the price-literal pattern bans prices but allows magnitude metrics", () => {
-    for (const price of ["$10K+", "$1,500", "$3,500–$5,000", "$3.5K", "$10,000.", "$1,500 budget", "$5,000 minimum", "$300 monthly"]) expect(price, price).toMatch(PRICE_LITERAL);
+    for (const price of ["$10K+", "$1,500", "$3,500–$5,000", "$3.5K", "$10,000.", "$1,500 budget", "$5,000 minimum", "$300 monthly"]) expect(price, price).toMatch(PRICE_LITERAL); // pregate-literal: CARE_PLAN_MAX_CLIENTS=10 the 10 is the build floor in sample price strings, not the care cap
     for (const metric of ["$200M+", "$2B", "$40 M"]) expect(metric, metric).not.toMatch(PRICE_LITERAL);
   });
 

@@ -51,6 +51,14 @@ const pages: PageRow[] = [
     localLine: true,
   },
   {
+    path: "/care-plan",
+    source: "care-plan",
+    h1: /Your systems, looked after\./,
+    fact: /\$[\d,]+–\$[\d,]+\/month · \d+–\d+ hours included/,
+    ctaText: /Book a 20-minute call|Send a message/,
+    firstScreen: 560,
+  },
+  {
     path: "/print-shops",
     source: "print-shops",
     h1: /without the paper/i,
@@ -95,6 +103,22 @@ for (const { path, source, h1, fact, ctaText } of pages) {
     expect(outline).not.toBe("none");
   });
 }
+
+// Value: protects=keyboard users reach the /care-plan FAQ past the hero, rows, tiers and terms links, with a visible focus ring;
+//   fails_when=a link between the hero and the FAQ traps focus, or the FAQ summary loses its focus outline;
+//   why_new=the row test above stops at the hero CTA (release 2 plan Step 5); seam=none; no_claim=screen reader output
+test("/care-plan: Tab reaches the first FAQ question with a visible focus ring", async ({ page }) => {
+  await page.goto("/care-plan");
+  const firstSummary = page.locator("main details summary").first();
+  let reached = false;
+  for (let i = 0; i < 40 && !reached; i++) {
+    await page.keyboard.press("Tab");
+    reached = await firstSummary.evaluate((el) => el === document.activeElement);
+  }
+  expect(reached).toBe(true);
+  const outline = await firstSummary.evaluate((el) => getComputedStyle(el).outlineStyle);
+  expect(outline).not.toBe("none");
+});
 
 // Value: protects=on a small phone the price or summary, what the offer is, and the primary action are in the
 //   first screen, below the fixed nav, with Cal.com off (project chromium) and on (project booking-on);
@@ -270,14 +294,15 @@ test("the homepage hero shows the sprint and the call in the first screen", asyn
   expect(overflow, "horizontal overflow at 320").toBeLessThanOrEqual(0);
 });
 
-// Value: protects=the homepage price line leads with the sprint and links the sprint and the review;
+// Value: protects=the homepage price line leads with the sprint, ends with the care plan, and links the offers;
 //   fails_when=the ladder order changes or its links drop; why_new=pricing moved to offerLadderParts;
 //   seam=none; no_claim=the exact prices (lib/offers.ts owns them)
 test("the homepage leads with the sprint and links both entry offers", async ({ page }) => {
   await page.goto("/");
   const ladder = page.getByTestId("offer-ladder");
-  await expect(ladder).toHaveText(/^Start with a \$[\d,]+–\$[\d,]+ automation sprint or a \$[\d,]+ AI-built app review\. Larger builds start at \$10,000\.$/);
+  await expect(ladder).toHaveText(/^Start with a \$[\d,]+–\$[\d,]+ automation sprint or a \$[\d,]+ AI-built app review\. Larger builds start at \$10,000\. Keep it running for \$[\d,]+–\$[\d,]+ a month\.$/); // pregate-literal: CARE_PLAN_MAX_CLIENTS=10 the 10 is the $10,000 build floor, not the care cap
   await expect(ladder.getByRole("link", { name: /automation sprint/ })).toHaveAttribute("href", "/automation-sprint");
+  await expect(ladder.getByRole("link", { name: /a month/ })).toHaveAttribute("href", "/care-plan");
   await page.getByRole("link", { name: "Get an AI-built app reviewed →" }).click();
   await expect(page).toHaveURL(/\/ai-app-review$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/what's risky in your AI-built app/i);

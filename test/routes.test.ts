@@ -1,5 +1,5 @@
 // Value: protects=every internal link the site hardcodes resolves to a page that exists;
-//   fails_when=a link to a route that hasn't shipped (e.g. /care-plan, /talks before release 2) or a renamed route;
+//   fails_when=a link to a route that hasn't shipped or a renamed route;
 //   why_new=nothing checked internal hrefs against app/; seam=none;
 //   no_claim=links built from runtime data (template literals are skipped) or external URLs
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -56,7 +56,7 @@ describe("internal links", () => {
     expect(routeExists("/automation-sprint")).toBe(true);
     expect(routeExists("/work/print-portal")).toBe(true);
     expect(routeExists("/talks")).toBe(true);
-    // The care plan (lane B) waits for the first delivered sprint or review.
-    expect(routeExists("/care-plan")).toBe(false);
+    expect(routeExists("/care-plan")).toBe(true);
+    expect(routeExists("/maintenance-plan")).toBe(false);
   });
 });

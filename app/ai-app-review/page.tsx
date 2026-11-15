@@ -8,6 +8,7 @@ import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
 import {
+  accentLink,
   eyebrow,
   heroFact,
   listItem,
@@ -189,6 +190,10 @@ export default function AiAppReviewPage() {
 
       <section className="border-t border-[var(--border)] px-6 py-24 md:py-32">
         <div className="mx-auto max-w-[1280px]">
+          {/* After the FAQ, so it doesn't interrupt the review purchase. */}
+          <Link href="/care-plan" className={`mb-12 ${accentLink}`}>
+            After the fixes, the care plan keeps it running →
+          </Link>
           <ClosingCta
             heading="Not sure it's safe to keep running?"
             body="Tell me what the app does and who built it. I'll tell you whether the review fits, or what would fit better."

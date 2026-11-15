@@ -12,6 +12,7 @@ import * as offers from "../lib/offers";
 import {
   BUILD_PRICE_FLOOR,
   CARE_PLAN_MAX,
+  CARE_PLAN_MAX_CLIENTS,
   CARE_PLAN_MIN,
   REVIEW_CREDIT_DAYS,
   REVIEW_CREDIT_TEXT,
@@ -23,6 +24,7 @@ import {
   SPRINT_PRICE_MAX,
   SPRINT_PRICE_MIN,
   capLine,
+  clientCapLine,
   formatReviewPrice,
   formatUsd,
   formatUsdCompact,
@@ -76,6 +78,8 @@ describe("owner gate inputs", () => {
       "CARE_PLAN_MIN",
       "CARE_PLAN_MAX",
       "CARE_PLAN_HOURS",
+      "CARE_PLAN_MAX_HOURS",
+      "CARE_PLAN_MAX_SYSTEMS",
       "BUILD_PRICE_FLOOR",
     ] as const;
     for (const key of numeric) {
@@ -94,6 +98,13 @@ describe("owner gate inputs", () => {
     expect(SPRINT_PRICE_MIN).toBeLessThan(SPRINT_PRICE_MAX);
     expect(SPRINT_PRICE_MAX).toBeLessThan(BUILD_PRICE_FLOOR);
     expect(CARE_PLAN_MIN).toBeLessThan(CARE_PLAN_MAX);
+    // Value: protects=the care tiers stay coherent: more systems buys more hours, and the second tier reads "2–N systems";
+    //   fails_when=CARE_PLAN_HOURS reaches CARE_PLAN_MAX_HOURS (formatCareHours throws on every page) or
+    //   CARE_PLAN_MAX_SYSTEMS drops below 2 ("2–1 systems"); why_new=render tests only fail on the throw, by stack trace,
+    //   and never on the tier label; seam=none; no_claim=the owner's chosen hours and system counts are right
+    expect(offers.CARE_PLAN_HOURS).toBeLessThan(offers.CARE_PLAN_MAX_HOURS);
+    expect(offers.formatCareHours()).toBe(`${offers.CARE_PLAN_HOURS}–${offers.CARE_PLAN_MAX_HOURS}`);
+    expect(offers.CARE_PLAN_MAX_SYSTEMS).toBeGreaterThanOrEqual(2);
     if (REVIEW_FRAMING === "small-door") expect(REVIEW_PRICE).toBeLessThan(SPRINT_PRICE_MAX);
   });
 
@@ -107,11 +118,23 @@ describe("owner gate inputs", () => {
     expect(capLine(2, "review", "reviews")).toBe("I take 2 reviews a month. Ask about the next available start.");
   });
 
+  // Value: protects=the care plan's standing client cap reads as a total, not "a month", and hides like capLine;
+  //   fails_when=clientCapLine reuses capLine's monthly wording or shows a zero cap; why_new=new helper; seam=none;
+  //   no_claim=none beyond protects
+  it("words the care-plan client cap as a total and hides it when unset or not positive", () => {
+    expect(clientCapLine(null)).toBeNull();
+    expect(clientCapLine(0)).toBeNull();
+    expect(clientCapLine(1)).toBe("I take on up to 1 care-plan client. Ask about the next opening.");
+    expect(clientCapLine(10)).toBe("I take on up to 10 care-plan clients. Ask about the next opening."); // pregate-literal: CARE_PLAN_MAX_CLIENTS=10 a deliberate plural input, independent of the live cap
+  });
+
   // Value: protects=the published caps match #101 (1 sprint, 2 reviews); fails_when=a cap is raised without
   //   the hours data; why_new=#101; seam=none; no_claim=actual delivery hours
   it("publishes the #101 caps", () => {
     expect(SPRINT_MONTHLY_CAP).toBe(1);
     expect(REVIEW_MONTHLY_CAP).toBe(2);
+    // uc3b: 5 clients × (included hours + 0.5–1 hour of updates), no separate incident buffer (docs/DOMAIN.md).
+    expect(CARE_PLAN_MAX_CLIENTS).toBe(5);
   });
 
   // Value: protects=the published credit matches the term the owner approved; fails_when=the wording drops the sprint, cap or no-cash clause;
@@ -127,11 +150,11 @@ describe("the pricing ladder", () => {
   const offerOrder = (framing: "small-door" | "premium") =>
     offerLadderParts(framing).flatMap((part) => (part.offer ? [part.offer] : []));
 
-  // Value: protects=sprint, review, build order and the review's presence per framing; fails_when=segments reorder or the framing branch is ignored;
+  // Value: protects=sprint, review, build, care order and the review's presence per framing; fails_when=segments reorder or the framing branch is ignored;
   //   why_new=new function; seam=none (framing is the production default argument); no_claim=which framing the owner picks
   it("orders offers by segment identity under both framings", () => {
-    expect(offerOrder("small-door")).toEqual(["sprint", "review", "build"]);
-    expect(offerOrder("premium")).toEqual(["sprint", "build"]);
+    expect(offerOrder("small-door")).toEqual(["sprint", "review", "build", "care"]);
+    expect(offerOrder("premium")).toEqual(["sprint", "build", "care"]);
   });
 
   it("joins the parts into the plain sentence for both framings", () => {
@@ -139,20 +162,20 @@ describe("the pricing ladder", () => {
       expect(offerLadderParts(framing).map((part) => part.text).join(""), framing).toBe(offerLadderText(framing));
     }
     expect(offerLadderText("small-door")).toBe(
-      `Start with a ${formatUsdRange(SPRINT_PRICE_MIN, SPRINT_PRICE_MAX)} automation sprint or a ${formatReviewPrice()} AI-built app review. Larger builds start at ${formatUsd(BUILD_PRICE_FLOOR)}.`,
+      `Start with a ${formatUsdRange(SPRINT_PRICE_MIN, SPRINT_PRICE_MAX)} automation sprint or a ${formatReviewPrice()} AI-built app review. Larger builds start at ${formatUsd(BUILD_PRICE_FLOOR)}. Keep it running for ${formatUsdRange(CARE_PLAN_MIN, CARE_PLAN_MAX)} a month.`,
     );
     expect(offerLadderText("premium")).not.toContain("AI-built app review");
     expect(reviewLineText()).toContain(formatReviewPrice());
   });
 
   it("picks a or an by how the price is spoken", () => {
-    for (const price of ["$1,500", "$3,500–$5,000", "$10,000", "$100"]) expect(indefiniteArticle(price), price).toBe("a");
+    for (const price of ["$1,500", "$3,500–$5,000", "$10,000", "$100"]) expect(indefiniteArticle(price), price).toBe("a"); // pregate-literal: CARE_PLAN_MAX_CLIENTS=10 the 10 is a sample price, not the care cap
     for (const price of ["$8,000", "$800", "$80,000", "$11,000", "$18,500"]) expect(indefiniteArticle(price), price).toBe("an");
   });
 
-  it("links only to routes that exist in release 1", () => {
+  it("links each priced offer to its page", () => {
     const hrefs = offerLadderParts("small-door").flatMap((part) => (part.href ? [part.href] : []));
-    expect(hrefs).toEqual(["/automation-sprint", "/ai-app-review"]);
+    expect(hrefs).toEqual(["/automation-sprint", "/ai-app-review", "/care-plan"]);
   });
 });
 

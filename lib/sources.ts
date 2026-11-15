@@ -9,7 +9,6 @@ const KNOWN_SOURCES = new Set<string>([
   "ai-app-review",
   "print-shops",
   "automation-sprint",
-  // Care plan and talks pages ship in release 2; the tags attribute early shared links now.
   "care-plan",
   "talks",
   "talk-attendee",

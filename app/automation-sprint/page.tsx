@@ -35,6 +35,8 @@ import {
   SPRINT_PRICE_MIN,
   SPRINT_WEEKS,
   capLine,
+  formatCareHours,
+  formatCarePrice,
   formatSprintPrice,
 } from "@/lib/offers";
 
@@ -147,6 +149,19 @@ export default function AutomationSprintPage() {
               {sprintExclusion}
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* The upkeep the exclusions line points at */}
+      <section className={section}>
+        <div className="mx-auto max-w-[720px]">
+          <h2 className={sectionHeading}>After handoff</h2>
+          <p className="mt-6 text-lg leading-relaxed text-[var(--text-secondary)]">
+            The care plan keeps it running: {formatCarePrice()} a month, {formatCareHours()} hours included.
+          </p>
+          <Link href="/care-plan" className={`mt-4 ${accentLink}`}>
+            See the care plan →
+          </Link>
         </div>
       </section>
 
