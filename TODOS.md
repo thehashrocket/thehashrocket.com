@@ -252,7 +252,8 @@
 - **Start when:** the first sprint or review is delivered (owner decision, 2026-11-14 gate). `/talks` shipped ahead of it in release 2.
 - **Effort:** M (CC: ~45 min) | **Priority:** P2
 
-### [P3] /ai-app-review hero doesn't fit a 375×560 screen
+### ~~[P3] /ai-app-review hero doesn't fit a 375×560 screen~~ ✓ COMPLETED
+- **Done (v0.9.0.0, 2026-11-15, #108):** shorter H1 and local line (owner-approved), the price and local line moved above the buttons, and mobile-only spacing; both offer pages are in the 560 check.
 - **What:** On an iPhone SE under Safari's chrome the review page's booking button sits below the fold (ends at ~607px); the four-line headline plus subline is too tall. `/automation-sprint` passes the same check.
 - **Fix:** shorten the H1 or move the price line and actions above the subline, then add `/ai-app-review` to the 560 check in `test/e2e/offer-pages.spec.ts`.
 - **Effort:** S | **Priority:** P3
@@ -281,7 +282,8 @@
 - **Why:** Buyers are asked to pay $1,500 before seeing what they get (Codex CEO review).
 - **Effort:** S | **Priority:** P3 | **Depends on:** none
 
-### [P3] Click events for the hero sprint button and Services choices
+### ~~[P3] Click events for the hero sprint button and Services choices~~ ✓ COMPLETED
+- **Done (v0.9.0.0, 2026-11-15, #107):** `TrackedLink` sends `offer_click { route, placement }` from the four Services links (`home-services`) and the hero sprint button (`home-hero`).
 - **What:** GA4 events (same `sendGAEvent` pattern as `BookingAnchor`) for the homepage sprint button and each `#services` choice link, with the target route.
 - **Why:** The 90-day read can then tell which entry point produced a visit; today only booking clicks and sent messages are recorded.
 - **Effort:** S (CC: ~10 min) | **Priority:** P3 | **Depends on:** #100 shipped
@@ -291,7 +293,8 @@
 - **Why:** With caps of 1 sprint and 2 reviews, a full month needs honest copy; build when it first fills.
 - **Effort:** S | **Priority:** P3 | **Depends on:** a month filling up
 
-### [P2] Homepage booking button sits below the fold on a 375×667 phone
+### ~~[P2] Homepage booking button sits below the fold on a 375×667 phone~~ ✓ COMPLETED
+- **Done (v0.9.0.0, 2026-11-15, #107):** mobile-only hero spacing and a `text-lg` paragraph; the homepage first-screen test asserts `home-hero-cta` inside 667px at 375 wide.
 - **What:** On a 375×667 phone the homepage hero's "Book a 20-minute call" button ends at about 697px, below the first screen. Desktop sizes (1440×900, 1280×720) are fine.
 - **Why:** A visitor who types the address after a talk, usually on a phone, has to scroll to the main call to action. Measured on main before #100; #100 did not move it.
 - **Options:** tighten the hero's mobile spacing (`pt-24` under the fixed nav, `mt-6`/`mt-10` gaps), shorten the mobile body paragraph, or move the buttons above it on small screens. Then add a 375×667 assertion to the homepage "first screen" test in `test/e2e/offer-pages.spec.ts`.
