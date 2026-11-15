@@ -7,7 +7,17 @@ import { ClosingCta } from "@/components/ui/ClosingCta";
 import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
-import { accentLink, eyebrow, heroNote, listItem, section, sectionHeading } from "@/components/ui/styles";
+import {
+  accentLink,
+  eyebrow,
+  heroFact,
+  listItem,
+  offerActionsSpacing,
+  offerScope,
+  offerSummary,
+  section,
+  sectionHeading,
+} from "@/components/ui/styles";
 import { caseStudies } from "@/lib/case-studies";
 import {
   sprintExamples,
@@ -55,27 +65,27 @@ export default function AutomationSprintPage() {
       <FAQJsonLd faqs={sprintFaqs} />
 
       {/* Hero */}
-      <section className="px-6 pt-24 pb-16 md:pt-32 md:pb-24">
+      <section className="px-6 pt-20 pb-16 sm:pt-24 md:pt-32 md:pb-24">
         <div className="mx-auto max-w-[720px]">
           <p className={eyebrow}>Automation sprint</p>
           <h1 className="font-display text-[clamp(40px,5.5vw,64px)] font-bold leading-[1.05] tracking-[-0.02em] text-[var(--text-primary)]">
             One process, automated.
           </h1>
-          <p data-testid="offer-summary" className="mt-6 font-mono text-sm text-[var(--text-primary)] tabular-nums">
-            <span className="text-[var(--accent)]">{PRICE}</span> &middot; fixed before work starts &middot;{" "}
-            {SPRINT_WEEKS} weeks
-          </p>
-          <p className="mt-2 font-mono text-xs text-[var(--text-muted)]">
-            Price depends on how many systems the process touches, up to {SPRINT_MAX_SYSTEMS}.
-          </p>
-          <p data-testid="offer-scope" className="mt-6 text-xl leading-relaxed text-[var(--text-secondary)]">
+          <p data-testid="offer-scope" className={offerScope}>
             Pick the one process that eats the most hours. I automate it, and we agree up front on the one result
             that means it&apos;s done.
           </p>
-          <OfferHeroActions source={SOURCE} />
-          <p data-testid="offer-local" className={heroNote}>
+          <p data-testid="offer-summary" className={offerSummary}>
+            <span className="text-[var(--accent)]">{PRICE}</span> &middot; fixed before work starts &middot;{" "}
+            {SPRINT_WEEKS} weeks
+          </p>
+          <p className={`mt-2 ${heroFact}`}>
+            Price depends on how many systems the process touches, up to {SPRINT_MAX_SYSTEMS}.
+          </p>
+          <p data-testid="offer-local" className={`mt-2 ${heroFact}`}>
             {sprintLocalLine}
           </p>
+          <OfferHeroActions source={SOURCE} spacing={offerActionsSpacing} />
         </div>
       </section>
       <DimCanvasBelow />

@@ -7,7 +7,16 @@ import { ClosingCta } from "@/components/ui/ClosingCta";
 import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
-import { eyebrow, heroNote, listItem, section, sectionHeading } from "@/components/ui/styles";
+import {
+  eyebrow,
+  heroFact,
+  listItem,
+  offerActionsSpacing,
+  offerScope,
+  offerSummary,
+  section,
+  sectionHeading,
+} from "@/components/ui/styles";
 import { caseStudies } from "@/lib/case-studies";
 import {
   reviewChecks,
@@ -52,24 +61,24 @@ export default function AiAppReviewPage() {
       <FAQJsonLd faqs={reviewFaqs} />
 
       {/* Hero */}
-      <section className="px-6 pt-24 pb-16 md:pt-32 md:pb-24">
+      <section className="px-6 pt-20 pb-16 sm:pt-24 md:pt-32 md:pb-24">
         <div className="mx-auto max-w-[1280px]">
           <p className={eyebrow}>AI-built app review</p>
           <h1 className="max-w-4xl font-display text-[clamp(40px,5.5vw,64px)] font-bold leading-[1.05] tracking-[-0.02em] text-[var(--text-primary)]">
-            Find out what&apos;s risky in the app your team built with AI.
+            Find out what&apos;s risky in your AI-built app.
           </h1>
-          <p data-testid="offer-scope" className="mt-6 max-w-xl text-xl leading-relaxed text-[var(--text-secondary)]">
+          <p data-testid="offer-scope" className={offerScope}>
             For owners whose business now runs on an app someone built with AI tools, or inherited from someone who
             left, and nobody can say what&apos;s holding it together.
           </p>
-          <p data-testid="offer-summary" className="mt-6 font-mono text-sm text-[var(--text-primary)] tabular-nums">
+          <p data-testid="offer-summary" className={offerSummary}>
             <span className="text-[var(--accent)]">{formatReviewPrice()}</span> &middot; {REVIEW_TURNAROUND} &middot;
             fixed scope
           </p>
-          <OfferHeroActions source={SOURCE} />
-          <p data-testid="offer-local" className={heroNote}>
+          <p data-testid="offer-local" className={`mt-2 ${heroFact}`}>
             {reviewLocalLine}
           </p>
+          <OfferHeroActions source={SOURCE} spacing={offerActionsSpacing} />
         </div>
       </section>
       <DimCanvasBelow />
@@ -101,7 +110,7 @@ export default function AiAppReviewPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 font-mono text-sm text-[var(--text-muted)]">Automated scanning included.</p>
+            <p className={`mt-6 ${heroFact}`}>Automated scanning included.</p>
           </div>
           <div>
             <h2 className={sectionHeading}>What you get</h2>

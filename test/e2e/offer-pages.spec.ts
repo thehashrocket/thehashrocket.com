@@ -17,6 +17,7 @@ test.beforeEach(async ({ page }) => {
 // One row per OFFER_ROUTES entry (a test below fails until a new route has one).
 // firstScreen: the shortest phone height (375 wide) where the hero's price/summary and primary
 // action must fit; 667 also checks the scope line and every hero action. false = no hero testids.
+// localLine: the hero has the local line next to the price (#108), so it is checked at both heights too.
 interface PageRow {
   path: (typeof OFFER_ROUTES)[number];
   source: string;
@@ -24,6 +25,7 @@ interface PageRow {
   fact: RegExp;
   ctaText: RegExp;
   firstScreen: 667 | 560 | false;
+  localLine?: boolean;
 }
 
 const pages: PageRow[] = [
@@ -33,16 +35,20 @@ const pages: PageRow[] = [
     h1: /One process, automated\./,
     fact: /\$[\d,]+–\$[\d,]+ · fixed before work starts/,
     ctaText: /Book a 20-minute call|Send a message/,
+    // The primary button ends at about 559px of 560 here (measured 2026-11-15), so any longer
+    // hero copy, an extra fact line or a font change fails this row. Before editing the sprint
+    // hero, trim words or mobile spacing, or move this row to 667 as the owner allowed for the review.
     firstScreen: 560,
+    localLine: true,
   },
   {
     path: "/ai-app-review",
     source: "ai-app-review",
-    h1: /what's risky in the app/i,
+    h1: /Find out what's risky in your AI-built app\./,
     fact: /\$[\d,]+ · 3 weeks · fixed scope/,
     ctaText: /Book a 20-minute call|Send a message/,
-    // The four-line headline plus subline doesn't fit 560 yet; see TODOS.md.
-    firstScreen: 667,
+    firstScreen: 560,
+    localLine: true,
   },
   {
     path: "/print-shops",
@@ -95,14 +101,17 @@ for (const { path, source, h1, fact, ctaText } of pages) {
 //   fails_when=the hero grows, the nav overlaps it, a booking button pushes the hero down, or the page scrolls
 //   sideways at 320px; why_new=Playwright ran Desktop Chrome only; seam=none;
 //   no_claim=real devices or larger text sizes
-for (const { path, firstScreen } of pages) {
+for (const { path, firstScreen, localLine } of pages) {
   if (firstScreen === false) continue;
+  const heroIds = localLine
+    ? ["offer-scope", "offer-summary", "offer-local", "booking-cta"]
+    : ["offer-summary", "offer-scope", "booking-cta"];
   test(`${path} first screen on a phone`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto(path);
     await page.evaluate(() => document.fonts.ready);
     const navBottom = await page.locator("header, nav").first().evaluate((el) => el.getBoundingClientRect().bottom);
-    for (const testId of ["offer-summary", "offer-scope", "booking-cta"]) {
+    for (const testId of heroIds) {
       const box = await page.getByTestId(testId).boundingBox();
       expect(box, testId).not.toBeNull();
       expect(box!.y, `${testId} below the nav`).toBeGreaterThanOrEqual(navBottom);
@@ -118,7 +127,7 @@ for (const { path, firstScreen } of pages) {
     // Shorter viewport: an iPhone SE under Safari's chrome.
     if (firstScreen === 560) {
       await page.setViewportSize({ width: 375, height: 560 });
-      for (const testId of ["offer-summary", "booking-cta"]) {
+      for (const testId of localLine ? heroIds : ["offer-summary", "booking-cta"]) {
         const box = await page.getByTestId(testId).boundingBox();
         expect(box!.y + box!.height, `${testId} at 560`).toBeLessThanOrEqual(560);
       }
@@ -161,10 +170,37 @@ test("related case studies on /ai-app-review navigate without WebGL", async ({ p
   await expect(page.locator('main a[href="/print-shops"]')).toHaveCount(0);
 });
 
-test("the review page preselects its project type on /contact", async ({ page }) => {
+// Value: protects=a visitor from an offer page sees that offer's price and steps on /contact, the price leaves when
+//   they switch offers, and after sending, the confirmation names what was sent with its steps and no other offer's
+//   price, and the sent type stays selected (#106, DD5–DD7, ED12); fails_when=the steps or terms key off ?source
+//   only, or the arrival offer's price shows under the receipt; why_new=e2e covered only the generic and talk flows; seam=none;
+//   no_claim=email delivery (TEST_EMAIL_ENABLED skips Resend and the limiter)
+test("an offer visitor sees that offer's steps on /contact, and the receipt names what was sent", async ({ page }) => {
   await page.goto("/contact?source=ai-app-review");
-  await expect(page.getByLabel(/what do you need/i)).toHaveValue("AI-built app review");
-  await expect(page.getByText("You're asking about the AI-built app review.")).toBeVisible();
+  const projectType = page.getByLabel(/what do you need/i);
+  await expect(projectType).toHaveValue("AI-built app review");
+  await expect(page.getByText("You came from the AI-built app review page.")).toBeVisible();
+  const terms = page.getByTestId("offer-terms");
+  const steps = page.getByTestId("next-steps");
+  await expect(terms).toContainText(/It's a flat \$[\d,]+/);
+  await expect(steps).toContainText("30-minute walkthrough");
+
+  await projectType.selectOption("Automation sprint");
+  await expect(terms).toHaveCount(0);
+  await expect(steps).toContainText("one-page scope");
+
+  await page.getByLabel(/name/i).fill("Test User");
+  await page.getByLabel(/email/i).fill("test@example.com");
+  await page.getByLabel(/message/i).fill("E2E sprint inquiry from the review page");
+  await page.getByRole("button", { name: /send/i }).click();
+  await expect(page.getByText("Message sent (Automation sprint).")).toBeVisible({ timeout: 10000 });
+  await expect(projectType).toHaveValue("Automation sprint");
+  await expect(steps).toContainText("one-page scope");
+  await expect(terms).toHaveCount(0);
+
+  await projectType.selectOption("AI-built app review");
+  await expect(terms).toBeVisible();
+  await expect(steps).toContainText("30-minute walkthrough");
 });
 
 // Value: protects=an organizer from /talks reaches the form with the talk type, the talk steps and no timeline,
@@ -201,9 +237,9 @@ test("the print case study links to /print-shops, and the footer does too", asyn
 });
 
 // Value: protects=the sprint and its price are visible without scrolling on common desktop sizes, and the booking
-//   call stays above the fold on those sizes, with Cal.com on and off (#100). On a 375×667 phone the call already sat below
-//   the fold before this change (697px on main), so phones are left to a hero design decision; fails_when=the hero grows or the sprint
-//   button is removed; why_new=the price ladder sat near the bottom of the page; seam=none;
+//   call stays above the fold on those sizes and on a 375×667 phone, with Cal.com on and off (#100, DD9);
+//   fails_when=the hero grows or the sprint button is removed; why_new=the price ladder sat near the bottom of the
+//   page, and the phone call sat at 697px before DD9; seam=none;
 //   no_claim=other viewport sizes. The name contains "first screen" so the booking-on project runs it.
 test("the homepage hero shows the sprint and the call in the first screen", async ({ page }) => {
   const hero = () => page.locator("main section").first();
@@ -222,6 +258,12 @@ test("the homepage hero shows the sprint and the call in the first screen", asyn
     expect(call!.y + call!.height, `booking call at ${width}×${height}`).toBeLessThanOrEqual(height);
   }
 
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/");
+  await page.evaluate(() => document.fonts.ready);
+  const phoneCall = await page.getByTestId("home-hero-cta").boundingBox();
+  expect(phoneCall!.y + phoneCall!.height, "booking call at 375×667").toBeLessThanOrEqual(667);
+
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto("/");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -238,7 +280,7 @@ test("the homepage leads with the sprint and links both entry offers", async ({ 
   await expect(ladder.getByRole("link", { name: /automation sprint/ })).toHaveAttribute("href", "/automation-sprint");
   await page.getByRole("link", { name: "Get an AI-built app reviewed →" }).click();
   await expect(page).toHaveURL(/\/ai-app-review$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/what's risky in the app/i);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/what's risky in your AI-built app/i);
 });
 
 // Value: protects=the contact form's preselected project type follows client-side navigation between offers;

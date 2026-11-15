@@ -17,8 +17,26 @@ export const listItem =
 export const accentLink =
   "inline-flex min-h-[44px] items-center font-mono text-sm text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]";
 
-/** A quiet closing line under hero actions (the offer pages' "local and reachable" line). */
-export const heroNote = "mt-6 max-w-xl text-sm leading-relaxed text-[var(--text-secondary)]";
+/** The offer heroes' fit sentence, right under the H1. Smaller and tighter below `sm` so the hero fits a small phone. */
+export const offerScope =
+  "mt-4 max-w-xl text-lg leading-snug text-[var(--text-secondary)] sm:mt-6 sm:text-xl sm:leading-relaxed";
+
+/**
+ * The offer heroes' price line: the largest fact in the block. Mono because it leads with
+ * the price (numeric data); its short terms ("fixed scope") ride along on purpose.
+ */
+export const offerSummary = "mt-4 font-mono text-lg text-[var(--text-primary)] tabular-nums sm:mt-6";
+
+/** Space between the last hero fact and the buttons on the offer pages. */
+export const offerActionsSpacing = "mt-4 sm:mt-8";
+
+/**
+ * A buyer fact: a sentence about price conditions, scope limits, location or format,
+ * timing, capacity or how to reach me. Body size in secondary text, never mono fine
+ * print (docs/DESIGN.md, Typography). Labels and eyebrows stay mono. No margin: each
+ * use sets its own, so two margin utilities never compete on one element.
+ */
+export const heroFact = "max-w-xl text-base leading-relaxed text-[var(--text-secondary)]";
 
 /** A link inside running text: always underlined, so it never relies on color alone (WCAG 1.4.1). */
 export const inlineLink = "text-[var(--accent)] underline underline-offset-4 transition-colors hover:text-[var(--accent-hover)]";

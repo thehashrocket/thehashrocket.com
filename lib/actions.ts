@@ -45,6 +45,12 @@ export interface ContactFormState {
    * uses these as default values to keep the draft there too.
    */
   draft?: ContactDraft;
+  /**
+   * On success, the allow-listed project type that was sent ("" when none was chosen).
+   * The confirmation names it, its steps stay visible until the visitor edits the form,
+   * and the form keeps it selected after clearing the fields.
+   */
+  submittedProjectType?: string;
 }
 
 export interface ContactDraft {
@@ -109,10 +115,12 @@ const deniedGate = (resetAt: number | undefined): LimitGate => ({ denied: true, 
  *        ▼ sent
  *   record: limit() on ip-day, ip and email (one slot each)
  *
- * The check spends nothing, so parallel requests would all pass it before any of them
- * records. The burst limiter is the atomic ceiling on that: it spends before the send,
- * so a parallel burst from one IP sends at most 10, the hourly IP allowance, and the
- * hourly check refuses everything after it once those sends record. It matches the
+ * Why the burst limiter stays (#111): the check spends nothing, so parallel requests all
+ * pass it before any of them records. burst is the only limiter that spends before the
+ * send, which makes it the only atomic pre-send cap: a parallel burst from one IP sends
+ * at most 10, the hourly IP allowance, and the hourly check refuses everything after it
+ * once those sends record. Without it, one script firing requests in parallel could send
+ * any number of emails before the first one is recorded. It matches the
  * hourly limit so a talk room on one Wi-Fi still gets through. A failed send costs a
  * slot in this one-minute limiter only. Fails open: a setup failure skips every limiter,
  * and a failed or timed-out check skips only that limiter. Upstash counts in weighted
@@ -225,8 +233,9 @@ export async function submitContact(
   const timeline = pickAllowed(formData.get("timeline"), TIMELINES);
 
   // Honeypot check
+  // Answers exactly like a real send, so a bot can't tell its honeypot field was caught.
   if (honeypot) {
-    return { success: true, error: null, code: null };
+    return { success: true, error: null, code: null, submittedProjectType: projectType ?? "" };
   }
 
   const draft: ContactDraft = { name, email, message, projectType: projectType ?? "", timeline: timeline ?? "" };
@@ -259,9 +268,10 @@ export async function submitContact(
   // the flag: a stray value there would drop every inquiry behind a success message.
   const testRun = process.env.TEST_EMAIL_ENABLED === "true" && process.env.VERCEL_ENV !== "production";
 
-  // Rate limiting (fail-open): one source per day, one source per hour, one person per hour.
-  // Checked before sending and recorded only after a successful send, so a failed send
-  // never uses up a slot. A talk room on shared venue Wi-Fi fits under the hourly IP limit.
+  // Rate limiting (fail-open): one source per day, one source per hour, one person per hour,
+  // checked before sending and recorded only after a successful send, so a failed send
+  // never uses up a slot; plus the per-minute burst limiter, which spends before the send
+  // and is the only cap on parallel requests (see checkLimits). A talk room on shared venue Wi-Fi fits under the hourly IP limit.
   const gate = testRun ? OPEN_GATE : await checkLimits(email);
   if (gate.denied) {
     return fail(tooManyMessage(gate.resetAt), "rate_limited");
@@ -299,5 +309,5 @@ export async function submitContact(
     await gate.record();
   }
 
-  return { success: true, error: null, code: null };
+  return { success: true, error: null, code: null, submittedProjectType: projectType ?? "" };
 }

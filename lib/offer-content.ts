@@ -155,13 +155,11 @@ export const talkScope = "You leave with one job picked out and a way to check i
 
 export const talkFormat = "In person in the Sacramento, Stockton and Modesto areas, or online.";
 
-// --- Local and reachable (#98) --------------------------------------------------
-// The last line of each offer hero. Both name the same three cities as talkFormat
-// (test/offers.test.ts), so the in-person area only ever says what's true.
+// --- Local and reachable (#98, #108) -------------------------------------------
+// Sits right under each offer hero's price. Kept to one line on a 375px phone so the
+// hero fits a 375x560 screen; the three cities stay on talkFormat (test/offers.test.ts).
 
-export const sprintLocalLine =
-  "Based in the Central Valley. In person in Sacramento, Stockton and Modesto, or remote, and you'll talk to me, not a ticket queue.";
+export const sprintLocalLine = "Central Valley based. In person or remote, and you talk to me.";
 
 /** The review is delivered remotely, so it leads with that; in person is the option. */
-export const reviewLocalLine =
-  "Reviews run remotely, wherever you are. In person in Sacramento, Stockton and Modesto if you'd rather. You work with me directly, not a ticket queue.";
+export const reviewLocalLine = "Remote, or in person in the Central Valley. You talk to me.";

@@ -86,6 +86,12 @@ code, pre, kbd {
   color: var(--text-primary);
 }
 
+/* Pages that render <DimCanvas /> keep the 3D background at the offer pages'
+   dimmed level from the first frame (components/ui/DimCanvas.tsx). */
+body:has([data-dim-canvas]) .scene-canvas {
+  opacity: 0.2;
+}
+
 .skip-link {
   position: absolute;
   top: -100%;

@@ -95,8 +95,8 @@ describe("ContactPage", () => {
   it("tailors the intro, preselect and fields to each source", async () => {
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "");
     const cases: [string | string[] | undefined, string, RegExp, boolean][] = [
-      ["ai-app-review", "AI-built app review", /You're asking about the AI-built app review\./, true],
-      ["automation-sprint", "Automation sprint", /You're asking about the automation sprint\./, true],
+      ["ai-app-review", "AI-built app review", /You came from the AI-built app review page\./, true],
+      ["automation-sprint", "Automation sprint", /You came from the automation sprint page\./, true],
       ["care-plan", "Ongoing support", /You're asking about ongoing support\./, true],
       ["talks", "A talk for my group", /Tell me about your group/, false],
       ["talk-attendee", "", /Heard me speak\?/, true],
@@ -113,7 +113,20 @@ describe("ContactPage", () => {
       expect(container.textContent, label).toMatch(intro);
       expect(container.querySelector("#timeline") !== null, label).toBe(hasTimeline);
       const steps = container.querySelector('[data-testid="next-steps"]')?.textContent ?? "";
-      expect(steps, label).toMatch(source === "talks" ? /We pick a date and a format\./ : /We do a 20-minute call\./);
+      const expectedSteps =
+        source === "talks"
+          ? /We pick a date and a format\./
+          : source === "automation-sprint"
+            ? /We do a 20-minute call about the process\./
+            : source === "ai-app-review"
+              ? /confirm the app fits the review’s scope\./
+              : /We do a 20-minute call\./;
+      expect(steps, label).toMatch(expectedSteps);
+      // The offer's price line sits with its steps, only for the two paid offers.
+      const terms = container.querySelector('[data-testid="offer-terms"]')?.textContent ?? null;
+      if (source === "automation-sprint") expect(terms, label).toMatch(/fixed before work starts/);
+      else if (source === "ai-app-review") expect(terms, label).toMatch(/It's a flat \$/);
+      else expect(terms, label).toBeNull();
       if (source === "talks" || source === "talk-attendee" || source === "care-plan") {
         expect(container.textContent, label).not.toMatch(/\$\d/);
       }

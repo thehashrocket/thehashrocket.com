@@ -17,36 +17,41 @@ export const TIMELINES = [
   "Just exploring",
 ] as const;
 
-const TALK_PROJECT_TYPE = "A talk for my group" satisfies (typeof PROJECT_TYPES)[number];
+export type ProjectType = (typeof PROJECT_TYPES)[number];
+
+export const SPRINT_PROJECT_TYPE = "Automation sprint" satisfies ProjectType;
+export const REVIEW_PROJECT_TYPE = "AI-built app review" satisfies ProjectType;
+export const TALK_PROJECT_TYPE = "A talk for my group" satisfies ProjectType;
 
 /** Preselects the form's project type for visitors arriving from an offer page. Still editable. */
 export const PROJECT_TYPE_BY_SOURCE = {
-  "ai-app-review": "AI-built app review",
-  "automation-sprint": "Automation sprint",
+  "ai-app-review": REVIEW_PROJECT_TYPE,
+  "automation-sprint": SPRINT_PROJECT_TYPE,
   "care-plan": "Ongoing support",
   "print-shops": "New build",
   talks: TALK_PROJECT_TYPE,
-} satisfies Partial<Record<string, (typeof PROJECT_TYPES)[number]>>;
+} satisfies Partial<Record<string, ProjectType>>;
 
-export function projectTypeForSource(
-  source: string | undefined,
-): (typeof PROJECT_TYPES)[number] | undefined {
+export function projectTypeForSource(source: string | undefined): ProjectType | undefined {
   if (!source || !Object.hasOwn(PROJECT_TYPE_BY_SOURCE, source)) return undefined;
   return PROJECT_TYPE_BY_SOURCE[source as keyof typeof PROJECT_TYPE_BY_SOURCE];
 }
 
+export type FlowKind = "generic" | "sprint" | "review" | "talk";
 
-const GENERIC_NEXT_STEPS = [
-  "I reply within one business day.",
-  "We do a 20-minute call.",
-  "You get a written proposal or an honest “I’m not your guy.”",
-];
-
-const TALK_NEXT_STEPS = [
-  "I reply within one business day.",
-  "We pick a date and a format.",
-  "I send a short outline for your group.",
-];
+/**
+ * Which "What happens next" each option gets. A Record over every option, so adding
+ * a project type without choosing its flow fails the type check.
+ */
+export const FLOW_BY_PROJECT_TYPE = {
+  "New build": "generic",
+  "Automation sprint": "sprint",
+  Rescue: "generic",
+  "AI-built app review": "review",
+  "Ongoing support": "generic",
+  "A talk for my group": "talk",
+  "Not sure": "generic",
+} as const satisfies Record<ProjectType, FlowKind>;
 
 export interface ContactFlow {
   /** "What happens next", in order. */
@@ -57,10 +62,49 @@ export interface ContactFlow {
   showTimeline: boolean;
 }
 
+const FLOWS: Record<FlowKind, ContactFlow> = {
+  generic: {
+    nextSteps: [
+      "I reply within one business day.",
+      "We do a 20-minute call.",
+      "You get a written proposal or an honest “I’m not your guy.”",
+    ],
+    showTimeline: true,
+  },
+  sprint: {
+    nextSteps: [
+      "I reply within one business day.",
+      "We do a 20-minute call about the process.",
+      "You get a one-page scope with a fixed price and one success metric, or an honest “this isn’t a sprint.”",
+    ],
+    showTimeline: true,
+  },
+  review: {
+    nextSteps: [
+      "I reply within one business day.",
+      "We do a 20-minute call to confirm the app fits the review’s scope.",
+      "You get a start date, the access checklist and a time for the 30-minute walkthrough.",
+    ],
+    showTimeline: true,
+  },
+  talk: {
+    nextSteps: [
+      "I reply within one business day.",
+      "We pick a date and a format.",
+      "I send a short outline for your group.",
+    ],
+    note: "Sending this doesn’t reserve a date.",
+    showTimeline: false,
+  },
+};
+
+export function flowKindFor(projectType: string): FlowKind {
+  return Object.hasOwn(FLOW_BY_PROJECT_TYPE, projectType)
+    ? FLOW_BY_PROJECT_TYPE[projectType as ProjectType]
+    : "generic";
+}
+
 /** The contact form follows the selected project type, not only the ?source it was seeded from. */
 export function contactFlowFor(projectType: string): ContactFlow {
-  if (projectType === TALK_PROJECT_TYPE) {
-    return { nextSteps: TALK_NEXT_STEPS, note: "Sending this doesn’t reserve a date.", showTimeline: false };
-  }
-  return { nextSteps: GENERIC_NEXT_STEPS, showTimeline: true };
+  return FLOWS[flowKindFor(projectType)];
 }

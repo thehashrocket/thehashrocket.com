@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   PROJECT_TYPES,
   PROJECT_TYPE_BY_SOURCE,
+  contactFlowFor,
+  flowKindFor,
   projectTypeForSource,
+  type ProjectType,
 } from "../lib/contact-options";
 import * as offers from "../lib/offers";
 import {
@@ -186,16 +189,63 @@ describe("project type by source", () => {
   });
 });
 
-// Value: protects=the offer pages' in-person area matches the talk's, so neither claims a city the other doesn't;
-//   fails_when=a city is added to or dropped from one line only; why_new=#98 adds two local lines; seam=none;
+// Value: protects=every project-type option leads to the "What happens next" it was meant to (#106);
+//   fails_when=a new option is added without choosing a flow, or the sprint/review rows fall through to generic;
+//   why_new=sprint and review get their own steps; seam=none; no_claim=the wording of each step (owner copy)
+describe("contact flows by project type", () => {
+  function intendedFlow(type: ProjectType) {
+    switch (type) {
+      case "Automation sprint":
+        return "sprint";
+      case "AI-built app review":
+        return "review";
+      case "A talk for my group":
+        return "talk";
+      case "New build":
+      case "Rescue":
+      case "Ongoing support":
+      case "Not sure":
+        return "generic";
+      default: {
+        const unhandled: never = type;
+        throw new Error(`No intended flow for ${String(unhandled)}`);
+      }
+    }
+  }
+
+  it("maps every option to its intended flow", () => {
+    for (const type of PROJECT_TYPES) expect(flowKindFor(type), type).toBe(intendedFlow(type));
+    expect(flowKindFor("")).toBe("generic");
+    expect(flowKindFor("constructor")).toBe("generic");
+  });
+
+  it("gives the sprint and the review their own steps, with a timeline and no note", () => {
+    const sprint = contactFlowFor("Automation sprint");
+    expect(sprint.nextSteps.join(" ")).toMatch(/one-page scope with a fixed price and one success metric/);
+    const review = contactFlowFor("AI-built app review");
+    expect(review.nextSteps.join(" ")).toMatch(/30-minute walkthrough/);
+    for (const flow of [sprint, review]) {
+      expect(flow.showTimeline).toBe(true);
+      expect(flow.note).toBeUndefined();
+    }
+  });
+});
+
+// Value: protects=the offer heroes' local lines stay the short approved copy (so the hero fits a 375x560
+//   phone) and still say where I work; the talk format keeps the three cities;
+//   fails_when=a local line drops "Central Valley" or grows back into the long city list, or a city leaves
+//   talkFormat; why_new=owner-approved shorter copy (d7a) moved the cities off the offer heroes; seam=none;
 //   no_claim=whether the owner actually travels there (owner-confirmed copy)
 describe("local and reachable lines", () => {
-  const cities = /In person in the (.+) areas/.exec(talkFormat)![1].split(/, | and /);
-
-  it("names the same three cities as the talk format", () => {
+  it("keeps the three cities on the talk format", () => {
+    const cities = /In person in the (.+) areas/.exec(talkFormat)![1].split(/, | and /);
     expect(cities).toEqual(["Sacramento", "Stockton", "Modesto"]);
+  });
+
+  it("says Central Valley on both offer heroes, in the short approved copy", () => {
     for (const line of [sprintLocalLine, reviewLocalLine]) {
-      for (const city of cities) expect(line).toContain(city);
+      expect(line).toContain("Central Valley");
+      expect(line.length).toBeLessThanOrEqual(70);
     }
   });
 
