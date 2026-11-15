@@ -1,8 +1,8 @@
 "use client";
 
 import { startTransition, useActionState, useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
-import { sendGAEvent } from "@next/third-parties/google";
 import { submitContact, type ContactFormState } from "@/lib/actions";
+import { trackEvent } from "@/lib/analytics";
 import { CONTACT_FORM_TIMEOUT_MS } from "@/lib/constants";
 import { PROJECT_TYPES, TIMELINES, contactFlowFor, type ProjectType } from "@/lib/contact-options";
 import { CONTACT_EMAIL, getBookingUrl } from "@/lib/site";
@@ -147,9 +147,16 @@ export function ContactForm({
   }, []);
 
   // Keyed on state, not state.success, so a second message in a row still counts.
+  // Only a message that really went out is a lead: a honeypot catch and a test run
+  // also report success (see ContactFormState.leadSent). The offer is the type the
+  // server accepted, not the select, which the visitor may have changed since.
   useEffect(() => {
-    if (state.success) {
-      sendGAEvent("event", "generate_lead", { method: "contact_form", source: source ?? "direct" });
+    if (state.leadSent) {
+      trackEvent("generate_lead", {
+        method: "contact_form",
+        source: source ?? "direct",
+        offer: state.submittedProjectType || "none",
+      });
     }
   }, [state, source]);
 

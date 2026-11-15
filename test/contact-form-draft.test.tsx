@@ -9,13 +9,15 @@ import { act, fireEvent, render } from "@testing-library/react";
 
 const submitContact = vi.fn();
 vi.mock("@/lib/actions", () => ({ submitContact }));
-const { sendGAEvent } = vi.hoisted(() => ({ sendGAEvent: vi.fn() }));
+const { sendGAEvent, track } = vi.hoisted(() => ({ sendGAEvent: vi.fn(), track: vi.fn() }));
 vi.mock("@next/third-parties/google", () => ({ sendGAEvent }));
+vi.mock("@vercel/analytics", () => ({ track }));
 
 const { ContactForm } = await import("@/components/ui/ContactForm");
 
 const DENIED = { success: false, error: "Too many submissions. Try again in 12 minutes.", code: "rate_limited" };
-const SENT = { success: true, error: null, code: null };
+// A real send, as submitContact returns it (leadSent marks an email that went out).
+const SENT = { success: true, error: null, code: null, leadSent: true };
 
 function field(container: HTMLElement, id: string) {
   return container.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`#${id}`)!;
@@ -38,6 +40,7 @@ async function submit(container: HTMLElement) {
 afterEach(() => {
   submitContact.mockReset();
   sendGAEvent.mockClear();
+  track.mockClear();
   vi.unstubAllEnvs();
 });
 
@@ -86,6 +89,23 @@ describe("ContactForm after a send", () => {
     //   state.success like the old reset did; why_new=conversion-events.test.tsx mocks useActionState and renders
     //   one state; seam=none; no_claim=GA4 receiving the event (sendGAEvent mocked)
     expect(sendGAEvent.mock.calls.filter(([, name]) => name === "generate_lead")).toHaveLength(2);
+  });
+
+  // Value: protects=the lead's offer is the project type the server accepted, not what the select showed (#115);
+  //   fails_when=the lead effect reads the select, the local projectType state or the ?source default;
+  //   why_new=conversion-events.test.tsx renders one state where all three agree; seam=submitContact mocked;
+  //   no_claim=GA4 or Vercel receiving the event (both mocked)
+  it("labels the lead with the offer the server accepted", async () => {
+    submitContact.mockResolvedValueOnce({ ...SENT, submittedProjectType: "Automation sprint" });
+    const { container } = render(<ContactForm />);
+    fill(container); // picks "Rescue" in the select
+    await submit(container);
+    expect(sendGAEvent).toHaveBeenCalledWith("event", "generate_lead", {
+      method: "contact_form",
+      source: "direct",
+      offer: "Automation sprint",
+    });
+    expect(track).toHaveBeenCalledWith("generate_lead", { source: "direct", offer: "Automation sprint" });
   });
 
   // Value: protects=a denied visitor can still reach the owner, by email or booking, never back to /contact, and a
