@@ -37,3 +37,33 @@ for (const path of OFFER_ROUTES) {
     });
   }
 }
+
+// Value: protects=/contact keeps the scene dim behind the form from load, and a dimmed offer page's cleanup cannot
+//   brighten it during client navigation (#105, ED11); fails_when=the DimCanvas marker is dropped, the CSS rule stops
+//   matching the canvas wrapper, or a page's setCanvasDimmed(false) wins; why_new=only scroll dimming was covered;
+//   seam=none; no_claim=browsers without :has() (they show the bright scene; the form still works)
+const canvasOpacity = (page: import("@playwright/test").Page) =>
+  page
+    .locator("canvas")
+    .first()
+    .locator("xpath=../..")
+    .evaluate((el) => Number(getComputedStyle(el).opacity));
+
+test("/contact is dimmed after load", async ({ page }) => {
+  await page.goto("/contact");
+  await expect(page.locator("canvas").first()).toBeAttached({ timeout: 15_000 });
+  await expect.poll(() => canvasOpacity(page), { timeout: 5_000 }).toBeLessThanOrEqual(0.25);
+});
+
+test("/contact stays dimmed after client navigation from a dimmed offer page", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/automation-sprint");
+  await expect(page.locator("canvas").first()).toBeAttached({ timeout: 15_000 });
+  const marker = page.getByTestId("dim-canvas-below");
+  await marker.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY));
+  await expect.poll(() => canvasOpacity(page), { timeout: 5_000 }).toBeLessThanOrEqual(0.25);
+
+  await page.locator("main").getByRole("link", { name: "Send a message" }).last().click();
+  await expect(page).toHaveURL(/\/contact/);
+  await expect.poll(() => canvasOpacity(page), { timeout: 5_000 }).toBeLessThanOrEqual(0.25);
+});

@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.0.0] - 2026-11-15
+
+### Added
+- The contact form now tells sprint and review visitors what happens next for their offer. Sprint visitors see a call about the process and a one-page scope; review visitors see a call to confirm the app fits, then a start date, access checklist and walkthrough. The steps sit right under "What do you need?" and change as soon as you pick a different type.
+- After you send a message, the confirmation names what you sent (for example "Message sent (Automation sprint).") and the type stays selected, so a follow-up keeps it.
+- The 3D background behind the contact page is dimmed from the moment the page loads, so the form is easy to read.
+
+### Changed
+- On the automation sprint and AI-built app review pages, the facts you decide on (what the price depends on, where the work happens) read as normal body text next to the price instead of small gray fine print, and the price line is larger. Both heroes, including the booking button, fit on an iPhone SE screen.
+- The AI-built app review headline is shorter: "Find out what's risky in your AI-built app."
+- The local line under each offer's price is shorter: Central Valley based, in person or remote, and you talk to Jason directly.
+- On a phone, the homepage's booking button is now on the first screen.
+- An offer's price shows on the contact form only while that offer is selected, and the line above the form says which page you came from.
+- While a message is sending, the form's fields are locked, so nothing you type in the meantime is lost.
+
 ## [0.8.1.0] - 2026-11-14
 
 ### Fixed

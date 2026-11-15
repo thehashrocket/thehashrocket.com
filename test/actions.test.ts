@@ -86,6 +86,8 @@ describe("submitContact", () => {
       makeFormData({ ...validFields, projectType: "AI-built app review", source: "ai-app-review" }),
     );
     expect(result.success).toBe(true);
+    // The confirmation names what was sent (ContactForm), so the action echoes the allow-listed type.
+    expect(result.submittedProjectType).toBe("AI-built app review");
     const payload = mockSend.mock.calls[0][0];
     expect(payload.text).toContain("Needs: AI-built app review");
   });
@@ -102,6 +104,8 @@ describe("submitContact", () => {
       }),
     );
     expect(result.success).toBe(true);
+    // Only an allow-listed value is echoed back to the page, never raw form data.
+    expect(result.submittedProjectType).toBe("");
     const payload = mockSend.mock.calls[0][0];
     expect(payload.subject).not.toContain("via");
     expect(payload.text).not.toContain("Bcc");
@@ -188,6 +192,20 @@ describe("submitContact", () => {
       makeFormData({ ...validFields, website: "spam-bot-value" }),
     );
     expect(result.success).toBe(true);
+  });
+
+  // Value: protects=a honeypot submit gets the same answer as a real send, so a bot can't learn it was caught;
+  //   fails_when=the honeypot branch returns a different shape or drops the echoed project type;
+  //   why_new=the success state now echoes the sent type (ContactForm's receipt); seam=none;
+  //   no_claim=what the browser renders (ContactForm tests)
+  it("answers a honeypot submit exactly like a real send, without sending", async () => {
+    mockSend.mockClear();
+    const fields = { ...validFields, projectType: "Rescue" };
+    const trapped = await submitContact(idle, makeFormData({ ...fields, website: "spam-bot-value" }));
+    expect(mockSend).not.toHaveBeenCalled();
+    const real = await submitContact(idle, makeFormData(fields));
+    expect(trapped).toEqual(real);
+    expect(trapped.submittedProjectType).toBe("Rescue");
   });
 
   it("rejects empty name", async () => {
@@ -341,7 +359,7 @@ describe("submitContact rate limiting", () => {
     code: "rate_limited",
     draft: expect.objectContaining({ message: validFields.message }),
   };
-  const SENT = { success: true, error: null, code: null };
+  const SENT = { success: true, error: null, code: null, submittedProjectType: "" };
   const warnSpy = () => vi.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
@@ -676,12 +694,12 @@ describe("submitContact length limits", () => {
       idle,
       makeFormData({ ...validFields, name: "x".repeat(100), message: "x".repeat(5000) }),
     );
-    expect(result).toEqual({ success: true, error: null, code: null });
+    expect(result).toEqual({ success: true, error: null, code: null, submittedProjectType: "" });
     // A textarea at its 5,000-character limit arrives with CRLF line breaks.
     const crlf = await submitContact(
       idle,
       makeFormData({ ...validFields, message: ("x".repeat(99) + "\r\n").repeat(50).slice(0, -2) }),
     );
-    expect(crlf).toEqual({ success: true, error: null, code: null });
+    expect(crlf).toEqual({ success: true, error: null, code: null, submittedProjectType: "" });
   });
 });

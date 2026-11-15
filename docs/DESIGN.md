@@ -18,6 +18,7 @@
 - **UI/Labels:** Inter (same as body)
 - **Data/Tables:** JetBrains Mono — supports tabular-nums, clear at small sizes
 - **Code:** JetBrains Mono
+- **Buyer facts:** Buyer facts (price conditions, scope limits, location and format, timing, capacity, contact) use Inter at body size in `--text-secondary` (`heroFact` in `components/ui/styles.ts`). Monospace is for labels, eyebrows and numeric data (prices, stats). The offer price line (`offerSummary`) stays mono: it leads with the price, and its short terms ("fixed scope", "fixed before work starts") ride along with it.
 - **Loading:** `next/font/google` (self-hosted, zero layout shift)
 - **Scale:**
   - 96px — hero display (Space Grotesk 700, -0.03em, line-height 1.05)
@@ -197,3 +198,4 @@
 | 2026-11-14 | Fixed-price entry offers below $10k | Small, tightly scoped doors (review, sprint) into larger builds; open-ended work still starts at $10k. |
 | 2026-11-04 | Homepage hero uses the 64px page-title size, not 96px | The longer headline and the photo column do not fit at hero display size. |
 | 2026-11-04 | Selected work replaces the Atlas sections | The homepage plan features four outcome-first studies. |
+| 2026-11-15 | Buyer facts in body text, not mono fine print | A fact a buyer decides on (price conditions, location, format) read as fine print in 12–14px gray mono. Mono stays for labels, eyebrows and numbers. |

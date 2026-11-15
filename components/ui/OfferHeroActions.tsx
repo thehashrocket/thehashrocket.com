@@ -10,6 +10,8 @@ interface OfferHeroActionsProps {
   messageLabel?: string;
   /** The booking link's text when Cal.com is configured. */
   bookingLabel?: string;
+  /** Top margin of the button row; heroes with fact lines above the buttons sit closer. */
+  spacing?: string;
 }
 
 /**
@@ -30,6 +32,7 @@ export function OfferHeroActions({
   lead = "booking",
   messageLabel = "Send a message",
   bookingLabel,
+  spacing = "mt-10",
 }: OfferHeroActionsProps) {
   const hasBooking = getBookingUrl(source) !== null;
   const messageLeads = lead === "message" || !hasBooking;
@@ -44,7 +47,7 @@ export function OfferHeroActions({
   );
 
   return (
-    <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+    <div className={`${spacing} flex flex-col gap-4 sm:flex-row sm:flex-wrap`}>
       {lead === "message" ? (
         <>
           {message}

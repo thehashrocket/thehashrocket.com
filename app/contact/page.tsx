@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { BookingLink } from "@/components/ui/BookingLink";
 import { ContactForm } from "@/components/ui/ContactForm";
+import { DimCanvas } from "@/components/ui/DimCanvas";
+import { heroFact } from "@/components/ui/styles";
 import { CONTACT_EMAIL, getBookingUrl } from "@/lib/site";
 import { projectTypeForSource } from "@/lib/contact-options";
 import { offerLadderText } from "@/lib/offers";
@@ -26,6 +28,7 @@ export default async function ContactPage({
 
   return (
     <div className="px-6 pt-32 pb-24">
+      <DimCanvas />
       <div className="mx-auto max-w-[720px]">
         <p className="mb-2 font-mono text-sm text-[var(--accent)]">Contact</p>
         <h1 className="mb-4 font-display text-5xl font-bold tracking-[-0.02em] text-[var(--text-primary)] md:text-6xl">
@@ -49,13 +52,14 @@ export default async function ContactPage({
           key={source ?? "direct"}
           source={source}
           defaultProjectType={projectTypeForSource(source)}
+          terms={intro.terms}
         />
 
-        <p className="mt-8 text-sm text-[var(--text-muted)]">
+        <p className={`mt-8 ${heroFact}`}>
           Prefer email?{" "}
           <a
             href={`mailto:${CONTACT_EMAIL}`}
-            className="inline-flex min-h-11 items-center text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+            className="inline-flex min-h-11 items-center text-[var(--text-primary)] underline underline-offset-4 transition-colors hover:text-[var(--accent)]"
           >
             {CONTACT_EMAIL}
           </a>

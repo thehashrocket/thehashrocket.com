@@ -6,6 +6,7 @@ import { AtlasCard } from "@/components/ui/AtlasCard";
 import { BookingLink, secondaryButton } from "@/components/ui/BookingLink";
 import { ClosingCta } from "@/components/ui/ClosingCta";
 import { FocusOnHash } from "@/components/ui/FocusOnHash";
+import { TrackedLink } from "@/components/ui/TrackedLink";
 import { accentLink, eyebrow, inlineLink, sectionHeading } from "@/components/ui/styles";
 import { getCaseStudySummaries } from "@/lib/case-studies";
 import { formatSprintPrice, offerLadderParts } from "@/lib/offers";
@@ -93,7 +94,7 @@ export default function Home() {
   return (
     <div className="relative">
       {/* Hero */}
-      <section className="flex min-h-screen flex-col justify-center px-6 pt-24 pb-12">
+      <section className="flex min-h-screen flex-col justify-center px-6 pt-20 pb-12 md:pt-24">
         <div className="mx-auto grid w-full max-w-[1280px] items-center gap-12 md:grid-cols-[3fr_2fr]">
           <div>
             <p className="mb-4 font-mono text-sm text-[var(--accent)]">
@@ -102,18 +103,18 @@ export default function Home() {
             <h1 className="font-display text-[clamp(40px,5.5vw,64px)] font-bold leading-[1.05] tracking-[-0.02em] text-[var(--text-primary)]">
               Your business runs on spreadsheets and duct tape. I can fix that.
             </h1>
-            <p className="mt-6 max-w-xl text-xl leading-relaxed text-[var(--text-secondary)]">
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-[var(--text-secondary)] md:mt-6 md:text-xl">
               I&apos;ve spent 20+ years replacing paper job tickets, rescuing
               legacy platforms, and keeping production servers alive. You get
               one senior engineer who designs it, builds it, and still picks up
               the phone when something goes sideways.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <BookingLink source="home" />
+            <div className="mt-6 flex flex-wrap gap-4 md:mt-10">
+              <BookingLink source="home" testId="home-hero-cta" />
               {/* The entry offer above the fold (#100); the work stays one click away under Selected work. */}
-              <Link href="/automation-sprint" className={secondaryButton}>
+              <TrackedLink href="/automation-sprint" placement="home-hero" className={secondaryButton}>
                 Automation sprint &middot; {formatSprintPrice()}
-              </Link>
+              </TrackedLink>
             </div>
           </div>
           <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)]">
@@ -159,9 +160,9 @@ export default function Home() {
           <ul data-testid="service-choices" className="mt-6 flex flex-col gap-3">
             {serviceChoices.map((choice) => (
               <li key={choice.href}>
-                <Link href={choice.href} className={accentLink}>
+                <TrackedLink href={choice.href} placement="home-services" className={accentLink}>
                   {choice.label}
-                </Link>
+                </TrackedLink>
               </li>
             ))}
           </ul>

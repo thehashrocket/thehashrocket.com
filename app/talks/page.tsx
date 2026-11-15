@@ -5,7 +5,7 @@ import { DimCanvasBelow } from "@/components/ui/DimCanvasBelow";
 import { NumberedSteps } from "@/components/ui/NumberedSteps";
 import { OfferHeroActions } from "@/components/ui/OfferHeroActions";
 import { primaryButton } from "@/components/ui/BookingLink";
-import { accentLink, eyebrow, inlineLink, section, sectionHeading } from "@/components/ui/styles";
+import { accentLink, eyebrow, heroFact, inlineLink, section, sectionHeading } from "@/components/ui/styles";
 import { talkFormat, talkScope } from "@/lib/offer-content";
 import { TALK_MINUTES_MAX, TALK_MINUTES_MIN } from "@/lib/offers";
 import { getContactHref } from "@/lib/site";
@@ -85,7 +85,7 @@ export default function TalksPage() {
         <div className="mx-auto max-w-[720px]">
           <h2 className={sectionHeading}>What attendees leave with</h2>
           <NumberedSteps steps={TALK_TAKEAWAYS} />
-          <p className="mt-12 font-mono text-sm text-[var(--text-muted)]">{talkFormat}</p>
+          <p className={`mt-12 ${heroFact}`}>{talkFormat}</p>
           <p className="mt-8 text-lg leading-relaxed text-[var(--text-secondary)]">
             In-house team workshops are available on request.{" "}
             <Link href={contactHref} className={inlineLink}>

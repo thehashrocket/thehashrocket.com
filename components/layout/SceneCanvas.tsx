@@ -33,7 +33,7 @@ export default function SceneCanvas() {
 
   return (
     <Canvas
-      className={`!fixed !inset-0 !-z-10 transition-opacity duration-[350ms] ease-out motion-reduce:transition-none ${dimmed ? "opacity-20" : ""}`}
+      className={`scene-canvas !fixed !inset-0 !-z-10 transition-opacity duration-[350ms] ease-out motion-reduce:transition-none ${dimmed ? "opacity-20" : ""}`}
       camera={{ position: [0, 0, 5], fov: 50 }}
       dpr={[1, 2]}
       aria-hidden

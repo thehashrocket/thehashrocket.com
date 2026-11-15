@@ -63,11 +63,12 @@ test("contact form happy path shows success", async ({ page }) => {
   await expect(page.getByText(/message sent/i)).toBeVisible({ timeout: 10000 });
 });
 
-// Value: protects=a sprint inquiry submits through the real server action and the form resets to its preselected type;
-//   fails_when=the preselect is lost on reset, the new project type is rejected server-side, or the limiter blocks test runs;
+// Value: protects=an inquiry from the sprint page submits through the real server action and the select stays on the
+//   type that was sent, so a follow-up keeps it; fails_when=the reset puts the select back on the arrival type, the new
+//   project type is rejected server-side, or the limiter blocks test runs;
 //   why_new=contact-preselect.test.tsx calls form.reset() directly and never submits; seam=none;
 //   no_claim=email delivery (TEST_EMAIL_ENABLED skips Resend and the rate limiter)
-test("a sprint inquiry submits and resets to the sprint type", async ({ page }) => {
+test("an inquiry from the sprint page submits and keeps the sent type selected", async ({ page }) => {
   await page.goto("/contact?source=automation-sprint");
   const projectType = page.getByLabel(/what do you need/i);
   await expect(projectType).toHaveValue("Automation sprint");
@@ -77,7 +78,8 @@ test("a sprint inquiry submits and resets to the sprint type", async ({ page }) 
   await page.getByLabel(/message/i).fill("E2E sprint inquiry from Playwright");
   await page.getByRole("button", { name: /send/i }).click();
   await expect(page.getByText(/message sent/i)).toBeVisible({ timeout: 10000 });
-  await expect(projectType).toHaveValue("Automation sprint");
+  await expect(projectType).toHaveValue("Rescue");
+  await expect(page.getByLabel(/name/i)).toHaveValue("");
 });
 
 // Value: protects=a submit before hydration still POSTs to the server action, so the visitor's message never lands
@@ -118,5 +120,23 @@ test.describe("without JavaScript", () => {
     await expect(page.locator("#name")).toHaveValue("No Script");
     await expect(page.locator("#email")).toHaveValue("pat@example");
     await expect(page.locator("#message")).toHaveValue("Private details about our broken workflow");
+  });
+
+  // Value: protects=without JavaScript, a rejected submit renders the restored project type's steps and terms,
+  //   not the arrival offer's (ED13); fails_when=the form's type state starts from the ?source seed instead of the
+  //   draft; why_new=the test above checks only the text fields; seam=none;
+  //   no_claim=real browsers with JavaScript turned off (Playwright javaScriptEnabled:false)
+  test("a rejected submit keeps the changed type's steps and drops the arrival offer's price", async ({ page }) => {
+    await page.goto("/contact?source=ai-app-review");
+    await page.locator("#projectType").selectOption("Automation sprint");
+    await page.locator("#name").fill("No Script");
+    await page.locator("#email").fill("pat@example");
+    await page.locator("#message").fill("Private details about our broken workflow");
+    await page.locator("form button[type=submit]").click();
+    await page.waitForLoadState();
+    await expect(page.getByRole("alert")).toContainText("valid email");
+    await expect(page.locator("#projectType")).toHaveValue("Automation sprint");
+    await expect(page.getByTestId("next-steps")).toContainText("one-page scope");
+    await expect(page.getByTestId("offer-terms")).toHaveCount(0);
   });
 });

@@ -26,6 +26,7 @@ const { render } = await import("@testing-library/react");
 const { caseStudies } = await import("@/lib/case-studies");
 const offers = await import("@/lib/offers");
 const content = await import("@/lib/offer-content");
+const styles = await import("@/components/ui/styles");
 const SprintPage = (await import("@/app/automation-sprint/page")).default;
 const ReviewPage = (await import("@/app/ai-app-review/page")).default;
 const PrintPage = (await import("@/app/print-shops/page")).default;
@@ -131,18 +132,41 @@ describe.each([
   });
 });
 
-// Value: protects=both offer heroes end with their own local, reachable line (#98);
-//   fails_when=a page drops the line or uses the other page's copy; why_new=#98; seam=none;
+// Value: protects=each offer hero reads scope → price → facts → local line → buttons, and every buyer fact in
+//   it is body text, not mono fine print (#108, #110, DD1, DD2); fails_when=a page drops its local line, uses
+//   the other page's copy, moves the local line back under the buttons, or styles a fact with a mono/xs class;
+//   why_new=#98 added the line; #108 moved it next to the price; seam=none;
 //   no_claim=where the line falls on a phone screen (e2e)
-describe("local line in the offer heroes", () => {
+describe("offer hero order and buyer facts", () => {
+  const follows = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
   it.each([
     ["/automation-sprint", () => SprintPage, () => content.sprintLocalLine],
     ["/ai-app-review", () => ReviewPage, () => content.reviewLocalLine],
-  ])("%s ends its hero with its own local line", (_path, page, line) => {
+  ])("%s puts its own local line between the price and the buttons", (_path, page, line) => {
     const { container } = renderPage(page());
-    const local = container.querySelector('[data-testid="offer-local"]')!;
+    const hero = container.querySelector("section")!;
+    const [scope, summary, local, cta] = ["offer-scope", "offer-summary", "offer-local", "booking-cta"].map(
+      (id) => hero.querySelector(`[data-testid="${id}"]`)!,
+    );
     expect(local.textContent).toBe(line());
-    expect(local.closest("section")?.querySelector("h1")).not.toBeNull();
+    expect(follows(scope, summary) && follows(summary, local) && follows(local, cta)).toBe(true);
+    expect(local.className).toContain(styles.heroFact);
+    expect(summary.className).toContain("text-lg");
+    // No buyer fact in the hero is mono fine print (the eyebrow label and the price line are mono on purpose).
+    for (const p of hero.querySelectorAll("p")) {
+      if (p === summary || p.className === styles.eyebrow) continue;
+      expect(p.className, p.textContent ?? "").not.toMatch(/font-mono|text-xs/);
+    }
+  });
+
+  // Value: protects=the sprint's "Price depends…" condition stays body text, not mono fine print (#110);
+  //   fails_when=the line goes back to font-mono text-xs muted; why_new=#110 named this exact line; seam=none;
+  //   no_claim=how it reads on a phone (e2e first-screen check)
+  it("sets the sprint's price condition as a buyer fact", () => {
+    const { container } = renderPage(SprintPage);
+    const fact = [...container.querySelectorAll("p")].find((p) => p.textContent?.startsWith("Price depends"))!;
+    expect(fact.className).toContain(styles.heroFact);
   });
 });
 
