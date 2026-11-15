@@ -4,7 +4,8 @@ import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import { PROJECT_TYPES, TIMELINES } from "@/lib/contact-options";
-import { NAME_MAX, contactSubject, tooManyMessage } from "@/lib/contact-email";
+import { NAME_MAX, contactFromAddress, contactSubject, isSingleEmailAddress, tooManyMessage } from "@/lib/contact-email";
+import { CONTACT_EMAIL } from "@/lib/site";
 import { normalizeSource } from "@/lib/sources";
 
 let resendClient: Resend | null = null;
@@ -253,7 +254,7 @@ export async function submitContact(
   if (name.length > NAME_MAX) {
     return fail(`Name must be ${NAME_MAX} characters or fewer.`);
   }
-  if (!email || email.length > EMAIL_MAX || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || email.length > EMAIL_MAX || !isSingleEmailAddress(email)) {
     return fail("Please enter a valid email address.");
   }
   if (!message || message.trim().length < 10) {
@@ -279,10 +280,12 @@ export async function submitContact(
 
   if (!testRun) {
     try {
-      const fromEmail = process.env.RESEND_FROM_EMAIL ?? "contact@thehashrocket.com";
+      const fromEmail = contactFromAddress(process.env.RESEND_FROM_EMAIL);
       const { error: sendError } = await withTimeout(getResend().emails.send({
         from: `Contact Form <${fromEmail}>`,
-        to: "jason@thehashrocket.com",
+        to: CONTACT_EMAIL,
+        // Reply in the inbox goes to the visitor, not to the sending address.
+        replyTo: email,
         subject: contactSubject(name, projectType, source),
         text: [
           `Name: ${name}`,

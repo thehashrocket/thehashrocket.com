@@ -61,6 +61,34 @@ describe("submitContact", () => {
     expect(result.error).toBeNull();
   });
 
+  // Value: protects=an inquiry reaches the jasonshultz.com inbox, and pressing Reply reaches the visitor (#104);
+  //   fails_when=to keeps a second literal, replyTo is missing, or an empty RESEND_FROM_EMAIL sends from "<>";
+  //   why_new=#104 moved the inbox and the live test showed an empty reply_to; seam=none;
+  //   no_claim=Resend delivery or DMARC (live send test before merge)
+  it("sends to the jasonshultz.com inbox with the visitor as Reply-To", async () => {
+    mockSend.mockClear();
+    vi.stubEnv("RESEND_FROM_EMAIL", "");
+    try {
+      await submitContact(idle, makeFormData({ ...validFields, email: "pat@example.com" }));
+      const payload = mockSend.mock.calls[0][0];
+      expect(payload.to).toBe("jason@jasonshultz.com");
+      expect(payload.replyTo).toBe("pat@example.com");
+      expect(payload.from).toBe("Contact Form <contact@mail.jasonshultz.com>");
+    } finally {
+      // Undo every stub, then put back the file-wide API key the other tests rely on.
+      vi.unstubAllEnvs();
+      vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    }
+  });
+
+  it("refuses an address list before sending anything", async () => {
+    mockSend.mockClear();
+    const result = await submitContact(idle, makeFormData({ ...validFields, email: "a@x.com,b@y.com" }));
+    expect(result.success).toBe(false);
+    expect(result.error).toBe("Please enter a valid email address.");
+    expect(mockSend).not.toHaveBeenCalled();
+  });
+
   it("emails known sources and qualifying answers", async () => {
     mockSend.mockClear();
     await submitContact(

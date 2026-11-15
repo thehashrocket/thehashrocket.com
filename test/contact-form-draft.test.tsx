@@ -108,8 +108,8 @@ describe("ContactForm after a send", () => {
     expect(alert.textContent).toContain("Too many submissions. Try again in 12 minutes.");
     const line = container.querySelector('[data-testid="contact-alternative"]')!;
     const hrefs = [...line.querySelectorAll("a")].map((a) => a.getAttribute("href"));
-    expect(hrefs[0]).toBe("mailto:jason@thehashrocket.com");
-    expect(line.textContent).toContain(hasBooking ? "or book a call." : "jason@thehashrocket.com.");
+    expect(hrefs[0]).toBe("mailto:jason@jasonshultz.com");
+    expect(line.textContent).toContain(hasBooking ? "or book a call." : "jason@jasonshultz.com.");
     expect(hrefs).toHaveLength(hasBooking ? 2 : 1);
     expect(hrefs.some((href) => href?.startsWith("/contact"))).toBe(false);
     if (hasBooking) {

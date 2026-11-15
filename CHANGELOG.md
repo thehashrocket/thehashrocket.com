@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.1.0] - 2026-11-15
+
+### Changed
+- The contact address on the site is now jason@jasonshultz.com, matching the site's own domain, and messages from the contact form arrive there.
+- Pressing Reply on a contact-form message now answers the person who wrote in.
+
+### Fixed
+- The contact form refuses an email address that is really a list or a display name (for example two addresses separated by a comma), so a reply always reaches one person.
+- Contact-form mail keeps sending if the sender setting is mistyped. Anything other than an address on mail.jasonshultz.com falls back to the default sender and is logged.
+
 ## [0.9.0.0] - 2026-11-15
 
 ### Added
