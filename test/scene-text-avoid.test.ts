@@ -2,8 +2,8 @@
  * @vitest-environment jsdom
  */
 // Value: protects=the hero scene's dots fade out over page text and back in off it, in viewport pixels, under
-//   reduced motion too (#109); fails_when=the projection flips y, a dot just inside a padded text block counts as
-//   clear, off-screen or hidden blocks are measured, text outside <main> counts, or the fade overshoots;
+//   reduced motion too (#109); fails_when=the projection flips y, a block partly scrolled off screen is dropped,
+//   a dot just inside a padded text block counts as clear, off-screen or hidden blocks are measured, text outside <main> counts, or the fade overshoots;
 //   why_new=new helper; seam=none (the scene calls these exact functions; getBoundingClientRect stubbed in jsdom);
 //   no_claim=how the dots look in WebGL (checked by screenshot)
 import { afterEach, describe, expect, it } from "vitest";
@@ -40,15 +40,19 @@ describe("readTextRects and isOverText", () => {
         <h1 id="h1">Title</h1>
         <p id="below">far below</p>
         <p id="hidden"></p>
+        <p id="straddle">half scrolled off the top</p>
       </main>`;
     place(document.getElementById("nav")!, { left: 0, top: 0, width: 200, height: 40 });
     place(document.getElementById("h1")!, { left: 100, top: 100, width: 400, height: 60 });
     place(document.getElementById("below")!, { left: 100, top: 2000, width: 400, height: 20 });
     place(document.getElementById("hidden")!, { left: 0, top: 0, width: 0, height: 0 });
+    // Partly on screen still counts: dots must clear the visible half of a block scrolling out of view.
+    place(document.getElementById("straddle")!, { left: 600, top: -30, width: 300, height: 60 });
 
     const rects = readTextRects(document, { width: 1440, height: 900 });
     expect(rects).toEqual([
       { left: 100 - TEXT_PADDING_PX, top: 100 - TEXT_PADDING_PX, right: 500 + TEXT_PADDING_PX, bottom: 160 + TEXT_PADDING_PX },
+      { left: 600 - TEXT_PADDING_PX, top: -30 - TEXT_PADDING_PX, right: 900 + TEXT_PADDING_PX, bottom: 30 + TEXT_PADDING_PX },
     ]);
     expect(isOverText(300, 130, rects)).toBe(true);
     expect(isOverText(100 - TEXT_PADDING_PX + 1, 130, rects)).toBe(true);
