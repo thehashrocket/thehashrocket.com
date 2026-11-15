@@ -13,7 +13,7 @@
 - The local line under each offer's price is shorter: Central Valley based, in person or remote, and you talk to Jason directly.
 - On a phone, the homepage's booking button is now on the first screen.
 - An offer's price shows on the contact form only while that offer is selected, and the line above the form says which page you came from.
-- While a message is sending, the form's fields are locked so nothing you type in the meantime is lost, and you can still copy your message. If sending takes too long, the form offers Jason's email address and a booking link.
+- While a message is sending, the form's fields are locked, so nothing you type in the meantime is lost.
 
 ## [0.8.1.0] - 2026-11-14
 
