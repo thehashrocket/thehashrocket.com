@@ -3,17 +3,18 @@
  */
 // Value: protects=the homepage Services section (the nav's Services target) has one priced card per offer page,
 //   prices rendered from lib/offers.ts, priced offers first, and the footer links every offer page (#107);
-//   fails_when=an OFFER_ROUTES page loses its card or footer link, a card retypes a price, or the order puts the
+//   fails_when=an OFFER_ROUTES page loses its card or footer link, a card retypes a price, a card's accessible name
+//   drops its visible heading or call to action, or the order puts the
 //   free offers ahead of the paid ones; why_new=Services became cards and the footer gained offer links; seam=none
 //   (next/link and next/navigation mocked as in tracked-link.test.tsx); no_claim=how the grid lays out (e2e)
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, within } from "@testing-library/react";
 
 vi.mock("@next/third-parties/google", () => ({ sendGAEvent: vi.fn() }));
-type AnchorProps = { href: string; className?: string; children: React.ReactNode };
+type AnchorProps = { href: string; className?: string; children: React.ReactNode; "aria-label"?: string };
 vi.mock("next/link", () => ({
-  default: ({ href, className, children }: AnchorProps) => (
-    <a href={href} className={className}>
+  default: ({ href, className, children, "aria-label": ariaLabel }: AnchorProps) => (
+    <a href={href} className={className} aria-label={ariaLabel}>
       {children}
     </a>
   ),
@@ -42,6 +43,15 @@ describe("homepage Services cards", () => {
     expect(text).toContain(offers.formatReviewPrice());
     expect(text).toContain(`${offers.formatCarePrice()} a month`);
     expect(text).toContain(`${offers.TALK_MINUTES_MIN}–${offers.TALK_MINUTES_MAX} minute`);
+
+    // Each card's short accessible name keeps its visible heading, price and call to action (WCAG 2.5.3).
+    for (const link of within(list).getAllByRole("link")) {
+      const name = link.getAttribute("aria-label") ?? "";
+      const heading = link.querySelector("h3")?.textContent ?? "";
+      const cta = (link.querySelector("span")?.textContent ?? "").replace(/\s*→\s*$/, "");
+      expect(name.startsWith(`${heading},`), name).toBe(true);
+      expect(name, name).toContain(cta);
+    }
   });
 });
 

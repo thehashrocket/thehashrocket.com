@@ -13,6 +13,8 @@ const PARTICLE_OPACITY = 0.5;
 const FADE_PER_SECOND = PARTICLE_OPACITY * 4;
 /** How often the text blocks are re-measured; layout moves on scroll and resize. */
 const TEXT_REFRESH_SECONDS = 0.2;
+/** While scrolling or resizing, re-measure sooner, but at most this often (scroll fires about once a frame). */
+const SCROLL_REFRESH_SECONDS = 0.05;
 
 export function HeroScene({ progress, active, onMorphComplete }: SceneProps) {
   const meshRef = useRef<Mesh>(null);
@@ -45,11 +47,12 @@ export function HeroScene({ progress, active, onMorphComplete }: SceneProps) {
     [],
   );
 
-  // Text moves on scroll and resize; re-measure on the next frame instead of waiting out the interval.
+  // Text moves on scroll and resize; re-measure within SCROLL_REFRESH_SECONDS instead of waiting out the
+  // interval, without measuring on every frame of a long scroll.
   useEffect(() => {
     if (!active) return;
     const stale = () => {
-      sinceRefresh.current = TEXT_REFRESH_SECONDS;
+      sinceRefresh.current = Math.max(sinceRefresh.current, TEXT_REFRESH_SECONDS - SCROLL_REFRESH_SECONDS);
     };
     window.addEventListener("scroll", stale, { passive: true });
     window.addEventListener("resize", stale);

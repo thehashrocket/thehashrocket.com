@@ -222,7 +222,7 @@ export default function Home() {
                 <TrackedLink
                   href={choice.href}
                   placement="home-services"
-                  ariaLabel={`${choice.name}, ${choice.price}`}
+                  ariaLabel={`${choice.name}, ${choice.price}. ${choice.cta}`}
                   className="group flex h-full flex-col rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-6 transition-colors hover:border-[var(--accent)] focus-visible:border-[var(--accent)]"
                 >
                   <h3 className="font-display text-2xl font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
