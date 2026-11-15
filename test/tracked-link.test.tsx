@@ -15,11 +15,11 @@ vi.mock("@next/third-parties/google", () => ({ sendGAEvent }));
 // next/link needs a mounted app router; a plain anchor that passes the handlers through is enough here.
 type AnchorProps = Pick<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  "href" | "className" | "children" | "onClick" | "onAuxClick"
+  "href" | "className" | "children" | "onClick" | "onAuxClick" | "aria-label"
 >;
 vi.mock("next/link", () => ({
-  default: ({ href, className, children, onClick, onAuxClick }: AnchorProps) => (
-    <a href={href} className={className} onClick={onClick} onAuxClick={onAuxClick}>
+  default: ({ href, className, children, onClick, onAuxClick, "aria-label": ariaLabel }: AnchorProps) => (
+    <a href={href} className={className} onClick={onClick} onAuxClick={onAuxClick} aria-label={ariaLabel}>
       {children}
     </a>
   ),
@@ -82,7 +82,7 @@ describe("homepage offer links", () => {
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "https://cal.com/example");
     render(<Home />);
 
-    fireEvent.click(screen.getByRole("link", { name: /the app review →/ }));
+    fireEvent.click(screen.getByRole("link", { name: /^AI-built app review, \$/ }));
     expect(sendGAEvent).toHaveBeenLastCalledWith("event", "offer_click", {
       route: "/ai-app-review",
       placement: "home-services",

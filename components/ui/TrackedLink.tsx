@@ -9,6 +9,8 @@ interface TrackedLinkProps {
   /** Where on the page the link sits, e.g. "home-services" or "home-hero". */
   placement: string;
   className?: string;
+  /** A short accessible name, for a link that wraps a whole card of text. */
+  ariaLabel?: string;
   children: ReactNode;
 }
 
@@ -19,12 +21,13 @@ interface TrackedLinkProps {
  * the context menu, not the page, so it sends nothing. Never prevents navigation.
  * Booking links keep their own `book_call_click` (BookingAnchor).
  */
-export function TrackedLink({ href, placement, className, children }: TrackedLinkProps) {
+export function TrackedLink({ href, placement, className, ariaLabel, children }: TrackedLinkProps) {
   const send = () => sendGAEvent("event", "offer_click", { route: href, placement });
   return (
     <Link
       href={href}
       className={className}
+      aria-label={ariaLabel}
       onClick={send}
       onAuxClick={(event) => {
         if (event.button === 1) send();

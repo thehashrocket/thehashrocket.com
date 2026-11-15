@@ -9,7 +9,16 @@ import { FocusOnHash } from "@/components/ui/FocusOnHash";
 import { TrackedLink } from "@/components/ui/TrackedLink";
 import { accentLink, eyebrow, inlineLink, sectionHeading } from "@/components/ui/styles";
 import { getCaseStudySummaries } from "@/lib/case-studies";
-import { formatSprintPrice, offerLadderParts } from "@/lib/offers";
+import {
+  REVIEW_TURNAROUND,
+  SPRINT_WEEKS,
+  TALK_MINUTES_MAX,
+  TALK_MINUTES_MIN,
+  formatCarePrice,
+  formatReviewPrice,
+  formatSprintPrice,
+  offerLadderParts,
+} from "@/lib/offers";
 
 export const metadata: Metadata = {
   openGraph: {
@@ -35,13 +44,53 @@ const proofPoints = [
 ];
 
 
-/** One link per offer page, worded by what the visitor wants to do (#100). The nav's Services link lands here. */
-const serviceChoices = [
-  { href: "/automation-sprint", label: "Automate one process: the automation sprint →" },
-  { href: "/ai-app-review", label: "Check an app someone built with AI: the app review →" },
-  { href: "/care-plan", label: "Keep what you run looked after: the care plan →" },
-  { href: "/talks", label: "Ask about a free talk for your group →" },
-  { href: "/print-shops", label: "Run a print shop? See the print-shop page →" },
+/**
+ * One card per offer page (#100, #107). The nav's Services link lands here, and every
+ * OFFER_ROUTES page must have a card (test/e2e/site-structure.spec.ts). Priced offers
+ * lead; prices come from lib/offers.ts. `span` lays the cards out asymmetrically on
+ * large screens (docs/DESIGN.md: no uniform card grids): the sprint leads the first row.
+ */
+const serviceChoices: { href: string; name: string; price: string; body: string; cta: string; span: string }[] = [
+  {
+    href: "/automation-sprint",
+    name: "Automation sprint",
+    price: formatSprintPrice(),
+    body: `The one process that eats the most hours, automated in ${SPRINT_WEEKS} weeks for a price fixed before work starts.`,
+    cta: "See the sprint",
+    span: "md:col-span-2 lg:col-span-6",
+  },
+  {
+    href: "/ai-app-review",
+    name: "AI-built app review",
+    price: formatReviewPrice(),
+    body: `What's risky in an app someone built with AI, in a written report within ${REVIEW_TURNAROUND}.`,
+    cta: "See the review",
+    span: "lg:col-span-3",
+  },
+  {
+    href: "/care-plan",
+    name: "Care plan",
+    price: `${formatCarePrice()} a month`,
+    body: "Monitoring, backups, updates and a same-business-day reply for what you already run.",
+    cta: "See the care plan",
+    span: "lg:col-span-3",
+  },
+  {
+    href: "/talks",
+    name: "Free talk",
+    price: "Free",
+    body: `A ${TALK_MINUTES_MIN}–${TALK_MINUTES_MAX} minute talk for your chamber, SBDC or business group.`,
+    cta: "Ask about a date",
+    span: "lg:col-span-6",
+  },
+  {
+    href: "/print-shops",
+    name: "Print shops",
+    price: "Scoped to your shop",
+    body: "The production portal that runs a print shop's every job, from quote to QuickBooks.",
+    cta: "See the print-shop page",
+    span: "lg:col-span-6",
+  },
 ];
 
 const services: { title: string; body: string; link?: { href: string; label: string } }[] = [
@@ -167,11 +216,23 @@ export default function Home() {
           >
             Services
           </h2>
-          <ul data-testid="service-choices" className="mt-6 flex flex-col gap-3">
+          <ul data-testid="service-choices" className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-12">
             {serviceChoices.map((choice) => (
-              <li key={choice.href}>
-                <TrackedLink href={choice.href} placement="home-services" className={accentLink}>
-                  {choice.label}
+              <li key={choice.href} className={choice.span}>
+                <TrackedLink
+                  href={choice.href}
+                  placement="home-services"
+                  ariaLabel={`${choice.name}, ${choice.price}. ${choice.cta}`}
+                  className="group flex h-full flex-col rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-6 transition-colors hover:border-[var(--accent)] focus-visible:border-[var(--accent)]"
+                >
+                  <h3 className="font-display text-2xl font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+                    {choice.name}
+                  </h3>
+                  <p className="mt-2 font-mono text-lg text-[var(--accent)] tabular-nums">{choice.price}</p>
+                  <p className="mt-3 leading-relaxed text-[var(--text-secondary)]">{choice.body}</p>
+                  <span className="mt-auto pt-4 font-mono text-sm text-[var(--accent)] group-hover:text-[var(--accent-hover)]">
+                    {choice.cta} →
+                  </span>
                 </TrackedLink>
               </li>
             ))}
