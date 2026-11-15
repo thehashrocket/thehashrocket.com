@@ -192,7 +192,7 @@
 - **Ledger:** keep a manual lead log with origin, offer, qualified, proposal, sale and delivery hours; `source` records the last click, not where the lead first heard of you.
 - **Caps (#101):** log actual hours on the first sprint and the first review, then revisit `SPRINT_MONTHLY_CAP` (1) and `REVIEW_MONTHLY_CAP` (2) and their monthly revenue (1 sprint + 2 reviews ≈ $6,500–$8,000 gross at full use) with this read.
 - **Why:** Both pages were built ahead of demand evidence; this is the kill/keep check.
-- **Context:** CTA clicks are not bookings (`BookingAnchor` records clicks). Keep a manual inquiry log with the first page that prompted contact and outreach touch counts. Verify one real Cal.com booking carries `source` first.
+- **Context:** CTA clicks are not bookings: `book_call_click` (in GA4 and Vercel Analytics) counts clicks on the Cal.com link, and the booked-call count comes from Cal.com's bookings, by `source`, checked by hand at this read. `generate_lead` counts only messages that were really sent, with `offer` (#115). Keep a manual inquiry log with the first page that prompted contact and outreach touch counts. Verify one real Cal.com booking carries `source` first.
 - **Effort:** S (CC: ~10 min) | **Priority:** P2 | **Depends on:** pages shipped
 
 ### [P3] Print Portal scene behind /print-shops

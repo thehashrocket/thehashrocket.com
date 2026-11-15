@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.2.0] - 2026-11-15
+
+### Added
+- Booking-button clicks, offer-link clicks and sent contact messages now show up as custom events in Vercel Analytics as well as Google Analytics, under the same event names.
+- A sent message now records which offer it was about (for example "Automation sprint", or "none" when no type was picked), so you can see which offer brings in leads.
+
+### Changed
+- Only messages that were really sent count as leads. Spam-bot submissions caught by the hidden form field and test runs no longer count, so the Google Analytics lead count may step down from this release onward. That drop is the cleanup, not fewer real leads.
+- Events only ever carry the offer, page source, link route and placement. A visitor's name, email address or message never reaches either analytics service.
+- A message sent or a link clicked before the page has finished loading still reaches Vercel Analytics, because the event waits until Vercel's script is ready.
+
 ## [0.10.1.0] - 2026-11-15
 
 ### Changed
