@@ -9,6 +9,8 @@ import React from "react";
 
 vi.mock("@react-three/fiber", () => ({
   useFrame: vi.fn(),
+  // HeroScene projects its dots with the camera and canvas size (#109); routing tests need neither to be real.
+  useThree: () => ({ camera: {}, size: { width: 1440, height: 900 } }),
 }));
 
 // jsdom doesn't implement matchMedia
