@@ -82,7 +82,7 @@ describe("homepage offer links", () => {
     vi.stubEnv("NEXT_PUBLIC_CALCOM_URL", "https://cal.com/example");
     render(<Home />);
 
-    fireEvent.click(screen.getByRole("link", { name: /the app review →/ }));
+    fireEvent.click(screen.getByRole("link", { name: /See the review →/ }));
     expect(sendGAEvent).toHaveBeenLastCalledWith("event", "offer_click", {
       route: "/ai-app-review",
       placement: "home-services",
