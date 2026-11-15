@@ -1,6 +1,6 @@
 "use client";
 
-import { sendGAEvent } from "@next/third-parties/google";
+import { trackEvent } from "@/lib/analytics";
 
 interface BookingAnchorProps {
   href: string;
@@ -19,7 +19,7 @@ export function BookingAnchor({ href, source, className, testId, children }: Boo
       rel="noopener noreferrer"
       className={className}
       data-testid={testId}
-      onClick={() => sendGAEvent("event", "book_call_click", { source: source ?? "direct" })}
+      onClick={() => trackEvent("book_call_click", { source: source ?? "direct" })}
     >
       {children}
     </a>

@@ -6,12 +6,13 @@
 //   the hero booking button keeps only book_call_click (ED7, ED15); fails_when=a link loses its placement, a
 //   middle click goes uncounted, a right click is counted, the handler prevents navigation, or BookingLink
 //   starts sending offer_click; why_new=TrackedLink is new; seam=none;
-//   no_claim=GA4 receiving them (sendGAEvent is mocked)
+//   no_claim=GA4 or Vercel receiving them (both are mocked)
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
-const { sendGAEvent } = vi.hoisted(() => ({ sendGAEvent: vi.fn() }));
+const { sendGAEvent, track } = vi.hoisted(() => ({ sendGAEvent: vi.fn(), track: vi.fn() }));
 vi.mock("@next/third-parties/google", () => ({ sendGAEvent }));
+vi.mock("@vercel/analytics", () => ({ track }));
 // next/link needs a mounted app router; a plain anchor that passes the handlers through is enough here.
 type AnchorProps = Pick<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
@@ -34,6 +35,7 @@ const Home = (await import("@/app/page")).default;
 afterEach(() => {
   cleanup();
   sendGAEvent.mockClear();
+  track.mockClear();
   vi.unstubAllEnvs();
 });
 
@@ -53,6 +55,8 @@ describe("TrackedLink", () => {
     expect(fireEvent.click(renderLink())).toBe(true);
     expect(sendGAEvent).toHaveBeenCalledTimes(1);
     expect(sendGAEvent).toHaveBeenCalledWith("event", "offer_click", { route: "/talks", placement: "home-services" });
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("offer_click", { route: "/talks", placement: "home-services" });
   });
 
   it("sends one event for a modified click (open in a new tab)", () => {
@@ -65,11 +69,14 @@ describe("TrackedLink", () => {
     expect(fireEvent(renderLink(), auxclick(1))).toBe(true);
     expect(sendGAEvent).toHaveBeenCalledTimes(1);
     expect(sendGAEvent).toHaveBeenCalledWith("event", "offer_click", { route: "/talks", placement: "home-services" });
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("offer_click", { route: "/talks", placement: "home-services" });
   });
 
   it("sends nothing for a right click", () => {
     fireEvent(renderLink(), auxclick(2));
     expect(sendGAEvent).not.toHaveBeenCalled();
+    expect(track).not.toHaveBeenCalled();
   });
 });
 
@@ -95,8 +102,11 @@ describe("homepage offer links", () => {
     });
 
     sendGAEvent.mockClear();
+    track.mockClear();
     fireEvent.click(screen.getByTestId("home-hero-cta"));
     expect(sendGAEvent).toHaveBeenCalledTimes(1);
     expect(sendGAEvent).toHaveBeenCalledWith("event", "book_call_click", { source: "home" });
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith("book_call_click", { source: "home" });
   });
 });
