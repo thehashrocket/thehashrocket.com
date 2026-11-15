@@ -1,4 +1,4 @@
-export const CONTACT_EMAIL = "jason@thehashrocket.com";
+export const CONTACT_EMAIL = "jason@jasonshultz.com";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/jasonshultz/";
 export const GITHUB_URL = "https://github.com/thehashrocket";
 
