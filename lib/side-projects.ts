@@ -11,6 +11,15 @@ export interface SideProject {
 // no client or employer names (see docs/DOMAIN.md confidentiality rule).
 export const sideProjects: SideProject[] = [
   {
+    slug: "modelchef",
+    name: "ModelChef",
+    status: "Season 1 airing",
+    description:
+      "A weekly cooking competition for language models. Every model gets the same brief and builds a single-file web app. A panel of AI judges scores each dish, machine checks catch console errors, layouts that break on a phone, and controls that don't work, and the weakest model goes home. Those are the same checks I run in an AI-built app review.",
+    tags: ["LLMs", "AI judges", "Evals", "Automation"],
+    url: "https://www.modelchef.tv/",
+  },
+  {
     slug: "money",
     name: "Money",
     status: "In daily use",

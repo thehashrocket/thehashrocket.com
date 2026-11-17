@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.10.3.0] - 2026-11-16
+
+### Added
+- ModelChef is on the Lab page, first in the list, linking to modelchef.tv. It's a weekly cooking competition for language models where AI judges score the apps each model builds, and the card says those are the same checks behind the AI-built app review.
+
 ## [0.10.2.0] - 2026-11-15
 
 ### Added
