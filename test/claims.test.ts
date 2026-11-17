@@ -42,6 +42,8 @@ const BANNED = [
   /nobody else (offers|does)/i,
   /only one (who|offering)/i,
   /rescued \d+/i,
+  // Job-seeker framing on a consulting site. The title lives in lib/site.ts (JOB_TITLE).
+  /full-stack engineer/i,
 ];
 
 describe("claims", () => {

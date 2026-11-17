@@ -24,7 +24,7 @@ describe("PersonJsonLd rendering", () => {
     expect(data["@type"]).toBe("Person");
     expect(data.name).toBe("Jason Shultz");
     expect(data.url).toBe("https://www.jasonshultz.com");
-    expect(data.jobTitle).toBe("Senior Full-Stack Engineer");
+    expect(data.jobTitle).toBe("Software & Automation Consultant");
     expect(data.sameAs).toContain("https://www.linkedin.com/in/jasonshultz/");
     expect(data.sameAs).toContain("https://github.com/thehashrocket");
   });

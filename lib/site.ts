@@ -3,6 +3,13 @@ export const LINKEDIN_URL = "https://www.linkedin.com/in/jasonshultz/";
 export const GITHUB_URL = "https://github.com/thehashrocket";
 
 /**
+ * How the site names Jason: page titles, the footer, JSON-LD and share images.
+ * Consultant framing, because the site sells offers to business owners. Not a job title for recruiters.
+ */
+export const JOB_TITLE = "Software & Automation Consultant";
+export const SITE_TITLE = `Jason Shultz — ${JOB_TITLE}`;
+
+/**
  * The Cal.com booking URL, tagged with where the visitor came from. Returns
  * null when NEXT_PUBLIC_CALCOM_URL is unset or invalid, so callers can fall back
  * to the contact form instead of rendering a dead button.

@@ -6,11 +6,12 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { SceneProvider } from "@/components/layout/SceneProvider";
 import { PersonJsonLd, WebSiteJsonLd } from "@/components/layout/JsonLd";
+import { SITE_TITLE } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Jason Shultz — Senior Full-Stack Engineer",
+    default: SITE_TITLE,
     template: "%s | Jason Shultz",
   },
   description:
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Jason Shultz",
-    title: "Jason Shultz — Senior Full-Stack Engineer",
+    title: SITE_TITLE,
     description:
       "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
   },

@@ -6,7 +6,7 @@ import { getAllLocations } from "@/lib/locations";
 export const metadata: Metadata = {
   title: "Locations",
   description:
-    "Senior full-stack engineer serving Sacramento, Stockton, Modesto, Manteca, Tracy, and Lathrop. Local software engineering for Central Valley businesses.",
+    "Software and automation consultant serving Sacramento, Stockton, Modesto, Manteca, Tracy, and Lathrop. Local software engineering for Central Valley businesses.",
 };
 
 export default function LocationsPage() {

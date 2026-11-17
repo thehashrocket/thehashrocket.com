@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.4.0] - 2026-11-16
+
+### Changed
+- The site now calls Jason a "Software & Automation Consultant" instead of a "Senior Full-Stack Engineer". The new title shows in Google results, link previews, the footer, the structured data search engines read, and the share images for the home, About and city pages. The old title read like a job seeker on a site that sells fixed-price work to business owners.
+- The About page bio and the city pages' search descriptions use the same consultant framing.
+- The title lives in one place (`JOB_TITLE` in `lib/site.ts`), and a claims test now fails if "full-stack engineer" creeps back into site source.
+
 ## [0.10.3.0] - 2026-11-16
 
 ### Added

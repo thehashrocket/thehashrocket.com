@@ -42,7 +42,7 @@ export const locations: Record<string, Location> = {
     region: "Sacramento County, CA",
     metaTitle: "Software Engineer in Sacramento, CA",
     metaDescription:
-      "Senior full-stack engineer in Sacramento building custom software for businesses running on paper, spreadsheets, or systems nobody wants to touch.",
+      "Software and automation consultant in Sacramento building custom software for businesses running on paper, spreadsheets, or systems nobody wants to touch.",
     heroHeadline: "I build complex systems\nfor Sacramento businesses",
     heroSubheadline:
       "20+ years engineering high-stakes software, including years in Sacramento building pharmaceutical distribution systems. You work directly with the engineer who builds it.",
@@ -85,7 +85,7 @@ export const locations: Record<string, Location> = {
     region: "San Joaquin County, CA",
     metaTitle: "Software Engineer in Stockton & San Joaquin County, CA",
     metaDescription:
-      "Senior full-stack engineer serving Stockton and San Joaquin County. Custom software for logistics, distribution, and manufacturing operations.",
+      "Software and automation consultant serving Stockton and San Joaquin County. Custom software for logistics, distribution, and manufacturing operations.",
     heroHeadline: "Senior engineering for\nSan Joaquin County businesses",
     heroSubheadline:
       "20+ years building the systems that power logistics, distribution, and community services. From warehouse management to nonprofit matching — complex problems solved directly, 1:1.",
@@ -133,7 +133,7 @@ export const locations: Record<string, Location> = {
     region: "Stanislaus County, CA",
     metaTitle: "Software Engineer in Modesto & Stanislaus County, CA",
     metaDescription:
-      "Senior full-stack engineer serving Modesto and Stanislaus County. Custom software for manufacturing, distribution, and operations teams replacing paper and spreadsheets.",
+      "Software and automation consultant serving Modesto and Stanislaus County. Custom software for manufacturing, distribution, and operations teams replacing paper and spreadsheets.",
     heroHeadline: "Complex software systems\nfor Stanislaus County",
     heroSubheadline:
       "20+ years of engineering for industries that can't afford failure. Pharmaceutical distribution and print production, plus over a year building WMS, ERP, and CRM systems in Modesto. Built by a senior engineer, not an agency.",
@@ -182,7 +182,7 @@ export const locations: Record<string, Location> = {
     region: "South San Joaquin County, CA",
     metaTitle: "Software Engineer in Manteca, Tracy & Lathrop, CA",
     metaDescription:
-      "Senior full-stack engineer based in Manteca, building custom software for Manteca, Tracy, and Lathrop businesses running on paper and spreadsheets.",
+      "Software and automation consultant based in Manteca, building custom software for Manteca, Tracy, and Lathrop businesses running on paper and spreadsheets.",
     heroHeadline: "Your local engineer\nin Manteca, Tracy & Lathrop",
     heroSubheadline:
       "I live in Manteca. 20+ years building warehouse systems, production software, and the infrastructure under them, for businesses that can't afford to go down.",

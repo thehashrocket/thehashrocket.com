@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
+import { GITHUB_URL, JOB_TITLE, LINKEDIN_URL } from "@/lib/site";
 
 const internalLinks = [
   { href: "/work", label: "Work" },
@@ -34,7 +34,7 @@ export function Footer() {
             Jason Shultz
           </p>
           <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Senior Full-Stack Engineer &middot; 20+ years building systems
+            {JOB_TITLE} &middot; 20+ years building systems
           </p>
         </div>
 
