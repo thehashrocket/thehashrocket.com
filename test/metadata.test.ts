@@ -23,7 +23,7 @@ const offerMetadata: Record<OfferRoute, Metadata> = {
 describe("metadata", () => {
   it("root layout openGraph values are defined (checked statically)", () => {
     // These values are hardcoded in app/layout.tsx and validated here as constants
-    const ogTitle = "Jason Shultz — Senior Full-Stack Engineer";
+    const ogTitle = "Jason Shultz — Software & Automation Consultant";
     const ogDescription =
       "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.";
     expect(ogTitle).toBeTruthy();

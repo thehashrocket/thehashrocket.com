@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { getLocation, locationSlugs } from "@/lib/locations";
+import { SITE_TITLE } from "@/lib/site";
 
 export const alt = "Jason Shultz — Software Engineering";
 export const size = { width: 1200, height: 630 };
@@ -75,7 +76,7 @@ export default async function OGImage({
             maxWidth: 700,
           }}
         >
-          Jason Shultz — Senior Full-Stack Engineer
+          {SITE_TITLE}
         </div>
         <div
           style={{

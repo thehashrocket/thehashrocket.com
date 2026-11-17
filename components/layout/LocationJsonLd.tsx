@@ -1,4 +1,5 @@
 import type { Location, FAQ } from "@/lib/locations";
+import { JOB_TITLE } from "@/lib/site";
 
 function city(name: string) {
   return {
@@ -22,7 +23,7 @@ export function LocationJsonLd({ location, slug }: { location: Location; slug: s
     provider: {
       "@type": "Person",
       name: "Jason Shultz",
-      jobTitle: "Senior Full-Stack Engineer",
+      jobTitle: JOB_TITLE,
       url: "https://www.jasonshultz.com",
     },
     serviceType: "Software Engineering",

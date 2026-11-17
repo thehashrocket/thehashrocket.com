@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { OgImageTemplate } from "@/lib/og-image";
 import { loadOgFonts } from "@/lib/og-fonts";
+import { JOB_TITLE } from "@/lib/site";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -11,7 +12,7 @@ export default async function Image() {
     <OgImageTemplate
       label="About"
       title="Jason Shultz"
-      subtitle="Senior Full-Stack Engineer"
+      subtitle={JOB_TITLE}
     />,
     {
       ...size,

@@ -1,4 +1,4 @@
-import { GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
+import { GITHUB_URL, JOB_TITLE, LINKEDIN_URL, SITE_TITLE } from "@/lib/site";
 
 export const PERSON_ID = "https://www.jasonshultz.com/#person";
 
@@ -9,7 +9,7 @@ export function PersonJsonLd() {
     "@id": PERSON_ID,
     name: "Jason Shultz",
     url: "https://www.jasonshultz.com",
-    jobTitle: "Senior Full-Stack Engineer",
+    jobTitle: JOB_TITLE,
     description:
       "Senior software engineer and consultant with 20+ years building and rescuing the systems owner-operated and mid-size businesses run on, and keeping them running.",
     sameAs: [
@@ -30,7 +30,7 @@ export function WebSiteJsonLd() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Jason Shultz — Senior Full-Stack Engineer",
+    name: SITE_TITLE,
     url: "https://www.jasonshultz.com",
   };
 

@@ -38,8 +38,9 @@ export default function AboutPage() {
 
         <div className="space-y-6 text-lg leading-relaxed text-[var(--text-secondary)]">
           <p>
-            I&apos;m a senior full-stack engineer with over 20 years of
-            experience building web applications and the systems behind them.
+            I&apos;m a software engineer and consultant with over 20 years
+            of experience building web applications and the systems behind
+            them.
             I&apos;ve worked across pharmaceutical logistics, nonprofit
             technology, EdTech, e-commerce, and print production, the kind of
             domains where software failures have real consequences.
